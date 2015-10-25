@@ -60,6 +60,11 @@ do_zap()
         msg("you can't zap with that!");
         return;
     }
+    if (!get_dir())
+    {
+        after = FALSE;
+        return;
+    }
     if (obj->o_charges == 0)
     {
         msg("nothing happens");

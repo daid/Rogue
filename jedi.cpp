@@ -1,7 +1,6 @@
 #include <string.h>
 #include <SDL/SDL.h>
 
-#define AA_DEP
 extern "C" {
 #include "jedi.h"
 #include "extern.h"
@@ -216,7 +215,7 @@ int displayMessage(const char* msg_buffer)
     int x = (DISPLAY_WIDTH - width * 4) / 2;
     int y = (DISPLAY_HEIGHT - line_count * 6) / 2;
     int sx = x;
-    fillBox(x - 2, y - 2, width * 4 + 4, line_count * 6 + 4, 255);
+    fillBox(x - 2, y - 2, width * 4 + 4, line_count * 6 + 5, 255);
     fillBox(x - 1, y - 1, width * 4 + 2, line_count * 6 + 2, 0);
     for(const char* c=buffer; *c; c++)
     {
@@ -243,7 +242,7 @@ int askForInput(const char* message, char* input_buffer, int input_buffer_size)
     int w = strlen(message) * 4;
     int x = (DISPLAY_WIDTH - w) / 2;
     int y = (DISPLAY_HEIGHT - 12) / 2;
-    fillBox(x - 2, y - 2, w + 4, 2 * 6 + 4, 255);
+    fillBox(x - 2, y - 2, w + 4, 2 * 6 + 5, 255);
     fillBox(x - 1, y - 1, w + 2, 2 * 6 + 2, 0);
     for(const char* c=message; *c; c++)
     {
@@ -300,7 +299,7 @@ static int drawDisplayStringList()
     int x = 5;
     int sx = x;
     int y = (DISPLAY_HEIGHT-display_string_list_line_count*6) / 2;
-    fillBox(x - 2, y - 2, w + 4, display_string_list_line_count * 6 + 4, 255);
+    fillBox(x - 2, y - 2, w + 4, display_string_list_line_count * 6 + 5, 255);
     fillBox(x - 1, y - 1, w + 2, display_string_list_line_count * 6 + 2, 0);
     for(char* c=display_string_list_buffer; *c; c++)
     {
@@ -666,9 +665,9 @@ uint8_t font_data[] = {
 //*
   0b1010, 
   0b0100, 
+  0b1110, 
+  0b0100, 
   0b1010, 
-  0b0000, 
-  0b0000, 
   0b0000, 
 //+
   0b0000, 

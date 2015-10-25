@@ -750,7 +750,9 @@ int md_readchar()
                 if (event.key.keysym.sym >= SDLK_a && event.key.keysym.sym <= SDLK_z)
                 {
                     if (event.key.keysym.mod & KMOD_SHIFT)
-                        return event.key.keysym.sym - 'a' + 'A';
+                        event.key.keysym.sym = event.key.keysym.sym - 'a' + 'A';
+                    if (event.key.keysym.mod & KMOD_CTRL)
+                        return CTRL(event.key.keysym.sym);
                     return event.key.keysym.sym;
                 }
                 if (event.key.keysym.sym >= SDLK_0 && event.key.keysym.sym <= SDLK_9)

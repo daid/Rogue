@@ -272,10 +272,7 @@ over:
                 when '/': after = FALSE; identify();
                 when 's': search();
                 when 'z':
-                    if (get_dir())
-                        do_zap();
-                    else
-                        after = FALSE;
+                    do_zap();
                 when 'D': after = FALSE; discovered();
                 when CTRL('P'): after = FALSE; msg(huh);
                 when CTRL('R'):

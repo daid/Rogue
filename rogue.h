@@ -590,7 +590,7 @@ void        init_player();
 void        init_probs();
 void        init_stones();
 void        init_weapon(THING *weap, int which);
-bool        inventory(THING *list, int type);
+int         inventory(THING *list, int type);
 void        invis_on();
 void        killed(THING *tp, bool pr);
 void        kill_daemon(void (*func)());

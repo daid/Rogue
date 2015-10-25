@@ -23,7 +23,7 @@ int askForInput(const char* message, char* input_buffer, int input_buffer_size);
 const char* getKeyName(int key);
 
 void startDisplayOfStringList();
-void displayStringListItem(const char* fmt, ...);
-void finishDisplayOfStringList();
+int displayStringListItem(const char* fmt, ...);
+int finishDisplayOfStringList();
 
 #endif//JEDI_H

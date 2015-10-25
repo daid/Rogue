@@ -331,57 +331,13 @@ pick_one(struct obj_info *info, int nitems)
  * discovered:
  *        list what the player has discovered in this game of a certain type
  */
-static int line_cnt = 0;
 
 void discovered()
 {
-    char ch;
-    bool disc_list;
-
-    do {
-        disc_list = FALSE;
-        if (!terse)
-            addmsg("for ");
-        addmsg("what type");
-        if (!terse)
-            addmsg(" of object do you want a list");
-        ch = msg("? (* for all)");
-        if (ch == '!')
-            ch = POTION;
-        if (ch == 'o')
-            ch = RING;
-        switch (ch)
-        {
-            case ESCAPE:
-                msg("");
-                return;
-            case POTION:
-            case SCROLL:
-            case RING:
-            case STICK:
-            case '*':
-                disc_list = TRUE;
-                break;
-            default:
-                if (terse)
-                    msg("Not a type");
-                else
-                    msg("Please type one of %c%c%c%c (ESCAPE to quit)", POTION, SCROLL, RING, STICK);
-        }
-    } while (!disc_list);
-    if (ch == '*')
-    {
-        print_disc(POTION);
-        print_disc(SCROLL);
-        print_disc(RING);
-        print_disc(STICK);
-        end_line();
-    }
-    else
-    {
-        print_disc(ch);
-        end_line();
-    }
+    print_disc(POTION);
+    print_disc(SCROLL);
+    print_disc(RING);
+    print_disc(STICK);
 }
 
 /*
@@ -392,8 +348,7 @@ void discovered()
 #define MAX4(a,b,c,d)        (a > b ? (a > c ? (a > d ? a : d) : (c > d ? c : d)) : (b > c ? (b > d ? b : d) : (c > d ? c : d)))
 
 
-void
-print_disc(char type)
+void print_disc(char type)
 {
     struct obj_info *info = NULL;
     int i, maxnum = 0, num_found;
@@ -423,16 +378,19 @@ print_disc(char type)
     obj.o_count = 1;
     obj.o_flags = 0;
     num_found = 0;
+    
+    startDisplayOfStringList();
     for (i = 0; i < maxnum; i++)
         if (info[order[i]].oi_know || info[order[i]].oi_guess)
         {
             obj.o_type = type;
             obj.o_which = order[i];
-            add_line("%s", inv_name(&obj, FALSE));
+            displayStringListItem("%s", inv_name(&obj, FALSE));
             num_found++;
         }
     if (num_found == 0)
-        add_line(nothing(type), NULL);
+        displayStringListItem("%s", nothing(type));
+    finishDisplayOfStringList();
 }
 
 /*
@@ -454,38 +412,6 @@ set_order(int *order, int numthings)
         t = order[i - 1];
         order[i - 1] = order[r];
         order[r] = t;
-    }
-}
-
-/*
- * add_line:
- *        Add a line to the list of discoveries
- */
-/* VARARGS1 */
-char add_line(char *fmt, char *arg)
-{
-    if (line_cnt == 0)
-    {
-        startDisplayOfStringList();
-    }
-    displayStringListItem(fmt, arg);
-    line_cnt++;
-
-    return ~ESCAPE;
-}
-
-/*
- * end_line:
- *        End the list of lines
- */
-
-void
-end_line()
-{
-    if (line_cnt > 0)
-    {
-        finishDisplayOfStringList();
-        line_cnt = 0;
     }
 }
 
@@ -604,17 +530,17 @@ pr_spec(struct obj_info *info, int nitems)
     struct obj_info *endp;
     int i, lastprob;
 
+    startDisplayOfStringList();
     endp = &info[nitems];
     lastprob = 0;
     for (i = '0'; info < endp; i++)
     {
         if (i == '9' + 1)
             i = 'a';
-        sprintf(prbuf, "%c: %%s (%d%%%%)", i, info->oi_prob - lastprob);
+        displayStringListItem("%c: %s (%d%%)", i, info->oi_name, info->oi_prob - lastprob);
         lastprob = info->oi_prob;
-        add_line(prbuf, info->oi_name);
         info++;
     }
-    end_line();
+    finishDisplayOfStringList();
 }
 # endif        /* MASTER */

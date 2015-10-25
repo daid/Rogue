@@ -321,7 +321,7 @@ void startDisplayOfStringList()
     display_string_list_line_count = 0;
 }
 
-void displayStringListItem(const char* fmt, ...)
+int displayStringListItem(const char* fmt, ...)
 {
     char buffer[128];
     va_list ap;
@@ -331,6 +331,8 @@ void displayStringListItem(const char* fmt, ...)
     
     int width, line_count;
     lineWrapString(buffer, 30, "   ", &width, &line_count);
+    
+    int ch = 0;
 
     if (display_string_list_line_count + line_count > 7)
     {
@@ -342,7 +344,7 @@ void displayStringListItem(const char* fmt, ...)
             x += 4;
         }
         refreshDisplay();
-        int ch = md_readchar();
+        ch = md_readchar();
         refreshMap();
         
         display_string_list_line_count = 0;
@@ -353,18 +355,22 @@ void displayStringListItem(const char* fmt, ...)
         strcat(display_string_list_buffer, "\n");
     strcat(display_string_list_buffer, buffer);
     display_string_list_line_count += line_count;
+    
+    return ch;
 }
 
-void finishDisplayOfStringList()
+int finishDisplayOfStringList()
 {
+    int ch = 0;
     if (display_string_list_line_count > 0)
     {
         drawDisplayStringList();
         
         refreshDisplay();
-        int ch = md_readchar();
+        ch = md_readchar();
         refreshMap();
     }
+    return ch;
 }
 
 uint8_t font_data[] = {

@@ -55,7 +55,6 @@ extern FILE        *scoreboard;
 void    auto_save(int);
 void        come_down();
 void        doctor();
-void        end_line();
 void        getltchars();
 void        land();
 void    leave(int);
@@ -76,8 +75,6 @@ void        tstp(int ignored);
 void        unconfuse();
 void        unsee();
 void        visuals();
-
-char        add_line(char *fmt, char *arg);
 
 char        *killname(char monst, bool doart);
 char        *nothing(char type);

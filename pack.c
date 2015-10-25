@@ -243,29 +243,47 @@ pack_char()
  *        List what is in the pack.  Return TRUE if there is something of
  *        the given type.
  */
-bool
-inventory(THING *list, int type)
+int inventory(THING *list_start, int type)
 {
-    static char inv_temp[MAXSTR];
-
+    int ch;
+    THING *list;
+    THING *list2;
+    
+    startDisplayOfStringList();
     n_objs = 0;
-    for (; list != NULL; list = next(list))
+    for (list=list_start; list != NULL; list = next(list))
     {
         if (type && type != list->o_type && !(type == CALLABLE &&
             list->o_type != FOOD && list->o_type != AMULET) &&
             !(type == R_OR_S && (list->o_type == RING || list->o_type == STICK)))
                 continue;
         n_objs++;
-        sprintf(inv_temp, "%c) %%s", list->o_packch);
-        msg_esc = TRUE;
-        if (add_line(inv_temp, inv_name(list, FALSE)) == ESCAPE)
+        ch = displayStringListItem("%c) %s", list->o_packch, inv_name(list, FALSE));
+        if (ch == ESCAPE)
+            return ch;
+        for (list2=list_start; list2 != NULL && list2 != next(list); list2 = next(list2))
         {
-            msg_esc = FALSE;
-            msg("");
-            return TRUE;
+            if (type && type != list2->o_type && !(type == CALLABLE &&
+                list2->o_type != FOOD && list2->o_type != AMULET) &&
+                !(type == R_OR_S && (list2->o_type == RING || list2->o_type == STICK)))
+                    continue;
+            if (list2->o_packch == ch)
+                return ch;
         }
-        msg_esc = FALSE;
     }
+    ch = finishDisplayOfStringList();
+    if (ch == ESCAPE)
+        return ch;
+    for (list=list_start; list != NULL; list = next(list))
+    {
+        if (type && type != list->o_type && !(type == CALLABLE &&
+            list->o_type != FOOD && list->o_type != AMULET) &&
+            !(type == R_OR_S && (list->o_type == RING || list->o_type == STICK)))
+                continue;
+        if (list->o_packch == ch)
+            return ch;
+    }
+    
     if (n_objs == 0)
     {
         if (terse)
@@ -274,10 +292,10 @@ inventory(THING *list, int type)
         else
             msg(type == 0 ? "you are empty handed" :
                             "you don't have anything appropriate");
-        return FALSE;
+        return ESCAPE;
     }
-    end_line();
-    return TRUE;
+
+    return 0;
 }
 
 /*
@@ -409,16 +427,19 @@ get_item(char *purpose, int type)
                 msg("");
                 return NULL;
             }
-            n_objs = 1;                /* normal case: person types one char */
             if (ch == '*')
             {
-                mpos = 0;
-                if (inventory(pack, type) == 0)
+                ch = inventory(pack, type);
+                if (ch == ESCAPE)
                 {
                     after = FALSE;
                     return NULL;
                 }
-                continue;
+                if (ch == 0)
+                {
+                    //No selection been made during the inventory call.
+                    continue;
+                }
             }
             for (obj = pack; obj != NULL; obj = next(obj))
                 if (obj->o_packch == ch)

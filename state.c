@@ -1891,15 +1891,12 @@ rs_save_file(FILE *savef)
     rs_write_boolean(savef, door_stop);             /* 6  */
     rs_write_boolean(savef, fight_flush);           /* 7  */
     rs_write_boolean(savef, firstmove);             /* 8  */
-    rs_write_boolean(savef, got_ltc);               /* 9  */
     rs_write_boolean(savef, has_hit);               /* 10 */
-    rs_write_boolean(savef, in_shell);              /* 11 */
     rs_write_boolean(savef, inv_describe);          /* 12 */
     rs_write_boolean(savef, jump);                  /* 13 */
     rs_write_boolean(savef, kamikaze);              /* 14 */
     rs_write_boolean(savef, lower_msg);             /* 15 */
     rs_write_boolean(savef, move_on);               /* 16 */
-    rs_write_boolean(savef, msg_esc);               /* 17 */
     rs_write_boolean(savef, passgo);                /* 18 */
     rs_write_boolean(savef, playing);               /* 19 */
     rs_write_boolean(savef, q_comm);                /* 20 */
@@ -1942,7 +1939,6 @@ rs_save_file(FILE *savef)
     rs_write_int(savef, inv_type);
     rs_write_int(savef, level);
     rs_write_int(savef, max_level);
-    rs_write_int(savef, mpos);
     rs_write_int(savef, no_food);
     rs_write_ints(savef,a_class,MAXARMORS);
     rs_write_int(savef, count);
@@ -2019,15 +2015,12 @@ rs_restore_file(FILE *inf)
     rs_read_boolean(inf, &door_stop);           /* 6  */
     rs_read_boolean(inf, &fight_flush);         /* 7  */
     rs_read_boolean(inf, &firstmove);           /* 8  */
-    rs_read_boolean(inf, &got_ltc);             /* 9  */
     rs_read_boolean(inf, &has_hit);             /* 10 */
-    rs_read_boolean(inf, &in_shell);            /* 11 */
     rs_read_boolean(inf, &inv_describe);        /* 12 */
     rs_read_boolean(inf, &jump);                /* 13 */
     rs_read_boolean(inf, &kamikaze);            /* 14 */
     rs_read_boolean(inf, &lower_msg);           /* 15 */
     rs_read_boolean(inf, &move_on);             /* 16 */
-    rs_read_boolean(inf, &msg_esc);             /* 17 */
     rs_read_boolean(inf, &passgo);              /* 18 */
     rs_read_boolean(inf, &playing);             /* 19 */
     rs_read_boolean(inf, &q_comm);              /* 20 */
@@ -2070,7 +2063,6 @@ rs_restore_file(FILE *inf)
     rs_read_int(inf, &inv_type);
     rs_read_int(inf, &level);
     rs_read_int(inf, &max_level);
-    rs_read_int(inf, &mpos);
     rs_read_int(inf, &no_food);
     rs_read_ints(inf,a_class,MAXARMORS);
     rs_read_int(inf, &count);

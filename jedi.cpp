@@ -1,3 +1,5 @@
+#include <random>
+#include <time.h>
 #include <string.h>
 #include <SDL/SDL.h>
 
@@ -12,6 +14,8 @@ extern uint8_t font_data[];
 #define DISPLAY_WIDTH 128
 #define DISPLAY_HEIGHT 64
 uint8_t jedi_screen_buffer[DISPLAY_WIDTH*DISPLAY_HEIGHT];
+
+static std::mt19937_64 random_engine;
 
 static char status_line[40];
 static int map_view_x;
@@ -65,6 +69,13 @@ void initJedi()
 {
     clearMapDisplay();
     memset(jedi_screen_buffer, 0, DISPLAY_WIDTH*DISPLAY_HEIGHT);
+    
+    random_engine.seed(time(NULL));
+}
+
+int getRandomNumber(int max)
+{
+    return std::uniform_int_distribution<>(0, max)(random_engine);
 }
 
 void clearMapDisplay()
@@ -102,6 +113,11 @@ void refreshMap()
     }
 
     refreshDisplay();
+}
+
+void animationDelay()
+{
+    SDL_Delay(30);
 }
 
 void displayLargeMap()

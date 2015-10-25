@@ -93,7 +93,7 @@ int main(int argc, char **argv)
 int
 rnd(int range)
 {
-    return range == 0 ? 0 : abs((int) RN) % range;
+    return range == 0 ? 0 : getRandomNumber(range - 1);
 }
 
 /*
@@ -137,8 +137,6 @@ quit(int sig)
     /*
      * Reset the signal in case we got here via an interrupt
      */
-    if (!q_comm)
-        mpos = 0;
     if (displayMessage("really quit?") == 'y')
     {
         msg("You quit with %d gold pieces", purse);
@@ -149,7 +147,6 @@ quit(int sig)
     {
         status();
         refreshMap();
-        mpos = 0;
         count = 0;
         to_death = FALSE;
     }
@@ -174,7 +171,6 @@ leave(int sig)
 void
 my_exit(int st)
 {
-    resetltchars();
     exit(st);
 }
 

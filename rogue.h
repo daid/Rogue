@@ -130,7 +130,7 @@
 #define LAMPDIST        3
 #ifdef MASTER
 #ifndef PASSWD
-#define        PASSWD                "mTBellIQOsLNA"
+#define        PASSWD                "wizard"
 #endif
 #endif
 
@@ -468,7 +468,7 @@ struct monster {
 
 extern bool        after, again, allscore, amulet, door_stop, fight_flush,
                 firstmove, has_hit, inv_describe, jump, kamikaze,
-                lower_msg, move_on, msg_esc, pack_used[],
+                lower_msg, move_on, pack_used[],
                 passgo, playing, q_comm, running, save_msg, see_floor,
                 seenstairs, stat_msg, terse, to_death, tombstone;
 
@@ -478,7 +478,7 @@ extern char        dir_ch, file_name[], home[], huh[],
                 *s_names[], take, *tr_name[], *ws_made[], *ws_type[];
 
 extern int        a_class[], count, food_left, hungry_state, inpack,
-                inv_type, lastscore, level, max_hit, max_level, mpos,
+                inv_type, lastscore, level, max_hit, max_level,
                 n_objs, no_command, no_food, no_move, noscore, ntraps, purse,
                 quiet, vf_hit;
 

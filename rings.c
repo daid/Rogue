@@ -110,7 +110,6 @@ ring_off()
     else
         if ((ring = gethand()) < 0)
             return;
-    mpos = 0;
     obj = cur_ring[ring];
     if (obj == NULL)
     {
@@ -135,7 +134,6 @@ gethand()
         c = displayMessage(terse ? "left or right ring?" : "left hand or right hand?");
         if (c == ESCAPE)
             return -1;
-        mpos = 0;
         if (c == 'l' || c == 'L')
             return LEFT;
         else if (c == 'r' || c == 'R')

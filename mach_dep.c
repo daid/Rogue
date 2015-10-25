@@ -117,43 +117,6 @@ void setup()
 }
 
 /*
- * getltchars:
- *        Get the local tty chars for later use
- */
-
-void
-getltchars()
-{
-    got_ltc = TRUE;
-    orig_dsusp = md_dsuspchar();
-    md_setdsuspchar( md_suspchar() );
-}
-
-/* 
- * resetltchars: 
- *      Reset the local tty chars to original values. 
- */ 
-void 
-resetltchars(void) 
-{ 
-    if (got_ltc) {
-        md_setdsuspchar(orig_dsusp);
-    } 
-} 
-  
-/* 
- * playltchars: 
- *      Set local tty chars to the values we use when playing. 
- */ 
-void 
-playltchars(void) 
-{ 
-    if (got_ltc) { 
-        md_setdsuspchar( md_suspchar() );
-    } 
-} 
-
-/*
  * start_score:
  *        Start the scoring sequence
  */

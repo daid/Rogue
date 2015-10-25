@@ -373,10 +373,8 @@ picky_inven()
     else
     {
         mch = displayMessage(terse ? "item:" : "which item do you wish to inventory:");
-        mpos = 0;
         if (mch == ESCAPE)
         {
-            msg("");
             return;
         }
         for (obj = pack; obj != NULL; obj = next(obj))
@@ -416,7 +414,6 @@ get_item(char *purpose, int type)
             if (terse)
                 addmsg(" what");
             ch = msg("? (* for list): ");
-            mpos = 0;
             /*
              * Give the poor player a chance to abort the command
              */

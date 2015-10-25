@@ -41,12 +41,10 @@ save_game()
     /*
      * get file name
      */
-    mpos = 0;
 over:
     for (;;)
     {
         c = displayMessage("Save and exit?");
-        mpos = 0;
         if (c == ESCAPE)
         {
             msg("");
@@ -74,7 +72,6 @@ gotfile:
             for (;;)
             {
                 c = displayMessage("File exists.  Do you wish to overwrite it?");
-                mpos = 0;
                 if (c == ESCAPE)
                     return;
                 if (c == 'y' || c == 'Y')
@@ -175,7 +172,6 @@ restore(char *file)
         printf("Cannot unlink file\n");
         return FALSE;
     }
-    mpos = 0;
 
     if (pstats.s_hpt <= 0)
     {
@@ -184,7 +180,6 @@ restore(char *file)
     }
 
     strcpy(file_name, file);
-    srand(time(NULL));
     displayMessage("Welcome back");
     playit();
     /*NOTREACHED*/

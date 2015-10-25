@@ -28,7 +28,6 @@ int msg(char *fmt, ...)
      */
     if (*fmt == '\0')
     {
-        mpos = 0;
         return ~ESCAPE;
     }
     /*
@@ -67,28 +66,6 @@ endmsg()
 
     if (save_msg)
         strcpy(huh, msgbuf);
-    if (mpos)
-    {
-        /*
-        look(FALSE);
-        mvaddstr(0, mpos, "--More--");
-        refresh();
-        if (!msg_esc)
-            wait_for(' ');
-        else
-        {
-            while ((ch = readchar()) != ' ')
-                if (ch == ESCAPE)
-                {
-                    msgbuf[0] = '\0';
-                    mpos = 0;
-                    newpos = 0;
-                    msgbuf[0] = '\0';
-                    return ESCAPE;
-                }
-        }
-        */
-    }
     /*
      * All messages should start with uppercase, except ones that
      * start with a pack addressing character
@@ -98,7 +75,6 @@ endmsg()
     
     ch = displayMessage(msgbuf);
 
-    mpos = newpos;
     newpos = 0;
     msgbuf[0] = '\0';
     return ch;

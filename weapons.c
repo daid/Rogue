@@ -105,6 +105,7 @@ do_motion(THING *obj, int ydelta, int xdelta)
             {
                 setMapDisplay(obj->o_pos.x, obj->o_pos.y, obj->o_type);
                 refreshMap();
+                animationDelay();
             }
             continue;
         }

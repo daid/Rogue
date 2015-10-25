@@ -340,7 +340,7 @@ check_level()
     pstats.s_lvl = i;
     if (i > olevel)
     {
-        add = roll(i - olevel, 10);
+        add = (i - olevel) * 5 + roll(i - olevel, 5);
         max_hp += add;
         pstats.s_hpt += add;
         msg("welcome to level %d", i);
@@ -501,7 +501,6 @@ get_dir()
                 when 'n': case'N': delta.y =  1; delta.x =  1;
                 when ESCAPE: last_dir = '\0'; reset_last(); return FALSE;
                 otherwise:
-                    mpos = 0;
                     dir_ch = displayMessage(prompt);
                     gotit = FALSE;
             }
@@ -518,7 +517,6 @@ get_dir()
             delta.y = rnd(3) - 1;
             delta.x = rnd(3) - 1;
         } while (delta.y == 0 && delta.x == 0);
-    mpos = 0;
     return TRUE;
 }
 

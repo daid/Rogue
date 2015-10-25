@@ -436,7 +436,7 @@ nothing(char type)
             case POTION: tystr = "potion";
             when SCROLL: tystr = "scroll";
             when RING: tystr = "ring";
-            when STICK: tystr = "stick";
+            when STICK: tystr = "wands";
         }
         sprintf(sp, " about any %ss", tystr);
     }

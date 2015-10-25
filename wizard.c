@@ -253,7 +253,7 @@ passwd()
     if (sp == buf)
         return FALSE;
     *sp = '\0';
-    return (strcmp(PASSWD, md_crypt(buf, "mT")) == 0);
+    return (strcmp(PASSWD, buf) == 0);
 }
 
 /*

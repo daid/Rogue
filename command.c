@@ -73,8 +73,6 @@ command()
             {
                 ch = md_readchar();
                 move_on = FALSE;
-                if (mpos != 0)                /* Erase message if its there */
-                    msg("");
             }
         }
         else
@@ -511,7 +509,6 @@ void help()
     register struct h_list *strp;
     register char helpch;
     helpch = displayMessage("character you want help for (* for all):");
-    mpos = 0;
     /*
      * If its not a *, print the right help string
      * or an error if he typed a funny character.
@@ -578,10 +575,8 @@ identify()
     };
 
     ch = displayMessage("what do you want identified?");
-    mpos = 0;
     if (ch == ESCAPE)
     {
-        msg("");
         return;
     }
     if (isupper(ch))

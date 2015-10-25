@@ -82,10 +82,10 @@ void score(int amount, int flags, char monst)
         scp->sc_score = 0;
         for (i = 0; i < MAXSTR; i++)
             scp->sc_name[i] = 0;
-        scp->sc_flags = RN;
-        scp->sc_level = RN;
-        scp->sc_monster = (unsigned short) RN;
-        scp->sc_uid = RN;
+        scp->sc_flags = 0;
+        scp->sc_level = 0;
+        scp->sc_monster = 0;
+        scp->sc_uid = 0;
     }
 
     rd_score(top_ten);

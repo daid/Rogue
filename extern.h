@@ -32,7 +32,6 @@
 #define MAXLINES        32        /* maximum number of screen lines used */
 #define MAXCOLS                80        /* maximum number of screen columns used */
 
-#define RN                (((seed = seed*11109+13849) >> 16) & 0xffff)
 #ifdef CTRL
 #undef CTRL
 #endif
@@ -42,7 +41,6 @@
  * Now all the global variables
  */
 
-extern bool        got_ltc, in_shell;
 extern int        wizard;
 extern char        fruit[], prbuf[];
 extern int orig_dsusp;
@@ -55,16 +53,13 @@ extern FILE        *scoreboard;
 void    auto_save(int);
 void        come_down();
 void        doctor();
-void        getltchars();
 void        land();
 void    leave(int);
 void        my_exit();
 void        nohaste();
 void        playit();
-void    playltchars(void);
 void        print_disc(char);
 void    quit(int);
-void    resetltchars(void);
 void        rollwand();
 void        runners();
 void        set_order();
@@ -81,22 +76,13 @@ char        *nothing(char type);
 char        *type_name(int type);
 
 int        md_chmod(char *filename, int mode);
-char        *md_crypt(char *key, char *salt);
-int        md_dsuspchar();
-int        md_erasechar();
 char        *md_gethomedir();
 char        *md_getusername();
 int        md_getuid();
-char        *md_getpass(char *prompt);
 int        md_getpid();
-char        *md_getrealname(int uid);
 void        md_init();
-int        md_killchar();
-void        md_normaluser();
 int        md_readchar();
 void       md_flush_input();
-int        md_setdsuspchar(int c);
-int        md_suspchar();
 int        md_unlink(char *file);
 int        md_unlink_open_file(char *file, FILE *inf);
 int md_issymlink(char *sp);

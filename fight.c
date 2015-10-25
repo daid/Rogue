@@ -375,10 +375,17 @@ set_mname(THING *tp)
 int
 swing(int at_lvl, int op_arm, int wplus)
 {
-    int res = rnd(20);
+    //Instead of 1d20, we throw 3d20 and select the middle one.
+    //This favors middle rolls more, making the game feel less random. While still making the average roll 10.5
+    int res0 = rnd(20);
+    int res1 = rnd(20);
+    int res2 = rnd(20);
     int need = (20 - at_lvl) - op_arm;
+    if (res0 > res1) { int tmp = res0; res0 = res1; res1 = tmp; }
+    if (res1 > res2) { int tmp = res1; res1 = res2; res2 = tmp; }
+    if (res0 > res1) { int tmp = res0; res0 = res1; res1 = tmp; }
 
-    return (res + wplus >= need);
+    return (res1 + wplus >= need);
 }
 
 /*

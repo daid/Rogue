@@ -77,137 +77,13 @@ md_getpid()
 char *
 md_getusername()
 {
-    return "ultimaker";
+    return "Jedi";
 }
 
 char *
 md_gethomedir()
 {
     return "";
-}
-
-char *
-md_getrealname(int uid)
-{
-    static char uidstr[20];
-#if !defined(_WIN32) && !defined(DJGPP)
-    struct passwd *pp;
-
-        if ((pp = getpwuid(uid)) == NULL)
-    {
-        sprintf(uidstr,"%d", uid);
-        return(uidstr);
-    }
-        else
-            return(pp->pw_name);
-#else
-   sprintf(uidstr,"%d", uid);
-   return(uidstr);
-#endif
-}
-
-extern char *xcrypt(char *key, char *salt);
-
-char *
-md_crypt(char *key, char *salt)
-{
-    return( xcrypt(key,salt) );
-}
-
-char *
-md_getpass(char *prompt)
-{
-#ifndef HAVE_GETPASS
-    static char password_buffer[9];
-    char *p = password_buffer;
-    int c, count = 0;
-    int max_length = 9;
-
-    fflush(stdout);
-    /* If we can't prompt, abort */
-    if (fputs(prompt, stderr) < 0)
-    {
-        *p = '\0';
-        return NULL;
-    }
-
-    for(;;)
-    {
-        /* Get a character with no echo */
-        c = md_readchar();
-
-        /* Exit on interrupt (^c or ^break) */
-        if (c == '\003' || c == 0x100)
-            exit(1);
-
-        /* Terminate on end of line or file (^j, ^m, ^d, ^z) */
-        if (c == '\r' || c == '\n' || c == '\004' || c == '\032')
-            break;
-
-        /* Back up on backspace */
-        if (c == '\b')
-        {
-            if (count)
-                count--;
-            else if (p > password_buffer)
-                p--;
-            continue;
-        }
-
-        /* Ignore DOS extended characters */
-        if ((c & 0xff) != c)
-            continue;
-
-        /* Add to password if it isn't full */
-        if (p < password_buffer + max_length - 1)
-            *p++ = (char) c;
-        else
-            count++;
-    }
-   *p = '\0';
-
-   fputc('\n', stderr);
-
-   return password_buffer;
-#else
-   return( (char *) getpass(prompt) );
-#endif
-}
-
-int
-md_erasechar()
-{
-    return 0;
-}
-
-int
-md_killchar()
-{
-    return 0;
-}
-
-int
-md_dsuspchar()
-{
-    return 0;
-}
-
-int
-md_setdsuspchar(int c)
-{
-    return(0);
-}
-
-int
-md_suspchar()
-{
-    return(0);
-}
-
-int
-md_setsuspchar(int c)
-{
-    return(0);
 }
 
 /*

@@ -14,6 +14,7 @@ void clearMapDisplay();
 void setMapDisplay(int x, int y, int display_char);
 int getMapDisplay(int x, int y);
 void refreshMap();
+void animationDelay();
 void displayLargeMap();
 void setMapViewTarget(int x, int y);
 void setStatusLine(const char* buffer);
@@ -25,5 +26,7 @@ const char* getKeyName(int key);
 void startDisplayOfStringList();
 int displayStringListItem(const char* fmt, ...);
 int finishDisplayOfStringList();
+
+int getRandomNumber(int max);
 
 #endif//JEDI_H

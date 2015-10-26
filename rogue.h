@@ -320,7 +320,7 @@
  * Help list
  */
 struct h_list {
-    char h_ch;
+    int h_ch;
     char *h_desc;
     bool h_print;
 };
@@ -472,14 +472,14 @@ extern bool        after, again, allscore, amulet, door_stop, fight_flush,
                 passgo, playing, q_comm, running, save_msg, see_floor,
                 seenstairs, stat_msg, terse, to_death, tombstone;
 
-extern char        dir_ch, file_name[], home[], huh[],
-                l_last_comm, l_last_dir, last_comm, last_dir, *Numname,
-                outbuf[], *p_colors[], *r_stones[], *release, runch,
+extern char     file_name[], home[], huh[], *Numname,
+                outbuf[], *p_colors[], *r_stones[], *release,
                 *s_names[], take, *tr_name[], *ws_made[], *ws_type[];
 
 extern int        a_class[], count, food_left, hungry_state, inpack,
-                inv_type, lastscore, level, max_hit, max_level,
+                inv_type, lastscore, level, max_hit, max_level, runch,
                 n_objs, no_command, no_food, no_move, noscore, ntraps, purse,
+                l_last_comm, l_last_dir, last_comm, last_dir, dir_ch,
                 quiet, vf_hit;
 
 extern unsigned int        numscores;
@@ -547,7 +547,7 @@ void        do_move(int dy, int dx);
 void        do_passages();
 void        do_pot(int type, bool knowit);
 void        do_rooms();
-void        do_run(char ch);
+void        do_run(int ch);
 void        do_zap();
 void        doadd(char *fmt, va_list args);
 void        door(struct room *rm, coord *cp);
@@ -610,7 +610,7 @@ void        open_score();
 void         passnum();
 char        *pick_color(char *col);
 int        pick_one(struct obj_info *info, int nitems);
-void        pick_up(char ch);
+void        pick_up(int ch);
 void        picky_inven();
 void        pr_spec(struct obj_info *info, int nitems);
 void        pr_list();
@@ -691,7 +691,6 @@ int        passwd();
 char        be_trapped(coord *tc);
 char        floor_ch();
 char        pack_char();
-char        readchar() __attribute__((deprecated));
 char        rnd_thing();
 
 char        *charge_str(THING *obj);

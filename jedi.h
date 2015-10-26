@@ -13,6 +13,7 @@ void initJedi();
 void clearMapDisplay();
 void setMapDisplay(int x, int y, int display_char);
 int getMapDisplay(int x, int y);
+void refreshMapWithMore();
 void refreshMap();
 void animationDelay();
 void displayLargeMap();

@@ -45,13 +45,13 @@ bool pack_used[26] = {                        /* Is the character used in the pa
     FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
 };
 
-char dir_ch;                                /* Direction from last get_dir() call */
+int dir_ch;                                /* Direction from last get_dir() call */
 char file_name[MAXSTR];                        /* Save file name */
 char huh[MAXSTR];                        /* The last message printed */
 char *p_colors[MAXPOTIONS];                /* Colors of the potions */
 char prbuf[2*MAXSTR];                        /* buffer for sprintfs */
 char *r_stones[MAXRINGS];                /* Stone settings of the rings */
-char runch;                                /* Direction player is running */
+int runch;                                /* Direction player is running */
 char *s_names[MAXSCROLLS];                /* Names of the scrolls */
 char take;                                /* Thing she is taking */
 char *ws_made[MAXSTICKS];                /* What sticks are made of */
@@ -60,10 +60,10 @@ int  orig_dsusp;                        /* Original dsusp char */
 char fruit[MAXSTR] =                        /* Favorite fruit */
                 { 's', 'l', 'i', 'm', 'e', '-', 'm', 'o', 'l', 'd', '\0' };
 char home[MAXSTR] = { '\0' };                /* User's home directory */
-char l_last_comm = '\0';                /* Last last_comm */
-char l_last_dir = '\0';                        /* Last last_dir */
-char last_comm = '\0';                        /* Last command typed */
-char last_dir = '\0';                        /* Last direction given */
+int l_last_comm = '\0';                /* Last last_comm */
+int l_last_dir = '\0';                        /* Last last_dir */
+int last_comm = '\0';                        /* Last command typed */
+int last_dir = '\0';                        /* Last direction given */
 char *tr_name[] = {                        /* Names of the traps */
         "a trapdoor",
         "an arrow trap",

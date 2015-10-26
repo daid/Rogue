@@ -62,7 +62,7 @@ addmsg(char *fmt, ...)
 int
 endmsg()
 {
-    char ch;
+    int ch = 0;
 
     if (save_msg)
         strcpy(huh, msgbuf);
@@ -73,7 +73,8 @@ endmsg()
     if (islower(msgbuf[0]) && !lower_msg && msgbuf[1] != ')')
         msgbuf[0] = (char) toupper(msgbuf[0]);
     
-    ch = displayMessage(msgbuf);
+    if (strlen(msgbuf) > 0)
+        ch = displayMessage(msgbuf);
 
     newpos = 0;
     msgbuf[0] = '\0';
@@ -121,26 +122,6 @@ step_ok(int ch)
         default:
             return (!isalpha(ch));
     }
-}
-
-/*
- * readchar:
- *        Reads and returns a character, checking for gross input errors
- */
-char
-readchar()
-{
-    char ch;
-
-    ch = (char) md_readchar();
-
-    if (ch == 3)
-    {
-        quit(0);
-        return(27);
-    }
-
-    return(ch);
 }
 
 /*

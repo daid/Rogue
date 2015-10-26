@@ -322,7 +322,7 @@ add_pass()
 {
     PLACE *pp;
     int y, x;
-    char ch;
+    int ch;
 
     for (y = 1; y < NUMLINES - 1; y++)
         for (x = 0; x < NUMCOLS; x++)
@@ -387,7 +387,7 @@ numpass(int y, int x)
 {
     char *fp;
     struct room *rp;
-    char ch;
+    int ch;
 
     if (x >= NUMCOLS || x < 0 || y >= NUMLINES || y <= 0)
         return;

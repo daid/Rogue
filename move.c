@@ -25,7 +25,7 @@ coord nh;
  */
 
 void
-do_run(char ch)
+do_run(int ch)
 {
     running = TRUE;
     after = FALSE;
@@ -41,7 +41,7 @@ do_run(char ch)
 void
 do_move(int dy, int dx)
 {
-    char ch, fl;
+    int ch, fl;
 
     firstmove = FALSE;
     if (no_move)
@@ -119,8 +119,8 @@ hit_bound:
 
                 switch (runch)
                 {
-                    case 'h':
-                    case 'l':
+                    case 'h': case K_LEFT:
+                    case 'l': case K_RIGHT:
                         b1 = (bool)(hero.y != 1 && turn_ok(hero.y - 1, hero.x));
                         b2 = (bool)(hero.y != NUMLINES - 2 && turn_ok(hero.y + 1, hero.x));
                         if (!(b1 ^ b2))
@@ -138,8 +138,8 @@ hit_bound:
                         dx = 0;
                         turnref();
                         goto over;
-                    case 'j':
-                    case 'k':
+                    case 'j': case K_DOWN:
+                    case 'k': case K_UP:
                         b1 = (bool)(hero.x != 0 && turn_ok(hero.y, hero.x - 1));
                         b2 = (bool)(hero.x != NUMCOLS - 1 && turn_ok(hero.y, hero.x + 1));
                         if (!(b1 ^ b2))
@@ -365,7 +365,7 @@ rndmove(THING *who)
 {
     THING *obj;
     int x, y;
-    char ch;
+    int ch;
     static coord ret;  /* what we will be returning */
 
     y = ret.y = who->t_pos.y + rnd(3) - 1;

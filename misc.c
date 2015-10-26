@@ -123,28 +123,28 @@ look(bool wakeup)
             {
                 switch (runch)
                 {
-                    case 'h':
+                    case 'h': case K_LEFT:
                         if (x == ex)
                             continue;
-                    when 'j':
+                    when 'j': case K_DOWN:
                         if (y == sy)
                             continue;
-                    when 'k':
+                    when 'k': case K_UP:
                         if (y == ey)
                             continue;
-                    when 'l':
+                    when 'l': case K_RIGHT:
                         if (x == sx)
                             continue;
-                    when 'y':
+                    when 'y': case K_UP_LEFT:
                         if ((y + x) - sumhero >= 1)
                             continue;
-                    when 'u':
+                    when 'u': case K_UP_RIGHT:
                         if ((y - x) - diffhero >= 1)
                             continue;
-                    when 'n':
+                    when 'n': case K_DOWN_RIGHT:
                         if ((y + x) - sumhero <= -1)
                             continue;
-                    when 'b':
+                    when 'b': case K_DOWN_LEFT:
                         if ((y - x) - diffhero <= -1)
                             continue;
                 }
@@ -491,14 +491,14 @@ get_dir()
             gotit = TRUE;
             switch (dir_ch)
             {
-                case 'h': case'H': delta.y =  0; delta.x = -1;
-                when 'j': case'J': delta.y =  1; delta.x =  0;
-                when 'k': case'K': delta.y = -1; delta.x =  0;
-                when 'l': case'L': delta.y =  0; delta.x =  1;
-                when 'y': case'Y': delta.y = -1; delta.x = -1;
-                when 'u': case'U': delta.y = -1; delta.x =  1;
-                when 'b': case'B': delta.y =  1; delta.x = -1;
-                when 'n': case'N': delta.y =  1; delta.x =  1;
+                case 'h': case'H': case K_LEFT:       delta.y =  0; delta.x = -1;
+                when 'j': case'J': case K_DOWN:       delta.y =  1; delta.x =  0;
+                when 'k': case'K': case K_UP:         delta.y = -1; delta.x =  0;
+                when 'l': case'L': case K_RIGHT:      delta.y =  0; delta.x =  1;
+                when 'y': case'Y': case K_UP_LEFT:    delta.y = -1; delta.x = -1;
+                when 'u': case'U': case K_UP_RIGHT:   delta.y = -1; delta.x =  1;
+                when 'b': case'B': case K_DOWN_LEFT:  delta.y =  1; delta.x = -1;
+                when 'n': case'N': case K_DOWN_RIGHT: delta.y =  1; delta.x =  1;
                 when ESCAPE: last_dir = '\0'; reset_last(); return FALSE;
                 otherwise:
                     dir_ch = displayMessage(prompt);
@@ -561,6 +561,7 @@ call_it(struct obj_info *info)
     }
     else if (!info->oi_guess)
     {
+        refreshMapWithMore(); //First show the map, as for some scrolls we need to see the effect
         if (askForInput(terse ? "call it:" : "what do you want to call it?", prbuf, MAXSTR) == NORM)
         {
             if (info->oi_guess != NULL)

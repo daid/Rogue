@@ -308,7 +308,7 @@ chase(THING *tp, coord *ee)
     register int x, y;
     register int curdist, thisdist;
     register coord *er = &tp->t_pos;
-    register char ch;
+    register int ch;
     register int plcnt = 1;
     static coord tryp;
 

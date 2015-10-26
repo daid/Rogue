@@ -1913,24 +1913,24 @@ rs_save_file(FILE *savef)
     rs_write_int(savef, 0);                         /* 28 */
 #endif
     rs_write_booleans(savef, pack_used, 26);        /* 29 */
-    rs_write_char(savef, dir_ch);
+    rs_write_int(savef, dir_ch);
     rs_write_chars(savef, file_name, MAXSTR);
     rs_write_chars(savef, huh, MAXSTR);
     rs_write_potions(savef);
     rs_write_chars(savef,prbuf,2*MAXSTR);
     rs_write_rings(savef);
     rs_write_string(savef,release);
-    rs_write_char(savef, runch);
+    rs_write_int(savef, runch);
     rs_write_scrolls(savef);
     rs_write_char(savef, take);
     rs_write_sticks(savef);
     rs_write_int(savef,orig_dsusp);
     rs_write_chars(savef, fruit, MAXSTR);
     rs_write_chars(savef, home, MAXSTR);
-    rs_write_char(savef,l_last_comm);
-    rs_write_char(savef,l_last_dir);
-    rs_write_char(savef,last_comm);
-    rs_write_char(savef,last_dir);
+    rs_write_int(savef,l_last_comm);
+    rs_write_int(savef,l_last_dir);
+    rs_write_int(savef,last_comm);
+    rs_write_int(savef,last_dir);
     rs_write_strings(savef,tr_name,8);
     rs_write_int(savef,n_objs);
     rs_write_int(savef, ntraps);
@@ -2037,24 +2037,24 @@ rs_restore_file(FILE *inf)
     rs_read_int(inf, &dummyint);                /* 28 */
 #endif
     rs_read_booleans(inf, pack_used, 26);       /* 29 */
-    rs_read_char(inf, &dir_ch);
+    rs_read_int(inf, &dir_ch);
     rs_read_chars(inf, file_name, MAXSTR);
     rs_read_chars(inf, huh, MAXSTR);
     rs_read_potions(inf);
     rs_read_chars(inf, prbuf, 2*MAXSTR);
     rs_read_rings(inf);
     rs_read_new_string(inf,&release);
-    rs_read_char(inf, &runch);
+    rs_read_int(inf, &runch);
     rs_read_scrolls(inf);
     rs_read_char(inf, &take);
     rs_read_sticks(inf);
     rs_read_int(inf,&orig_dsusp);
     rs_read_chars(inf, fruit, MAXSTR);
     rs_read_chars(inf, home, MAXSTR);
-    rs_read_char(inf, &l_last_comm);
-    rs_read_char(inf, &l_last_dir);
-    rs_read_char(inf, &last_comm);
-    rs_read_char(inf, &last_dir);
+    rs_read_int(inf, &l_last_comm);
+    rs_read_int(inf, &l_last_dir);
+    rs_read_int(inf, &last_comm);
+    rs_read_int(inf, &last_dir);
     rs_read_new_strings(inf,tr_name,8);
     rs_read_int(inf, &n_objs);
     rs_read_int(inf, &ntraps);

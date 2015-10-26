@@ -31,15 +31,26 @@
 
 #include <stdlib.h>
 #include <string.h>
+#ifdef USE_SDL
 #include <SDL/SDL.h>
+#else
+#include <stdio.h>
+#include <linux/input.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#endif
 
 #include "extern.h"
 
 void md_init()
 {
+#ifdef USE_SDL
     SDL_Init(SDL_INIT_VIDEO);
     atexit(SDL_Quit);
     SDL_SetVideoMode(900, 480, 32, SDL_SWSURFACE);
+#endif
 }
 
 int
@@ -86,531 +97,19 @@ md_gethomedir()
     return "";
 }
 
-/*
-    Cursor/Keypad Support
-
-    Sadly Cursor/Keypad support is less straightforward than it should be.
-    
-    The various terminal emulators/consoles choose to differentiate the 
-    cursor and keypad keys (with modifiers) in different ways (if at all!). 
-    Furthermore they use different code set sequences for each key only
-    a subset of which the various curses libraries recognize. Partly due
-    to incomplete termcap/terminfo entries and partly due to inherent 
-    limitations of those terminal capability databases.
-
-    I give curses first crack at decoding the sequences. If it fails to decode
-    it we check for common ESC-prefixed sequences.
-
-    All cursor/keypad results are translated into standard rogue movement 
-    commands.
-
-    Unmodified keys are translated to walk commands: hjklyubn
-    Modified (shift,control,alt) are translated to run commands: HJKLYUBN
-
-    Console and supported (differentiated) keys
-    Interix:  Cursor Keys, Keypad, Ctl-Keypad
-    Cygwin:   Cursor Keys, Keypad, Alt-Cursor Keys
-    MSYS:     Cursor Keys, Keypad, Ctl-Cursor Keys, Ctl-Keypad
-    Win32:    Cursor Keys, Keypad, Ctl/Shift/Alt-Cursor Keys, Ctl/Alt-Keypad
-    DJGPP:    Cursor Keys, Keypad, Ctl/Shift/Alt-Cursor Keys, Ctl/Alt-Keypad
-
-    Interix Console (raw, ncurses)
-    ==============================
-    normal        shift                ctrl            alt
-    ESC [D,        ESC F^,                ESC [D,            ESC [D            /# Left            #/
-    ESC [C,        ESC F$,                ESC [C,            ESC [C            /# Right            #/
-    ESC [A,        ESC F-,                local win,  ESC [A            /# Up            #/
-    ESC [B,        ESC F+,                local win,  ESC [B            /# Down            #/
-    ESC [H,        ESC [H,                ESC [H,            ESC [H            /# Home            #/
-    ESC [S,        local win,        ESC [S,            ESC [S            /# Page Up            #/
-    ESC [T,        local win,        ESC [T,            ESC [T            /# Page Down    #/
-    ESC [U,        ESC [U,                ESC [U,            ESC [U            /# End            #/
-    ESC [D,        ESC F^,                ESC [D,            O                    /# Keypad Left  #/
-    ESC [C,        ESC F$,                ESC [C,            O                    /# Keypad Right #/
-    ESC [A,        ESC [A,                ESC [-1,    O                    /# Keypad Up    #/
-    ESC [B,        ESC [B,                ESC [-2,    O                    /# Keypad Down  #/
-    ESC [H,        ESC [H,                ESC [-263,  O                    /# Keypad Home  #/
-    ESC [S,        ESC [S,                ESC [-19,   O                    /# Keypad PgUp  #/
-    ESC [T,        ESC [T,                ESC [-20,   O                    /# Keypad PgDn  #/
-    ESC [U,        ESC [U,                ESC [-21,   O                    /# Keypad End   #/
-    nothing,        nothing,        nothing,    O                    /# Kaypad 5     #/
-
-    Interix Console (term=interix, ncurses)
-    ==============================
-    KEY_LEFT,        ESC F^,                KEY_LEFT,   KEY_LEFT            /# Left            #/
-    KEY_RIGHT,        ESC F$,                KEY_RIGHT,  KEY_RIGHT            /# Right            #/
-    KEY_UP,        0x146,                local win,  KEY_UP            /# Up            #/
-    KEY_DOWN,        0x145,                local win,  KEY_DOWN            /# Down            #/
-    ESC [H,        ESC [H,                ESC [H,            ESC [H            /# Home            #/
-    KEY_PPAGE,        local win,        KEY_PPAGE,  KEY_PPAGE            /# Page Up            #/
-    KEY_NPAGE,        local win,        KEY_NPAGE,  KEY_NPAGE            /# Page Down    #/
-    KEY_LL,        KEY_LL,                KEY_LL,            KEY_LL            /# End            #/
-    KEY_LEFT,        ESC F^,                ESC [-4,    O                    /# Keypad Left  #/
-    KEY_RIGHT,        ESC F$,                ESC [-3,    O                    /# Keypad Right #/
-    KEY_UP,        KEY_UP,                ESC [-1,    O                    /# Keypad Up    #/
-    KEY_DOWN,        KEY_DOWN,        ESC [-2,    O                    /# Keypad Down  #/
-    ESC [H,        ESC [H,                ESC [-263,  O                    /# Keypad Home  #/
-    KEY_PPAGE,        KEY_PPAGE,        ESC [-19,   O                    /# Keypad PgUp  #/
-    KEY_NPAGE,        KEY_NPAGE,        ESC [-20,   O                    /# Keypad PgDn  #/
-    KEY_LL,        KEY_LL,                ESC [-21,   O                    /# Keypad End   #/
-    nothing,        nothing,        nothing,    O                    /# Keypad 5     #/
-
-    Cygwin Console (raw, ncurses)
-    ==============================
-    normal        shift                ctrl            alt
-    ESC [D,        ESC [D,                ESC [D,            ESC ESC [D            /# Left            #/
-    ESC [C,        ESC [C,                ESC [C,            ESC ESC [C            /# Rght            #/
-    ESC [A,        ESC [A,                ESC [A,            ESC ESC [A            /# Up            #/
-    ESC [B,        ESC [B,                ESC [B,            ESC ESC [B            /# Down            #/
-    ESC [1~,        ESC [1~,        ESC [1~,    ESC ESC [1~            /# Home            #/
-    ESC [5~,        ESC [5~,        ESC [5~,    ESC ESC [5~            /# Page Up            #/
-    ESC [6~,        ESC [6~,        ESC [6~,    ESC ESC [6~            /# Page Down    #/
-    ESC [4~,        ESC [4~,        ESC [4~,    ESC ESC [4~            /# End            #/
-    ESC [D,        ESC [D,                ESC [D,            ESC ESC [D,O    /# Keypad Left  #/
-    ESC [C,        ESC [C,                ESC [C,            ESC ESC [C,O    /# Keypad Right #/
-    ESC [A,        ESC [A,                ESC [A,            ESC ESC [A,O    /# Keypad Up    #/
-    ESC [B,        ESC [B,                ESC [B,            ESC ESC [B,O    /# Keypad Down  #/
-    ESC [1~,        ESC [1~,        ESC [1~,    ESC ESC [1~,O   /# Keypad Home  #/
-    ESC [5~,        ESC [5~,        ESC [5~,    ESC ESC [5~,O   /# Keypad PgUp  #/
-    ESC [6~,        ESC [6~,        ESC [6~,    ESC ESC [6~,O   /# Keypad PgDn  #/
-    ESC [4~,        ESC [4~,        ESC [4~,    ESC ESC [4~,O   /# Keypad End   #/
-    ESC [-71,        nothing,        nothing,    O                    /# Keypad 5            #/
-
-    Cygwin Console (term=cygwin, ncurses)
-    ==============================
-    KEY_LEFT,        KEY_LEFT,        KEY_LEFT,   ESC-260            /# Left            #/
-    KEY_RIGHT,        KEY_RIGHT,        KEY_RIGHT,  ESC-261            /# Rght            #/
-    KEY_UP,        KEY_UP,                KEY_UP,            ESC-259            /# Up            #/
-    KEY_DOWN,        KEY_DOWN,        KEY_DOWN,   ESC-258            /# Down            #/
-    KEY_HOME,        KEY_HOME,        KEY_HOME,   ESC-262            /# Home            #/
-    KEY_PPAGE,        KEY_PPAGE,        KEY_PPAGE,  ESC-339            /# Page Up            #/
-    KEY_NPAGE,        KEY_NPAGE,        KEY_NPAGE,  ESC-338            /# Page Down    #/
-    KEY_END,        KEY_END,        KEY_END,    ESC-360            /# End            #/
-    KEY_LEFT,        KEY_LEFT,        KEY_LEFT,   ESC-260,O            /# Keypad Left  #/
-    KEY_RIGHT,        KEY_RIGHT,        KEY_RIGHT,  ESC-261,O            /# Keypad Right #/
-    KEY_UP,        KEY_UP,                KEY_UP,            ESC-259,O       /# Keypad Up    #/
-    KEY_DOWN,        KEY_DOWN,        KEY_DOWN,   ESC-258,O       /# Keypad Down  #/
-    KEY_HOME,        KEY_HOME,        KEY_HOME,   ESC-262,O       /# Keypad Home  #/
-    KEY_PPAGE,        KEY_PPAGE,        KEY_PPAGE,  ESC-339,O            /# Keypad PgUp  #/
-    KEY_NPAGE,        KEY_NPAGE,        KEY_NPAGE,  ESC-338,O            /# Keypad PgDn  #/
-    KEY_END,        KEY_END,        KEY_END,    ESC-360,O       /# Keypad End   #/
-    ESC [G,        nothing,        nothing,    O                    /# Keypad 5            #/
-
-    MSYS Console (raw, ncurses)
-    ==============================
-    normal        shift                ctrl            alt
-    ESC OD,        ESC [d,                ESC Od            nothing            /# Left            #/
-    ESC OE,        ESC [e,                ESC Oe,            nothing            /# Right            #/
-    ESC OA,        ESC [a,                ESC Oa,            nothing            /# Up            #/
-    ESC OB,        ESC [b,                ESC Ob,            nothing            /# Down            #/
-    ESC [7~,        ESC [7$,        ESC [7^,    nothing            /# Home            #/
-    ESC [5~,        local window,   ESC [5^,    nothing            /# Page Up      #/
-    ESC [6~,        local window,   ESC [6^,    nothing            /# Page Down    #/
-    ESC [8~,        ESC [8$,        ESC [8^,    nothing            /# End            #/
-    ESC OD,        ESC [d,                ESC Od            O                    /# Keypad Left  #/
-    ESC OE,        ESC [c,                ESC Oc,            O                    /# Keypad Right #/
-    ESC OA,        ESC [a,                ESC Oa,            O                    /# Keypad Up    #/
-    ESC OB,        ESC [b,                ESC Ob,            O                    /# Keypad Down  #/
-    ESC [7~,        ESC [7$,        ESC [7^,    O                    /# Keypad Home  #/
-    ESC [5~,        local window,   ESC [5^,    O                    /# Keypad PgUp  #/
-    ESC [6~,        local window,   ESC [6^,    O                    /# Keypad PgDn  #/
-    ESC [8~,        ESC [8$,        ESC [8^,    O                    /# Keypad End   #/
-    11,                11,                11,            O                    /# Keypad 5     #/
-
-    MSYS Console (term=rxvt, ncurses)
-    ==============================
-    normal        shift                ctrl            alt
-    KEY_LEFT,        KEY_SLEFT,        514            nothing            /# Left            #/
-    KEY_RIGHT,        KEY_SRIGHT,        516,            nothing            /# Right            #/
-    KEY_UP,        518,                519,            nothing            /# Up            #/
-    KEY_DOWN,        511,                512,            nothing            /# Down            #/
-    KEY_HOME,        KEY_SHOME,        ESC [7^,    nothing            /# Home            #/
-    KEY_PPAGE,        local window,   ESC [5^,    nothing            /# Page Up      #/
-    KEY_NPAGE,        local window,   ESC [6^,    nothing            /# Page Down    #/
-    KEY_END,        KEY_SEND,        KEY_EOL,    nothing            /# End            #/
-    KEY_LEFT,        KEY_SLEFT,        514            O                    /# Keypad Left  #/
-    KEY_RIGHT,        KEY_SRIGHT,        516,            O                    /# Keypad Right #/
-    KEY_UP,        518,                519,            O                    /# Keypad Up    #/
-    KEY_DOWN,        511,                512,            O                    /# Keypad Down  #/
-    KEY_HOME,        KEY_SHOME,        ESC [7^,    O                    /# Keypad Home  #/
-    KEY_PPAGE,        local window,   ESC [5^,    O                    /# Keypad PgUp  #/
-    KEY_NPAGE,        local window,   ESC [6^,    O                    /# Keypad PgDn  #/
-    KEY_END,        KEY_SEND,        KEY_EOL,    O                    /# Keypad End   #/
-    11,                11,                11,            O                    /# Keypad 5     #/
-
-    Win32 Console (raw, pdcurses)
-    DJGPP Console (raw, pdcurses)
-    ==============================
-    normal        shift                ctrl            alt
-    260,        391,                443,            493                    /# Left            #/
-    261,        400,                444,            492                    /# Right            #/
-    259,        547,                480,            490                    /# Up            #/
-    258,        548,                481,            491                    /# Down            #/
-    262,        388,                447,            524                        /# Home            #/
-    339,        396,                445,            526                        /# Page Up            #/
-    338,        394,                446,            520                    /# Page Down    #/
-    358,        384,                448,            518                     /# End            #/
-    452,        52('4'),        511,            521                    /# Keypad Left  #/
-    454,        54('6'),        513,            523                    /# Keypad Right #/
-    450,        56('8'),        515,            525                    /# Keypad Up    #/
-    456,        50('2'),        509,            519                    /# Keypad Down  #/
-    449,        55('7'),        514,            524                    /# Keypad Home  #/
-    451,        57('9'),        516,            526                    /# Keypad PgUp  #/
-    457,        51('3'),        510,            520                    /# Keypad PgDn  #/
-    455,        49('1'),        508,            518                    /# Keypad End   #/
-    453,        53('5'),        512,            522                    /# Keypad 5     #/
-
-    Win32 Console (pdcurses, MSVC/MingW32)
-    DJGPP Console (pdcurses)
-    ==============================
-    normal        shift                ctrl            alt
-    KEY_LEFT,        KEY_SLEFT,        CTL_LEFT,   ALT_LEFT            /# Left            #/
-    KEY_RIGHT,        KEY_SRIGHT,        CTL_RIGHT,  ALT_RIGHT            /# Right            #/
-    KEY_UP,        KEY_SUP,        CTL_UP,            ALT_UP            /# Up            #/
-    KEY_DOWN,        KEY_SDOWN,        CTL_DOWN,   ALT_DOWN            /# Down            #/
-    KEY_HOME,        KEY_SHOME,        CTL_HOME,   ALT_HOME            /# Home            #/
-    KEY_PPAGE,        KEY_SPREVIOUS,  CTL_PGUP,   ALT_PGUP            /# Page Up      #/
-    KEY_NPAGE,        KEY_SNEXTE,        CTL_PGDN,   ALT_PGDN            /# Page Down    #/
-    KEY_END,        KEY_SEND,        CTL_END,    ALT_END            /# End            #/
-    KEY_B1,        52('4'),        CTL_PAD4,   ALT_PAD4            /# Keypad Left  #/
-    KEY_B3,        54('6'),        CTL_PAD6,   ALT_PAD6            /# Keypad Right #/
-    KEY_A2,        56('8'),        CTL_PAD8,   ALT_PAD8            /# Keypad Up    #/
-    KEY_C2,        50('2'),        CTL_PAD2,   ALT_PAD2            /# Keypad Down  #/
-    KEY_A1,        55('7'),        CTL_PAD7,   ALT_PAD7            /# Keypad Home  #/
-    KEY_A3,        57('9'),        CTL_PAD9,   ALT_PAD9            /# Keypad PgUp  #/
-    KEY_C3,        51('3'),        CTL_PAD3,   ALT_PAD3            /# Keypad PgDn  #/
-    KEY_C1,        49('1'),        CTL_PAD1,   ALT_PAD1            /# Keypad End   #/
-    KEY_B2,        53('5'),        CTL_PAD5,   ALT_PAD5            /# Keypad 5     #/
-
-    Windows Telnet (raw)
-    ==============================
-    normal        shift                ctrl            alt
-    ESC [D,        ESC [D,                ESC [D,            ESC [D            /# Left            #/
-    ESC [C,        ESC [C,                ESC [C,            ESC [C            /# Right            #/
-    ESC [A,        ESC [A,                ESC [A,            ESC [A            /# Up            #/
-    ESC [B,        ESC [B,                ESC [B,            ESC [B            /# Down            #/
-    ESC [1~,        ESC [1~,        ESC [1~,    ESC [1~            /# Home            #/
-    ESC [5~,        ESC [5~,        ESC [5~,    ESC [5~            /# Page Up            #/
-    ESC [6~,        ESC [6~,        ESC [6~,    ESC [6~            /# Page Down    #/
-    ESC [4~,        ESC [4~,        ESC [4~,    ESC [4~            /# End            #/
-    ESC [D,        ESC [D,                ESC [D,            ESC [D            /# Keypad Left  #/
-    ESC [C,        ESC [C,                ESC [C,            ESC [C            /# Keypad Right #/
-    ESC [A,        ESC [A,                ESC [A,            ESC [A            /# Keypad Up    #/
-    ESC [B,        ESC [B,                ESC [B,            ESC [B            /# Keypad Down  #/
-    ESC [1~,        ESC [1~,        ESC [1~,    ESC [1~            /# Keypad Home  #/
-    ESC [5~,        ESC [5~,        ESC [5~,    ESC [5~            /# Keypad PgUp  #/
-    ESC [6~,        ESC [6~,        ESC [6~,    ESC [6~            /# Keypad PgDn  #/
-    ESC [4~,        ESC [4~,        ESC [4~,    ESC [4~            /# Keypad End   #/
-    nothing,        nothing,        nothing,    nothing            /# Keypad 5     #/
-
-    Windows Telnet (term=xterm)
-    ==============================
-    normal        shift                ctrl            alt
-    KEY_LEFT,        KEY_LEFT,        KEY_LEFT,   KEY_LEFT            /# Left            #/
-    KEY_RIGHT,        KEY_RIGHT,        KEY_RIGHT,  KEY_RIGHT            /# Right            #/
-    KEY_UP,        KEY_UP,                KEY_UP,            KEY_UP            /# Up            #/
-    KEY_DOWN,        KEY_DOWN,        KEY_DOWN,   KEY_DOWN            /# Down            #/
-    ESC [1~,        ESC [1~,        ESC [1~,    ESC [1~            /# Home            #/
-    KEY_PPAGE,        KEY_PPAGE,        KEY_PPAGE,  KEY_PPAGE            /# Page Up            #/
-    KEY_NPAGE,        KEY_NPAGE,        KEY_NPAGE,  KEY_NPAGE            /# Page Down    #/
-    ESC [4~,        ESC [4~,        ESC [4~,    ESC [4~            /# End            #/
-    KEY_LEFT,        KEY_LEFT,        KEY_LEFT,   O                    /# Keypad Left  #/
-    KEY_RIGHT,        KEY_RIGHT,        KEY_RIGHT,  O                    /# Keypad Right #/
-    KEY_UP,        KEY_UP,                KEY_UP,            O                    /# Keypad Up    #/
-    KEY_DOWN,        KEY_DOWN,        KEY_DOWN,   O                    /# Keypad Down  #/
-    ESC [1~,        ESC [1~,        ESC [1~,    ESC [1~            /# Keypad Home  #/
-    KEY_PPAGE,        KEY_PPAGE,        KEY_PPAGE,  KEY_PPAGE            /# Keypad PgUp  #/
-    KEY_NPAGE,        KEY_NPAGE,        KEY_NPAGE,  KEY_NPAGE            /# Keypad PgDn  #/
-    ESC [4~,        ESC [4~,        ESC [4~,    O                    /# Keypad End   #/
-    ESC [-71,        nothing,        nothing,    O                    /# Keypad 5            #/
-
-    PuTTY
-    ==============================
-    normal        shift                ctrl            alt
-    ESC [D,        ESC [D,                ESC OD,            ESC [D            /# Left            #/
-    ESC [C,        ESC [C,                ESC OC,            ESC [C            /# Right            #/
-    ESC [A,        ESC [A,                ESC OA,            ESC [A            /# Up            #/
-    ESC [B,        ESC [B,                ESC OB,            ESC [B            /# Down            #/
-    ESC [1~,        ESC [1~,        local win,  ESC [1~            /# Home            #/
-    ESC [5~,        local win,        local win,  ESC [5~            /# Page Up            #/
-    ESC [6~,        local win,        local win,  ESC [6~            /# Page Down    #/
-    ESC [4~,        ESC [4~,        local win,  ESC [4~            /# End            #/
-    ESC [D,        ESC [D,                ESC [D,            O                    /# Keypad Left  #/
-    ESC [C,        ESC [C,                ESC [C,            O                    /# Keypad Right #/
-    ESC [A,        ESC [A,                ESC [A,            O                    /# Keypad Up    #/
-    ESC [B,        ESC [B,                ESC [B,            O                    /# Keypad Down  #/
-    ESC [1~,        ESC [1~,        ESC [1~,    O                    /# Keypad Home  #/
-    ESC [5~,        ESC [5~,        ESC [5~,    O                    /# Keypad PgUp  #/
-    ESC [6~,        ESC [6~,        ESC [6~,    O                    /# Keypad PgDn  #/
-    ESC [4~,        ESC [4~,        ESC [4~,    O                    /# Keypad End   #/
-    nothing,        nothing,        nothing,    O                    /# Keypad 5            #/
-
-    PuTTY
-    ==============================
-    normal        shift                ctrl            alt
-    KEY_LEFT,        KEY_LEFT,        ESC OD,            ESC KEY_LEFT    /# Left            #/
-    KEY_RIGHT        KEY_RIGHT,        ESC OC,            ESC KEY_RIGHT   /# Right            #/
-    KEY_UP,        KEY_UP,                ESC OA,            ESC KEY_UP            /# Up            #/
-    KEY_DOWN,        KEY_DOWN,        ESC OB,            ESC KEY_DOWN    /# Down            #/
-    ESC [1~,        ESC [1~,        local win,  ESC ESC [1~            /# Home            #/
-    KEY_PPAGE        local win,        local win,  ESC KEY_PPAGE   /# Page Up            #/
-    KEY_NPAGE        local win,        local win,  ESC KEY_NPAGE   /# Page Down    #/
-    ESC [4~,        ESC [4~,        local win,  ESC ESC [4~            /# End            #/
-    ESC Ot,        ESC Ot,                ESC Ot,            O                    /# Keypad Left  #/
-    ESC Ov,        ESC Ov,                ESC Ov,            O                    /# Keypad Right #/
-    ESC Ox,        ESC Ox,                ESC Ox,            O                    /# Keypad Up    #/
-    ESC Or,        ESC Or,                ESC Or,            O                    /# Keypad Down  #/
-    ESC Ow,        ESC Ow,                ESC Ow,     O                    /# Keypad Home  #/
-    ESC Oy,        ESC Oy,                ESC Oy,     O                    /# Keypad PgUp  #/
-    ESC Os,        ESC Os,                ESC Os,     O                    /# Keypad PgDn  #/
-    ESC Oq,        ESC Oq,                ESC Oq,     O                    /# Keypad End   #/
-    ESC Ou,        ESC Ou,                ESC Ou,            O                    /# Keypad 5            #/
-*/
-
-#define M_NORMAL 0
-#define M_ESC    1
-#define M_KEYPAD 2
-#define M_TRAIL  3
-
 int md_readchar()
 {
-#if 0
-    int ch = 0;
-    int lastch = 0;
-    int mode = M_NORMAL;
-    int mode2 = M_NORMAL;
+#ifdef USE_SDL
 
-    for(;;)
-    {
-        ch = getch();
-
-        if (ch == ERR)            /* timed out waiting for valid sequence */
-        {                    /* flush input so far and start over    */
-            mode = M_NORMAL;
-            nocbreak();
-            raw();
-            ch = 27;
-            break;
-        }
-
-        if (mode == M_TRAIL)
-        {
-            if (ch == '^')                /* msys console  : 7,5,6,8: modified*/
-                ch = CTRL( toupper(lastch) );
-
-            if (ch == '~')                /* cygwin console: 1,5,6,4: normal  */
-                ch = tolower(lastch);   /* windows telnet: 1,5,6,4: normal  */
-                                        /* msys console  : 7,5,6,8: normal  */
-
-            if (mode2 == M_ESC)                /* cygwin console: 1,5,6,4: modified*/
-                ch = CTRL( toupper(ch) );
-
-            break;
-        }
-
-        if (mode == M_ESC) 
-        {
-            if (ch == 27)
-            {
-                mode2 = M_ESC;
-                continue;
-            }
-
-            if ((ch == 'F') || (ch == 'O') || (ch == '['))
-            {
-                mode = M_KEYPAD;
-                continue;
-            }
-
-
-            switch(ch)
-            {
-                /* Cygwin Console   */
-                /* PuTTY            */
-                case KEY_LEFT : ch = CTRL('H'); break;
-                case KEY_RIGHT: ch = CTRL('L'); break;
-                case KEY_UP   : ch = CTRL('K'); break;
-                case KEY_DOWN : ch = CTRL('J'); break;
-                case KEY_HOME : ch = CTRL('Y'); break;
-                case KEY_PPAGE: ch = CTRL('U'); break;
-                case KEY_NPAGE: ch = CTRL('N'); break;
-                case KEY_END  : ch = CTRL('B'); break;
-
-                default: break;
-            }
-
-            break;
-        }
-
-        if (mode == M_KEYPAD)
-        {
-            switch(ch)
-            {
-                /* ESC F - Interix Console codes */
-                case   '^': ch = CTRL('H'); break;        /* Shift-Left            */
-                case   '$': ch = CTRL('L'); break;        /* Shift-Right            */
-
-                /* ESC [ - Interix Console codes */
-                case   'H': ch = 'y'; break;                /* Home                    */
-                case     1: ch = CTRL('K'); break;        /* Ctl-Keypad Up    */
-                case     2: ch = CTRL('J'); break;        /* Ctl-Keypad Down  */
-                case     3: ch = CTRL('L'); break;        /* Ctl-Keypad Right */
-                case     4: ch = CTRL('H'); break;        /* Ctl-Keypad Left  */
-                case   263: ch = CTRL('Y'); break;        /* Ctl-Keypad Home  */
-                case    19: ch = CTRL('U'); break;        /* Ctl-Keypad PgUp  */
-                case    20: ch = CTRL('N'); break;        /* Ctl-Keypad PgDn  */
-                case    21: ch = CTRL('B'); break;        /* Ctl-Keypad End   */
-
-                /* ESC [ - Cygwin Console codes */
-                case   'G': ch = '.'; break;                /* Keypad 5            */
-                case   '7': lastch = 'Y'; mode=M_TRAIL; break;        /* Ctl-Home */
-                case   '5': lastch = 'U'; mode=M_TRAIL; break;        /* Ctl-PgUp */
-                case   '6': lastch = 'N'; mode=M_TRAIL; break;        /* Ctl-PgDn */
-
-                /* ESC [ - Win32 Telnet, PuTTY */
-                case   '1': lastch = 'y'; mode=M_TRAIL; break;        /* Home            */
-                case   '4': lastch = 'b'; mode=M_TRAIL; break;        /* End            */
-
-                /* ESC O - PuTTY */
-                case   'D': ch = CTRL('H'); break;
-                case   'C': ch = CTRL('L'); break;
-                case   'A': ch = CTRL('K'); break;
-                case   'B': ch = CTRL('J'); break;
-                case   't': ch = 'h'; break;
-                case   'v': ch = 'l'; break;
-                case   'x': ch = 'k'; break;
-                case   'r': ch = 'j'; break;
-                case   'w': ch = 'y'; break;
-                case   'y': ch = 'u'; break;
-                case   's': ch = 'n'; break;
-                case   'q': ch = 'b'; break;
-                case   'u': ch = '.'; break;
-            }
-
-            if (mode != M_KEYPAD)
-                continue;
-        }
-
-        if (ch == 27)
-        {
-            halfdelay(1);
-            mode = M_ESC;
-            continue;
-        }
-
-        switch(ch)
-        {
-            case KEY_LEFT   : ch = 'h'; break;
-            case KEY_DOWN   : ch = 'j'; break;
-            case KEY_UP     : ch = 'k'; break;
-            case KEY_RIGHT  : ch = 'l'; break;
-            case KEY_HOME   : ch = 'y'; break;
-            case KEY_PPAGE  : ch = 'u'; break;
-            case KEY_END    : ch = 'b'; break;
-#ifdef KEY_LL
-            case KEY_LL            : ch = 'b'; break;
-#endif
-            case KEY_NPAGE  : ch = 'n'; break;
-
-#ifdef KEY_B1
-            case KEY_B1            : ch = 'h'; break;
-            case KEY_C2     : ch = 'j'; break;
-            case KEY_A2     : ch = 'k'; break;
-            case KEY_B3            : ch = 'l'; break;
-#endif
-            case KEY_A1     : ch = 'y'; break;
-            case KEY_A3     : ch = 'u'; break;
-            case KEY_C1     : ch = 'b'; break;
-            case KEY_C3     : ch = 'n'; break;
-            /* next should be '.', but for problem with putty/linux */
-            case KEY_B2            : ch = 'u'; break;
-
-#ifdef KEY_SLEFT
-            case KEY_SRIGHT  : ch = CTRL('L'); break;
-            case KEY_SLEFT   : ch = CTRL('H'); break;
-#ifdef KEY_SUP
-            case KEY_SUP     : ch = CTRL('K'); break;
-            case KEY_SDOWN   : ch = CTRL('J'); break;
-#endif
-            case KEY_SHOME   : ch = CTRL('Y'); break;
-            case KEY_SPREVIOUS:ch = CTRL('U'); break;
-            case KEY_SEND    : ch = CTRL('B'); break;
-            case KEY_SNEXT   : ch = CTRL('N'); break;
-#endif
-            case 0x146       : ch = CTRL('K'); break;         /* Shift-Up        */
-            case 0x145       : ch = CTRL('J'); break;         /* Shift-Down        */
-
-
-#ifdef CTL_RIGHT
-            case CTL_RIGHT   : ch = CTRL('L'); break;
-            case CTL_LEFT    : ch = CTRL('H'); break;
-            case CTL_UP      : ch = CTRL('K'); break;
-            case CTL_DOWN    : ch = CTRL('J'); break;
-            case CTL_HOME    : ch = CTRL('Y'); break;
-            case CTL_PGUP    : ch = CTRL('U'); break;
-            case CTL_END     : ch = CTRL('B'); break;
-            case CTL_PGDN    : ch = CTRL('N'); break;
-#endif
-#ifdef KEY_EOL
-            case KEY_EOL     : ch = CTRL('B'); break;
-#endif
-
-#ifndef CTL_PAD1
-            /* MSYS rxvt console */
-            case 511             : ch = CTRL('J'); break; /* Shift Dn */
-            case 512         : ch = CTRL('J'); break; /* Ctl Down */
-            case 514             : ch = CTRL('H'); break; /* Ctl Left */
-            case 516             : ch = CTRL('L'); break; /* Ctl Right*/
-            case 518             : ch = CTRL('K'); break; /* Shift Up */
-            case 519             : ch = CTRL('K'); break; /* Ctl Up   */
-#endif
-
-#ifdef CTL_PAD1
-            case CTL_PAD1   : ch = CTRL('B'); break;
-            case CTL_PAD2   : ch = CTRL('J'); break;
-            case CTL_PAD3   : ch = CTRL('N'); break;
-            case CTL_PAD4   : ch = CTRL('H'); break;
-            case CTL_PAD5   : ch = '.'; break;
-            case CTL_PAD6   : ch = CTRL('L'); break;
-            case CTL_PAD7   : ch = CTRL('Y'); break;
-            case CTL_PAD8   : ch = CTRL('K'); break;
-            case CTL_PAD9   : ch = CTRL('U'); break;
-#endif
-
-#ifdef ALT_RIGHT
-            case ALT_RIGHT  : ch = CTRL('L'); break;
-            case ALT_LEFT   : ch = CTRL('H'); break;
-            case ALT_DOWN   : ch = CTRL('J'); break;
-            case ALT_HOME   : ch = CTRL('Y'); break;
-            case ALT_PGUP   : ch = CTRL('U'); break;
-            case ALT_END    : ch = CTRL('B'); break;
-            case ALT_PGDN   : ch = CTRL('N'); break;
-#endif
-
-#ifdef ALT_PAD1
-            case ALT_PAD1   : ch = CTRL('B'); break;
-            case ALT_PAD2   : ch = CTRL('J'); break;
-            case ALT_PAD3   : ch = CTRL('N'); break;
-            case ALT_PAD4   : ch = CTRL('H'); break;
-            case ALT_PAD5   : ch = '.'; break;
-            case ALT_PAD6   : ch = CTRL('L'); break;
-            case ALT_PAD7   : ch = CTRL('Y'); break;
-            case ALT_PAD8   : ch = CTRL('K'); break;
-            case ALT_PAD9   : ch = CTRL('U'); break;
-#endif
-#ifdef KEY_BACKSPACE /* NCURSES in Keypad mode sends this for Ctrl-H */
-            case KEY_BACKSPACE: ch = CTRL('H'); break;
-#endif
-        }
-
-        break;
+#define HANDLE_KEY(k, n, s, c, a) \
+    if (event.key.keysym.sym == (k)) { \
+        if ((a) && (event.key.keysym.mod & KMOD_ALT)) return (a); \
+        if ((c) && (event.key.keysym.mod & KMOD_CTRL)) return (c); \
+        if ((s) && (event.key.keysym.mod & KMOD_SHIFT)) return (s); \
+        if (n) return (n); \
     }
-
-    nocbreak();            /* disable halfdelay mode if on */
-    raw();
-
-    return(ch & 0x7F);
-#endif
+#define HANDLE_KEY_CHAR(k, n) \
+    HANDLE_KEY(k, n, (n)-'a'+'A', CTRL(n), 0)
 
     while(true)
     {
@@ -625,101 +124,366 @@ int md_readchar()
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym >= SDLK_a && event.key.keysym.sym <= SDLK_z)
                 {
-                    if (event.key.keysym.mod & KMOD_SHIFT)
-                        event.key.keysym.sym = event.key.keysym.sym - 'a' + 'A';
-                    if (event.key.keysym.mod & KMOD_CTRL)
-                        return CTRL(event.key.keysym.sym);
-                    return event.key.keysym.sym;
+                    HANDLE_KEY_CHAR(event.key.keysym.sym, event.key.keysym.sym);
                 }
-                if (event.key.keysym.sym >= SDLK_0 && event.key.keysym.sym <= SDLK_9)
-                {
-                    if (event.key.keysym.mod & KMOD_SHIFT)
-                    {
-                        if (event.key.keysym.sym == '1')
-                            return '!';
-                        if (event.key.keysym.sym == '2')
-                            return '@';
-                        if (event.key.keysym.sym == '3')
-                            return '#';
-                        if (event.key.keysym.sym == '4')
-                            return '$';
-                        if (event.key.keysym.sym == '5')
-                            return '%';
-                        if (event.key.keysym.sym == '6')
-                            return '^';
-                        if (event.key.keysym.sym == '7')
-                            return '&';
-                        if (event.key.keysym.sym == '8')
-                            return '*';
-                        if (event.key.keysym.sym == '9')
-                            return '(';
-                        if (event.key.keysym.sym == '0')
-                            return ')';
-                    }
-                    return event.key.keysym.sym;
-                }
-                if (event.key.keysym.sym == SDLK_SPACE)
-                    return ' ';
-                if (event.key.keysym.sym == SDLK_LEFT)
-                {
-                    if (event.key.keysym.mod & KMOD_SHIFT)
-                        return 'H';
-                    return 'h';
-                }
-                if (event.key.keysym.sym == SDLK_RIGHT)
-                {
-                    if (event.key.keysym.mod & KMOD_SHIFT)
-                        return 'L';
-                    return 'l';
-                }
-                if (event.key.keysym.sym == SDLK_UP)
-                {
-                    if (event.key.keysym.mod & KMOD_SHIFT)
-                        return 'K';
-                    return 'k';
-                }
-                if (event.key.keysym.sym == SDLK_DOWN)
-                {
-                    if (event.key.keysym.mod & KMOD_SHIFT)
-                        return 'J';
-                    return 'j';
-                }
-                if (event.key.keysym.sym == SDLK_SLASH)
-                {
-                    if (event.key.keysym.mod & KMOD_SHIFT)
-                        return '?';
-                    return '/';
-                }
-                if (event.key.keysym.sym == SDLK_PERIOD)
-                {
-                    if (event.key.keysym.mod & KMOD_SHIFT)
-                        return '>';
-                    return '.';
-                }
-                if (event.key.keysym.sym == SDLK_COMMA)
-                {
-                    if (event.key.keysym.mod & KMOD_SHIFT)
-                        return '<';
-                    return ',';
-                }
-                if (event.key.keysym.sym == SDLK_KP_MULTIPLY)
-                    return '*';
-                if (event.key.keysym.sym == SDLK_ESCAPE)
-                    return 27;
-                if (event.key.keysym.sym == SDLK_RETURN)
-                    return 13;
-                if (event.key.keysym.sym == SDLK_BACKSPACE)
-                    return 8;
+                HANDLE_KEY(SDLK_ESCAPE, 27, 0, 0, 0);
+                HANDLE_KEY(SDLK_1, '1', '!', 0, 0);
+                HANDLE_KEY(SDLK_2, '2', '@', 0, 0);
+                HANDLE_KEY(SDLK_3, '3', '#', 0, 0);
+                HANDLE_KEY(SDLK_4, '4', '$', 0, 0);
+                HANDLE_KEY(SDLK_5, '5', '%', 0, 0);
+                HANDLE_KEY(SDLK_6, '6', '^', 0, 0);
+                HANDLE_KEY(SDLK_7, '7', '&', 0, 0);
+                HANDLE_KEY(SDLK_8, '8', '*', 0, 0);
+                HANDLE_KEY(SDLK_9, '9', '(', 0, 0);
+                HANDLE_KEY(SDLK_0, '0', ')', 0, 0);
+                HANDLE_KEY(SDLK_MINUS, '-', '_', 0, 0);
+                HANDLE_KEY(SDLK_EQUALS, '=', '+', 0, 0);
+                HANDLE_KEY(SDLK_BACKSPACE, 8, 0, 0, 0);
+                HANDLE_KEY(SDLK_TAB, 0, 0, 0, 0);
+                HANDLE_KEY(SDLK_LEFTBRACKET, '[', '{', 0, 0);
+                HANDLE_KEY(SDLK_RIGHTBRACKET, ']', '}', 0, 0);
+                HANDLE_KEY(SDLK_RETURN, 13, 0, 0, 0);
+                HANDLE_KEY(SDLK_SEMICOLON, ';', ':', 0, 0);
+                HANDLE_KEY(SDLK_QUOTE, '\'', '"', 0, 0);
+                HANDLE_KEY(SDLK_BACKQUOTE, '`', '~', 0, 0);
+                HANDLE_KEY(SDLK_BACKSLASH, '\\', '|', 0, 0);
+                HANDLE_KEY(SDLK_COMMA, ',', '<', 0, 0);
+                HANDLE_KEY(SDLK_PERIOD, '.', '>', 0, 0);
+                HANDLE_KEY(SDLK_SLASH, '/', '?', 0, 0);
+                HANDLE_KEY(SDLK_KP_MULTIPLY, '*', 0, 0, 0);
+                HANDLE_KEY(SDLK_SPACE, ' ', 0, 0, 0);
+
+                HANDLE_KEY(SDLK_KP7, K_UP_LEFT, 0, CTRL(K_UP_LEFT), 0);
+                HANDLE_KEY(SDLK_KP8, K_UP, 0, CTRL(K_UP), 0);
+                HANDLE_KEY(SDLK_KP9, K_UP_RIGHT, 0, CTRL(K_UP_RIGHT), 0);
+                HANDLE_KEY(SDLK_KP_MINUS, '-', 0, 0, 0);
+                HANDLE_KEY(SDLK_KP4, K_LEFT, 0, CTRL(K_LEFT), 0);
+                HANDLE_KEY(SDLK_KP5, '.', 0, 0, 0);
+                HANDLE_KEY(SDLK_KP6, K_RIGHT, 0, CTRL(K_RIGHT), 0);
+                HANDLE_KEY(SDLK_KP_PLUS, '+', 0, 0, 0);
+                HANDLE_KEY(SDLK_KP1, K_DOWN_LEFT, 0, CTRL(K_DOWN_LEFT), 0);
+                HANDLE_KEY(SDLK_KP2, K_DOWN, 0, CTRL(K_DOWN), 0);
+                HANDLE_KEY(SDLK_KP3, K_DOWN_RIGHT, 0, CTRL(K_DOWN_RIGHT), 0);
+                HANDLE_KEY(SDLK_KP0, 0, 0, 0, 0);
+                HANDLE_KEY(SDLK_KP_PERIOD, '.', 0, 0, 0);
+                
+                printf("Unknown key: %s %d\n", SDL_GetKeyName(event.key.keysym.sym), event.key.keysym.sym);
                 break;
             }
         }
     }
+#else
+    static int handle = -1;
+    static int mods = 0;
+    const int LEFT_SHIFT = 0x01;
+    const int RIGHT_SHIFT = 0x02;
+    const int ANY_SHIFT = LEFT_SHIFT | RIGHT_SHIFT;
+    const int LEFT_CTRL = 0x04;
+    const int RIGHT_CTRL = 0x08;
+    const int ANY_CTRL = LEFT_CTRL | RIGHT_CTRL;
+    const int LEFT_ALT = 0x10;
+    const int RIGHT_ALT = 0x20;
+    const int ANT_ALT = LEFT_ALT | RIGHT_ALT;
+
+#define HANDLE_MOD_KEY(k, m) \
+    if (event.code == (k)) { if (event.value) { mods |= (m); } else { mods &=~(m); } continue; }
+#define HANDLE_KEY(k, n, s, c, a) \
+    if (event.value && event.code == (k)) { \
+        if ((a) && (mods & ANY_ALT)) return (a); \
+        if ((c) && (mods & ANY_CTRL)) return (c); \
+        if ((s) && (mods & ANY_SHIFT)) return (s); \
+        if (n) return (n); \
+    }
+#define HANDLE_KEY_CHAR(k, n) \
+    HANDLE_KEY(k, n, (n)-'a'+'A', CTRL(n), 0)
+
+    if (handle == -1)
+    {
+        handle = open("/dev/input4", O_RDWR);
+    }
+
+    struct input_event event;
+    while(read(handle, &event, sizeof(event)) == sizeof(event))
+    {
+        if (event.type == EV_KEY)
+        {
+            HANDLE_MOD_KEY(KEY_LEFTSHIFT, LEFT_SHIFT);
+            HANDLE_MOD_KEY(KEY_RIGHTSHIFT, RIGHT_SHIFT);
+            HANDLE_MOD_KEY(KEY_LEFTCTRL, LEFT_CTRL);
+            HANDLE_MOD_KEY(KEY_RIGHTCTRL, RIGHT_CTRL);
+            HANDLE_MOD_KEY(KEY_LEFTALT, LEFT_ALT);
+            HANDLE_MOD_KEY(KEY_RIGHTALT, RIGHT_ALT);
+
+            HANDLE_KEY(KEY_ESC, ESCAPE, 27, 0, 0);
+            HANDLE_KEY(KEY_1, '1', '!', 0, 0);
+            HANDLE_KEY(KEY_2, '2', '@', 0, 0);
+            HANDLE_KEY(KEY_3, '3', '#', 0, 0);
+            HANDLE_KEY(KEY_4, '4', '$', 0, 0);
+            HANDLE_KEY(KEY_5, '5', '%', 0, 0);
+            HANDLE_KEY(KEY_6, '6', '^', 0, 0);
+            HANDLE_KEY(KEY_7, '7', '&', 0, 0);
+            HANDLE_KEY(KEY_8, '8', '*', 0, 0);
+            HANDLE_KEY(KEY_9, '9', '(', 0, 0);
+            HANDLE_KEY(KEY_0, '0', ')', 0, 0);
+            HANDLE_KEY(KEY_MINUS, '-', '_', 0, 0);
+            HANDLE_KEY(KEY_EQUAL, '=', '+', 0, 0);
+            HANDLE_KEY(KEY_BACKSPACE, 8, 0, 0, 0);
+            HANDLE_KEY(KEY_TAB, 0, 0, 0, 0);
+            HANDLE_KEY_CHAR(KEY_Q, 'q');
+            HANDLE_KEY_CHAR(KEY_W, 'w');
+            HANDLE_KEY_CHAR(KEY_E, 'e');
+            HANDLE_KEY_CHAR(KEY_R, 'r');
+            HANDLE_KEY_CHAR(KEY_T, 't');
+            HANDLE_KEY_CHAR(KEY_Y, 'y');
+            HANDLE_KEY_CHAR(KEY_U, 'u');
+            HANDLE_KEY_CHAR(KEY_I, 'i');
+            HANDLE_KEY_CHAR(KEY_O, 'o');
+            HANDLE_KEY_CHAR(KEY_P, 'p');
+            HANDLE_KEY(KEY_LEFTBRACE, '[', '{', 0, 0);
+            HANDLE_KEY(KEY_RIGHTBRACE, ']', '}', 0, 0);
+            HANDLE_KEY(KEY_ENTER, 13, 0, 0, 0);
+            HANDLE_KEY_CHAR(KEY_A, 'a');
+            HANDLE_KEY_CHAR(KEY_S, 's');
+            HANDLE_KEY_CHAR(KEY_D, 'd');
+            HANDLE_KEY_CHAR(KEY_F, 'f');
+            HANDLE_KEY_CHAR(KEY_G, 'g');
+            HANDLE_KEY_CHAR(KEY_H, 'h');
+            HANDLE_KEY_CHAR(KEY_J, 'j');
+            HANDLE_KEY_CHAR(KEY_K, 'k');
+            HANDLE_KEY_CHAR(KEY_L, 'l');
+            HANDLE_KEY(KEY_SEMICOLON, ';', ':', 0, 0);
+            HANDLE_KEY(KEY_APOSTROPHE, '\'', '"', 0, 0);
+            HANDLE_KEY(KEY_GRAVE, '`', '~', 0, 0);
+            HANDLE_KEY(KEY_BACKSLASH, '\\', '|', 0, 0);
+            HANDLE_KEY_CHAR(KEY_Z, 'z');
+            HANDLE_KEY_CHAR(KEY_X, 'x');
+            HANDLE_KEY_CHAR(KEY_C, 'c');
+            HANDLE_KEY_CHAR(KEY_V, 'v');
+            HANDLE_KEY_CHAR(KEY_B, 'b');
+            HANDLE_KEY_CHAR(KEY_N, 'n');
+            HANDLE_KEY_CHAR(KEY_M, 'm');
+            HANDLE_KEY(KEY_COMMA, ',', '<', 0, 0);
+            HANDLE_KEY(KEY_DOT, '.', '>', 0, 0);
+            HANDLE_KEY(KEY_SLASH, '/', '?', 0, 0);
+            HANDLE_KEY(KEY_KPASTERISK, '*', 0, 0, 0);
+            HANDLE_KEY(KEY_SPACE, ' ', 0, 0, 0);
+            HANDLE_KEY(KEY_CAPSLOCK, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F1, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F2, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F3, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F4, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F5, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F6, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F7, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F8, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F9, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F10, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_NUMLOCK, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SCROLLLOCK, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_KP7, K_UP_LEFT, 0, 0, 0);
+            HANDLE_KEY(KEY_KP8, K_UP, 0, 0, 0);
+            HANDLE_KEY(KEY_KP9, K_UP_RIGHT, 0, 0, 0);
+            HANDLE_KEY(KEY_KPMINUS, '-', 0, 0, 0);
+            HANDLE_KEY(KEY_KP4, K_LEFT, 0, 0, 0);
+            HANDLE_KEY(KEY_KP5, '.', 0, 0, 0);
+            HANDLE_KEY(KEY_KP6, K_RIGHT, 0, 0, 0);
+            HANDLE_KEY(KEY_KPPLUS, '+', 0, 0, 0);
+            HANDLE_KEY(KEY_KP1, K_DOWN_LEFT, 0, 0, 0);
+            HANDLE_KEY(KEY_KP2, K_DOWN, 0, 0, 0);
+            HANDLE_KEY(KEY_KP3, K_DOWN_RIGHT, 0, 0, 0);
+            HANDLE_KEY(KEY_KP0, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_KPDOT, '.', 0, 0, 0);
+
+            HANDLE_KEY(KEY_ZENKAKUHANKAKU, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_102ND, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F11, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F12, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_RO, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_KATAKANA, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_HIRAGANA, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_HENKAN, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_KATAKANAHIRAGANA, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_MUHENKAN, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_KPJPCOMMA, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_KPENTER, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_KPSLASH, '/', 0, 0, 0);
+            HANDLE_KEY(KEY_SYSRQ, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_LINEFEED, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_HOME, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_UP, KEY_UP, 0, 0, 0);
+            HANDLE_KEY(KEY_PAGEUP, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_LEFT, K_LEFT, 0, 0, 0);
+            HANDLE_KEY(KEY_RIGHT, K_RIGHT, 0, 0, 0);
+            HANDLE_KEY(KEY_END, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_DOWN, K_DOWN, 0, 0, 0);
+            HANDLE_KEY(KEY_PAGEDOWN, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_INSERT, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_DELETE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_MACRO, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_MUTE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_VOLUMEDOWN, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_VOLUMEUP, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_POWER, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_KPEQUAL, '=', 0, 0, 0);
+            HANDLE_KEY(KEY_KPPLUSMINUS, '-', 0, 0, 0);
+            HANDLE_KEY(KEY_PAUSE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SCALE, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_KPCOMMA, ',', 0, 0, 0);
+            HANDLE_KEY(KEY_HANGEUL, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_HANGUEL, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_HANJA, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_YEN, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_LEFTMETA, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_RIGHTMETA, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_COMPOSE, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_STOP, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_AGAIN, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_PROPS, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_UNDO, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_FRONT, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_COPY, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_OPEN, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_PASTE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_FIND, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_CUT, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_HELP, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_MENU, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_CALC, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SETUP, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SLEEP, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_WAKEUP, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_FILE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SENDFILE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_DELETEFILE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_XFER, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_PROG1, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_PROG2, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_WWW, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_MSDOS, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_COFFEE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SCREENLOCK, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_ROTATE_DISPLAY, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_DIRECTION, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_CYCLEWINDOWS, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_MAIL, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_BOOKMARKS, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_COMPUTER, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_BACK, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_FORWARD, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_CLOSECD, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_EJECTCD, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_EJECTCLOSECD, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_NEXTSONG, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_PLAYPAUSE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_PREVIOUSSONG, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_STOPCD, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_RECORD, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_REWIND, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_PHONE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_ISO, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_CONFIG, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_HOMEPAGE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_REFRESH, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_EXIT, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_MOVE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_EDIT, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SCROLLUP, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SCROLLDOWN, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_KPLEFTPAREN, '(', 0, 0, 0);
+            HANDLE_KEY(KEY_KPRIGHTPAREN, ')', 0, 0, 0);
+            HANDLE_KEY(KEY_NEW, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_REDO, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_F13, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F14, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F15, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F16, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F17, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F18, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F19, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F20, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F21, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F22, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F23, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_F24, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_PLAYCD, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_PAUSECD, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_PROG3, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_PROG4, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_DASHBOARD, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SUSPEND, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_CLOSE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_PLAY, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_FASTFORWARD, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_BASSBOOST, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_PRINT, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_HP, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_CAMERA, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SOUND, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_QUESTION, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_EMAIL, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_CHAT, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SEARCH, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_CONNECT, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_FINANCE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SPORT, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SHOP, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_ALTERASE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_CANCEL, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_BRIGHTNESSDOWN, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_BRIGHTNESSUP, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_MEDIA, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_SWITCHVIDEOMODE, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_KBDILLUMTOGGLE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_KBDILLUMDOWN, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_KBDILLUMUP, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_SEND, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_REPLY, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_FORWARDMAIL, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_SAVE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_DOCUMENTS, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_BATTERY, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_BLUETOOTH, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_WLAN, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_UWB, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_UNKNOWN, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_VIDEO_NEXT, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_VIDEO_PREV, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_BRIGHTNESS_CYCLE, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_BRIGHTNESS_AUTO, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_BRIGHTNESS_ZERO, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_DISPLAY_OFF, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_WWAN, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_WIMAX, 0, 0, 0, 0);
+            HANDLE_KEY(KEY_RFKILL, 0, 0, 0, 0);
+
+            HANDLE_KEY(KEY_MICMUTE, 0, 0, 0, 0);
+        }
+    }
+    printf("Failed to read input device?\n");
+    return 0;
+#endif
 }
 
 void md_flush_input()
 {
+#ifdef USE_SDL
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
     }
+#endif
 }

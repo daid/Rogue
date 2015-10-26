@@ -1,7 +1,9 @@
 #include <random>
 #include <time.h>
 #include <string.h>
+#ifdef USE_SDL
 #include <SDL/SDL.h>
+#endif
 
 extern "C" {
 #include "jedi.h"
@@ -50,6 +52,16 @@ static void fillBox(int x, int y, int w, int h, uint8_t color)
     }
 }
 
+static void drawMore(int y)
+{
+    int x = 90;
+    for(const char* c="  MORE  "; *c; c++)
+    {
+        drawChar(x, y, *c | DISPLAY_INVERT);
+        x += 4;
+    }
+}
+
 static void refreshDisplay()
 {
     SDL_Surface* screen = SDL_GetVideoSurface();
@@ -63,6 +75,26 @@ static void refreshDisplay()
         }
     }
     SDL_Flip(screen);
+}
+
+static void drawMap()
+{
+    for(int x=0; x<DISPLAY_WIDTH / 4; x++)
+    {
+        for(int y=0; y<DISPLAY_HEIGHT / 6; y++)
+        {
+            int n = 0;
+            if ((x + map_view_x) >= 0 && (x + map_view_x) < NUMCOLS && (y + map_view_y) >= 0 && (y + map_view_y) < NUMLINES)
+                n = map_buffer[(x + map_view_x) + (y + map_view_y) * NUMCOLS];
+
+            drawChar(x*4, y*6, n);
+        }
+    }
+    fillBox(0, DISPLAY_HEIGHT-6, DISPLAY_WIDTH, 6, 255);
+    for(char* c=status_line; *c; c++)
+    {
+        drawChar((c-status_line)*4, DISPLAY_HEIGHT-6, (*c) | DISPLAY_INVERT);
+    }
 }
 
 void initJedi()
@@ -93,25 +125,18 @@ int getMapDisplay(int x, int y)
     return map_buffer[x + y * NUMCOLS];
 }
 
+void refreshMapWithMore()
+{
+    drawMap();
+    drawMore(DISPLAY_HEIGHT - 12);
+    refreshDisplay();
+    md_readchar();
+    refreshMap();
+}
+
 void refreshMap()
 {
-    for(int x=0; x<DISPLAY_WIDTH / 4; x++)
-    {
-        for(int y=0; y<DISPLAY_HEIGHT / 6; y++)
-        {
-            int n = 0;
-            if ((x + map_view_x) >= 0 && (x + map_view_x) < NUMCOLS && (y + map_view_y) >= 0 && (y + map_view_y) < NUMLINES)
-                n = map_buffer[(x + map_view_x) + (y + map_view_y) * NUMCOLS];
-
-            drawChar(x*4, y*6, n);
-        }
-    }
-    fillBox(0, DISPLAY_HEIGHT-6, DISPLAY_WIDTH, 6, 255);
-    for(char* c=status_line; *c; c++)
-    {
-        drawChar((c-status_line)*4, DISPLAY_HEIGHT-6, (*c) | DISPLAY_INVERT);
-    }
-
+    drawMap();
     refreshDisplay();
 }
 
@@ -227,7 +252,7 @@ int displayMessage(const char* msg_buffer)
     int width, line_count;
     lineWrapString(buffer, max_line_width, "", &width, &line_count);
     
-    refreshMap();
+    drawMap();
     int x = (DISPLAY_WIDTH - width * 4) / 2;
     int y = (DISPLAY_HEIGHT - line_count * 6) / 2;
     int sx = x;
@@ -299,9 +324,25 @@ const char* getKeyName(int key)
     if ((key >= ' ' && key <= '~'))
         sprintf(buffer, "%c", key);
     if (key == 0)
-        strcpy(buffer, "");
+        return "";
     if (key == 27)
-        strcpy(buffer, "ESC");
+        return "ESC";
+    if (key == K_UP_LEFT)
+        return "UpLeft";
+    if (key == K_UP)
+        return "Up";
+    if (key == K_UP_RIGHT)
+        return "UpRight";
+    if (key == K_LEFT)
+        return "Left";
+    if (key == K_RIGHT)
+        return "Right";
+    if (key == K_DOWN_LEFT)
+        return "DownLeft";
+    if (key == K_DOWN)
+        return "Down";
+    if (key == K_DOWN_RIGHT)
+        return "DownRight";
     return buffer;
 }
 
@@ -310,7 +351,7 @@ char display_string_list_buffer[1024];
 
 static int drawDisplayStringList()
 {
-    refreshMap();
+    drawMap();
     int w = 30 * 4;
     int x = 5;
     int sx = x;
@@ -352,13 +393,7 @@ int displayStringListItem(const char* fmt, ...)
 
     if (display_string_list_line_count + line_count > 7)
     {
-        int x = 90;
-        int y = drawDisplayStringList() + 5;
-        for(const char* c="  MORE  "; *c; c++)
-        {
-            drawChar(x, y, *c | DISPLAY_INVERT);
-            x += 4;
-        }
+        drawMore(drawDisplayStringList() + 5);
         refreshDisplay();
         ch = md_readchar();
         refreshMap();

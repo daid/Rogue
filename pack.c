@@ -304,7 +304,7 @@ int inventory(THING *list_start, int type)
  */
 
 void
-pick_up(char ch)
+pick_up(int ch)
 {
     THING *obj;
 
@@ -395,7 +395,7 @@ THING *
 get_item(char *purpose, int type)
 {
     THING *obj;
-    char ch;
+    int ch;
 
     if (pack == NULL)
         msg("you aren't carrying anything");
@@ -492,7 +492,7 @@ floor_ch()
 char
 floor_at()
 {
-    char ch;
+    int ch;
 
     ch = chat(hero.y, hero.x);
     if (ch == FLOOR)

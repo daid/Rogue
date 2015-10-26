@@ -22,7 +22,7 @@
 void
 command()
 {
-    register char ch;
+    register int ch;
     register int ntimes = 1;                        /* Number of player moves */
     char *fp;
     THING *mp;
@@ -118,6 +118,8 @@ command()
                     case 'z': case 'B': case 'C': case 'H': case 'I':
                     case 'J': case 'K': case 'L': case 'N': case 'U':
                     case 'Y': case 'M':
+                    case K_UP_LEFT: case K_UP: case K_UP_RIGHT: case K_LEFT:
+                    case K_RIGHT: case K_DOWN_LEFT: case K_DOWN: case K_DOWN_RIGHT:
 #ifdef MASTER
                     case CTRL('D'): case CTRL('A'):
 #endif
@@ -170,14 +172,14 @@ over:
                         endmsg();
                     }
                 }
-                when 'h': do_move(0, -1);
-                when 'j': do_move(1, 0);
-                when 'k': do_move(-1, 0);
-                when 'l': do_move(0, 1);
-                when 'y': do_move(-1, -1);
-                when 'u': do_move(-1, 1);
-                when 'b': do_move(1, -1);
-                when 'n': do_move(1, 1);
+                when 'h': case K_LEFT: do_move(0, -1);
+                when 'j': case K_DOWN: do_move(1, 0);
+                when 'k': case K_UP: do_move(-1, 0);
+                when 'l': case K_RIGHT: do_move(0, 1);
+                when 'y': case K_UP_LEFT: do_move(-1, -1);
+                when 'u': case K_UP_RIGHT: do_move(-1, 1);
+                when 'b': case K_DOWN_LEFT: do_move(1, -1);
+                when 'n': case K_DOWN_RIGHT: do_move(1, 1);
                 when 'H': do_run('h');
                 when 'J': do_run('j');
                 when 'K': do_run('k');
@@ -188,6 +190,8 @@ over:
                 when 'N': do_run('n');
                 when CTRL('H'): case CTRL('J'): case CTRL('K'): case CTRL('L'):
                 case CTRL('Y'): case CTRL('U'): case CTRL('B'): case CTRL('N'):
+                case CTRL(K_UP_LEFT): case CTRL(K_UP): case CTRL(K_UP_RIGHT): case CTRL(K_LEFT):
+                case CTRL(K_RIGHT): case CTRL(K_DOWN_LEFT): case CTRL(K_DOWN): case CTRL(K_DOWN_RIGHT):
                 {
                     if (!on(player, ISBLIND))
                     {

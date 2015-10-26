@@ -379,7 +379,7 @@ enter_room(coord *cp)
     struct room *rp;
     THING *tp;
     int y, x;
-    char ch;
+    int ch;
 
     rp = proom = roomin(cp);
     door_open(rp);
@@ -419,7 +419,7 @@ leave_room(coord *cp)
     struct room *rp;
     int y, x;
     char floor;
-    char ch;
+    int ch;
 
     rp = proom;
 

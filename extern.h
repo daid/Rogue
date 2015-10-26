@@ -35,8 +35,15 @@
 #ifdef CTRL
 #undef CTRL
 #endif
-#define CTRL(c)                (c & 037)
-
+#define CTRL(c)                ((c) | 0x1000)
+#define K_UP_LEFT                0x101
+#define K_UP                     0x102
+#define K_UP_RIGHT               0x103
+#define K_LEFT                   0x104
+#define K_RIGHT                  0x105
+#define K_DOWN_LEFT              0x106
+#define K_DOWN                   0x107
+#define K_DOWN_RIGHT             0x108
 /*
  * Now all the global variables
  */

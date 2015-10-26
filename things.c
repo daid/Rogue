@@ -140,7 +140,7 @@ inv_name(THING *obj, bool drop)
 void
 drop()
 {
-    char ch;
+    int ch;
     THING *obj;
 
     ch = chat(hero.y, hero.x);
@@ -499,7 +499,7 @@ pr_list()
     if (!terse)
         addmsg(" of object do you want a list");
     msg("? ");
-    ch = readchar();
+    ch = md_readchar();
     switch (ch)
     {
         case POTION:

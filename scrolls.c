@@ -24,7 +24,7 @@ read_scroll()
     THING *obj;
     PLACE *pp;
     int y, x;
-    char ch;
+    int ch;
     int i;
     bool discardit = FALSE;
     struct room *cur_room;
@@ -312,7 +312,7 @@ def:
     obj = orig_obj;
     look(TRUE);        /* put the result of the scroll on the screen */
     status();
-
+    
     call_it(&scr_info[obj->o_which]);
 
     if (discardit)

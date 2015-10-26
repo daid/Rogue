@@ -153,22 +153,27 @@ int md_readchar()
                 HANDLE_KEY(SDLK_SLASH, '/', '?', 0, 0);
                 HANDLE_KEY(SDLK_KP_MULTIPLY, '*', 0, 0, 0);
                 HANDLE_KEY(SDLK_SPACE, ' ', 0, 0, 0);
+                
+                HANDLE_KEY(SDLK_LEFT, K_LEFT, K_SHIFT_LEFT, CTRL(K_SHIFT_LEFT), 0);
+                HANDLE_KEY(SDLK_RIGHT, K_RIGHT, K_SHIFT_RIGHT, CTRL(K_SHIFT_RIGHT), 0);
+                HANDLE_KEY(SDLK_UP, K_UP, K_SHIFT_UP, CTRL(K_SHIFT_UP), 0);
+                HANDLE_KEY(SDLK_DOWN, K_DOWN, K_SHIFT_DOWN, CTRL(K_SHIFT_DOWN), 0);
 
-                HANDLE_KEY(SDLK_KP7, K_UP_LEFT, 0, CTRL(K_UP_LEFT), 0);
-                HANDLE_KEY(SDLK_KP8, K_UP, 0, CTRL(K_UP), 0);
-                HANDLE_KEY(SDLK_KP9, K_UP_RIGHT, 0, CTRL(K_UP_RIGHT), 0);
+                HANDLE_KEY(SDLK_KP7, K_UP_LEFT, K_SHIFT_UP_LEFT, CTRL(K_SHIFT_UP_LEFT), 0);
+                HANDLE_KEY(SDLK_KP8, K_UP, K_SHIFT_UP, CTRL(K_SHIFT_UP), 0);
+                HANDLE_KEY(SDLK_KP9, K_UP_RIGHT, K_SHIFT_UP_RIGHT, CTRL(K_SHIFT_UP_RIGHT), 0);
                 HANDLE_KEY(SDLK_KP_MINUS, '-', 0, 0, 0);
-                HANDLE_KEY(SDLK_KP4, K_LEFT, 0, CTRL(K_LEFT), 0);
+                HANDLE_KEY(SDLK_KP4, K_LEFT, K_SHIFT_LEFT, CTRL(K_SHIFT_LEFT), 0);
                 HANDLE_KEY(SDLK_KP5, '.', 0, 0, 0);
-                HANDLE_KEY(SDLK_KP6, K_RIGHT, 0, CTRL(K_RIGHT), 0);
+                HANDLE_KEY(SDLK_KP6, K_RIGHT, K_SHIFT_RIGHT, CTRL(K_SHIFT_RIGHT), 0);
                 HANDLE_KEY(SDLK_KP_PLUS, '+', 0, 0, 0);
-                HANDLE_KEY(SDLK_KP1, K_DOWN_LEFT, 0, CTRL(K_DOWN_LEFT), 0);
-                HANDLE_KEY(SDLK_KP2, K_DOWN, 0, CTRL(K_DOWN), 0);
-                HANDLE_KEY(SDLK_KP3, K_DOWN_RIGHT, 0, CTRL(K_DOWN_RIGHT), 0);
+                HANDLE_KEY(SDLK_KP1, K_DOWN_LEFT, K_SHIFT_DOWN_LEFT, CTRL(K_SHIFT_DOWN_LEFT), 0);
+                HANDLE_KEY(SDLK_KP2, K_DOWN, K_SHIFT_DOWN, CTRL(K_SHIFT_DOWN), 0);
+                HANDLE_KEY(SDLK_KP3, K_DOWN_RIGHT, K_SHIFT_DOWN_RIGHT, CTRL(K_SHIFT_DOWN_RIGHT), 0);
                 HANDLE_KEY(SDLK_KP0, 0, 0, 0, 0);
                 HANDLE_KEY(SDLK_KP_PERIOD, '.', 0, 0, 0);
                 
-                printf("Unknown key: %s %d\n", SDL_GetKeyName(event.key.keysym.sym), event.key.keysym.sym);
+                //printf("Unknown key: %s %d\n", SDL_GetKeyName(event.key.keysym.sym), event.key.keysym.sym);
                 break;
             }
         }
@@ -281,17 +286,17 @@ int md_readchar()
             HANDLE_KEY(KEY_F10, 0, 0, 0, 0);
             HANDLE_KEY(KEY_NUMLOCK, 0, 0, 0, 0);
             HANDLE_KEY(KEY_SCROLLLOCK, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_KP7, K_UP_LEFT, 0, 0, 0);
-            HANDLE_KEY(KEY_KP8, K_UP, 0, 0, 0);
-            HANDLE_KEY(KEY_KP9, K_UP_RIGHT, 0, 0, 0);
+            HANDLE_KEY(KEY_KP7, K_UP_LEFT, K_SHIFT_UP_LEFT, CTRL(K_SHIFT_UP_LEFT), 0);
+            HANDLE_KEY(KEY_KP8, K_UP, K_SHIFT_UP, CTRL(K_SHIFT_UP), 0);
+            HANDLE_KEY(KEY_KP9, K_UP_RIGHT, K_SHIFT_UP_RIGHT, CTRL(K_SHIFT_UP_RIGHT), 0);
             HANDLE_KEY(KEY_KPMINUS, '-', 0, 0, 0);
-            HANDLE_KEY(KEY_KP4, K_LEFT, 0, 0, 0);
+            HANDLE_KEY(KEY_KP4, K_LEFT, K_SHIFT_LEFT, CTRL(K_SHIFT_LEFT), 0);
             HANDLE_KEY(KEY_KP5, '.', 0, 0, 0);
-            HANDLE_KEY(KEY_KP6, K_RIGHT, 0, 0, 0);
+            HANDLE_KEY(KEY_KP6, K_RIGHT, K_SHIFT_RIGHT, CTRL(K_SHIFT_RIGHT), 0);
             HANDLE_KEY(KEY_KPPLUS, '+', 0, 0, 0);
-            HANDLE_KEY(KEY_KP1, K_DOWN_LEFT, 0, 0, 0);
-            HANDLE_KEY(KEY_KP2, K_DOWN, 0, 0, 0);
-            HANDLE_KEY(KEY_KP3, K_DOWN_RIGHT, 0, 0, 0);
+            HANDLE_KEY(KEY_KP1, K_DOWN_LEFT, K_SHIFT_DOWN_LEFT, CTRL(K_SHIFT_DOWN_LEFT), 0);
+            HANDLE_KEY(KEY_KP2, K_DOWN, K_SHIFT_DOWN, CTRL(K_SHIFT_DOWN), 0);
+            HANDLE_KEY(KEY_KP3, K_DOWN_RIGHT, K_SHIFT_DOWN_RIGHT, CTRL(K_SHIFT_DOWN_RIGHT), 0);
             HANDLE_KEY(KEY_KP0, 0, 0, 0, 0);
             HANDLE_KEY(KEY_KPDOT, '.', 0, 0, 0);
 
@@ -311,12 +316,12 @@ int md_readchar()
             HANDLE_KEY(KEY_SYSRQ, 0, 0, 0, 0);
             HANDLE_KEY(KEY_LINEFEED, 0, 0, 0, 0);
             HANDLE_KEY(KEY_HOME, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_UP, KEY_UP, 0, 0, 0);
+            HANDLE_KEY(KEY_UP, KEY_UP, K_SHIFT_UP, CTRL(K_SHIFT_UP), 0);
             HANDLE_KEY(KEY_PAGEUP, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_LEFT, K_LEFT, 0, 0, 0);
-            HANDLE_KEY(KEY_RIGHT, K_RIGHT, 0, 0, 0);
+            HANDLE_KEY(KEY_LEFT, K_LEFT, K_SHIFT_LEFT, CTRL(K_SHIFT_LEFT), 0);
+            HANDLE_KEY(KEY_RIGHT, K_RIGHT, K_SHIFT_RIGHT, CTRL(K_SHIFT_RIGHT), 0);
             HANDLE_KEY(KEY_END, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_DOWN, K_DOWN, 0, 0, 0);
+            HANDLE_KEY(KEY_DOWN, K_DOWN, K_SHIFT_DOWN, CTRL(K_SHIFT_DOWN), 0);
             HANDLE_KEY(KEY_PAGEDOWN, 0, 0, 0, 0);
             HANDLE_KEY(KEY_INSERT, 0, 0, 0, 0);
             HANDLE_KEY(KEY_DELETE, 0, 0, 0, 0);

@@ -429,8 +429,7 @@ roll_em(THING *thatt, THING *thdef, THING *weap, bool hurl)
         cp = weap->o_damage;
         if (hurl)
         {
-            if ((weap->o_flags&ISMISL) && cur_weapon != NULL &&
-              cur_weapon->o_which == weap->o_launch)
+            if ((weap->o_flags&ISMISL) && cur_weapon != NULL && cur_weapon->o_which == weap->o_launch)
             {
                 cp = weap->o_hurldmg;
                 hplus += cur_weapon->o_hplus;

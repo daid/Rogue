@@ -19,20 +19,20 @@
 int group = 2;
 
 static struct init_weaps {
-    char *iw_dam;        /* Damage when wielded */
-    char *iw_hrl;        /* Damage when thrown */
+    char *iw_dam;        /* Damage when wielded (or thrown damage when bow required but not using a bow) */
+    char *iw_hrl;        /* Damage when thrown (or fired from a bow) */
     char iw_launch;        /* Launching weapon */
     int iw_flags;        /* Miscellaneous flags */
 } init_dam[MAXWEAPONS] = {
     { "2x4",        "1x3",        NO_WEAPON,        0,                },        /* Mace */
     { "3x4",        "1x2",        NO_WEAPON,        0,                },        /* Long sword */
     { "1x1",        "1x1",        NO_WEAPON,        0,                },        /* Bow */
-    { "1x1",        "2x3",        BOW,                ISMANY|ISMISL,        },        /* Arrow */
-    { "1x6",        "1x4",        NO_WEAPON,        ISMISL|ISMISL,        },        /* Dagger */
+    { "1x1",        "2x3",        BOW,              ISMANY|ISMISL,    },        /* Arrow */
+    { "1x6",        "1x4",        NO_WEAPON,        ISMANY|ISMISL,    },        /* Dagger */
     { "4x4",        "1x2",        NO_WEAPON,        0,                },        /* 2h sword */
-    { "1x1",        "1x3",        NO_WEAPON,        ISMANY|ISMISL,        },        /* Dart */
-    { "1x2",        "2x4",        NO_WEAPON,        ISMANY|ISMISL,        },        /* Shuriken */
-    { "2x3",        "1x6",        NO_WEAPON,        ISMISL,                },        /* Spear */
+    { "1x1",        "1x3",        NO_WEAPON,        ISMANY|ISMISL,    },        /* Dart */
+    { "1x2",        "2x4",        NO_WEAPON,        ISMANY|ISMISL,    },        /* Shuriken */
+    { "2x3",        "1x6",        NO_WEAPON,        ISMISL,           },        /* Spear */
 };
 
 /*

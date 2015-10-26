@@ -44,6 +44,14 @@
 #define K_DOWN_LEFT              0x106
 #define K_DOWN                   0x107
 #define K_DOWN_RIGHT             0x108
+#define K_SHIFT_UP_LEFT                0x201
+#define K_SHIFT_UP                     0x202
+#define K_SHIFT_UP_RIGHT               0x203
+#define K_SHIFT_LEFT                   0x204
+#define K_SHIFT_RIGHT                  0x205
+#define K_SHIFT_DOWN_LEFT              0x206
+#define K_SHIFT_DOWN                   0x207
+#define K_SHIFT_DOWN_RIGHT             0x208
 /*
  * Now all the global variables
  */

@@ -120,6 +120,10 @@ command()
                     case 'Y': case 'M':
                     case K_UP_LEFT: case K_UP: case K_UP_RIGHT: case K_LEFT:
                     case K_RIGHT: case K_DOWN_LEFT: case K_DOWN: case K_DOWN_RIGHT:
+                    case K_SHIFT_UP_LEFT: case K_SHIFT_UP: case K_SHIFT_UP_RIGHT: case K_SHIFT_LEFT:
+                    case K_SHIFT_RIGHT: case K_SHIFT_DOWN_LEFT: case K_SHIFT_DOWN: case K_SHIFT_DOWN_RIGHT:
+                    case CTRL(K_SHIFT_UP_LEFT): case CTRL(K_SHIFT_UP): case CTRL(K_SHIFT_UP_RIGHT): case CTRL(K_SHIFT_LEFT):
+                    case CTRL(K_SHIFT_RIGHT): case CTRL(K_SHIFT_DOWN_LEFT): case CTRL(K_SHIFT_DOWN): case CTRL(K_SHIFT_DOWN_RIGHT):
 #ifdef MASTER
                     case CTRL('D'): case CTRL('A'):
 #endif
@@ -180,18 +184,18 @@ over:
                 when 'u': case K_UP_RIGHT: do_move(-1, 1);
                 when 'b': case K_DOWN_LEFT: do_move(1, -1);
                 when 'n': case K_DOWN_RIGHT: do_move(1, 1);
-                when 'H': do_run('h');
-                when 'J': do_run('j');
-                when 'K': do_run('k');
-                when 'L': do_run('l');
-                when 'Y': do_run('y');
-                when 'U': do_run('u');
-                when 'B': do_run('b');
-                when 'N': do_run('n');
+                when 'H': case K_SHIFT_LEFT: do_run('h');
+                when 'J': case K_SHIFT_DOWN: do_run('j');
+                when 'K': case K_SHIFT_UP: do_run('k');
+                when 'L': case K_SHIFT_RIGHT: do_run('l');
+                when 'Y': case K_SHIFT_UP_LEFT: do_run('y');
+                when 'U': case K_SHIFT_UP_RIGHT: do_run('u');
+                when 'B': case K_SHIFT_DOWN_LEFT: do_run('b');
+                when 'N': case K_SHIFT_DOWN_RIGHT: do_run('n');
                 when CTRL('H'): case CTRL('J'): case CTRL('K'): case CTRL('L'):
                 case CTRL('Y'): case CTRL('U'): case CTRL('B'): case CTRL('N'):
-                case CTRL(K_UP_LEFT): case CTRL(K_UP): case CTRL(K_UP_RIGHT): case CTRL(K_LEFT):
-                case CTRL(K_RIGHT): case CTRL(K_DOWN_LEFT): case CTRL(K_DOWN): case CTRL(K_DOWN_RIGHT):
+                case CTRL(K_SHIFT_UP_LEFT): case CTRL(K_SHIFT_UP): case CTRL(K_SHIFT_UP_RIGHT): case CTRL(K_SHIFT_LEFT):
+                case CTRL(K_SHIFT_RIGHT): case CTRL(K_SHIFT_DOWN_LEFT): case CTRL(K_SHIFT_DOWN): case CTRL(K_SHIFT_DOWN_RIGHT):
                 {
                     if (!on(player, ISBLIND))
                     {

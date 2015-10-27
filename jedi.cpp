@@ -5,11 +5,9 @@
 #include <SDL/SDL.h>
 #endif
 
-extern "C" {
 #include "jedi.h"
 #include "extern.h"
 #include "rogue.h"
-}
 
 extern uint8_t font_data[];
 

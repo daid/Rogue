@@ -19,7 +19,7 @@ static char msgbuf[2*MAXMSG+1];
 static int newpos = 0;
 
 /* VARARGS1 */
-int msg(char *fmt, ...)
+int msg(const char *fmt, ...)
 {
     va_list args;
 
@@ -44,8 +44,7 @@ int msg(char *fmt, ...)
  *        Add things to the current message
  */
 /* VARARGS1 */
-void
-addmsg(char *fmt, ...)
+void addmsg(const char *fmt, ...)
 {
     va_list args;
 
@@ -86,7 +85,7 @@ endmsg()
  *        Perform an add onto the message buffer
  */
 void
-doadd(char *fmt, va_list args)
+doadd(const char *fmt, va_list args)
 {
     static char buf[MAXSTR];
 
@@ -140,7 +139,7 @@ status()
     static int s_arm = 0;
     static str_t s_str = 0;
     static int s_exp = 0;
-    static char *state_name[] =
+    static const char *state_name[] =
     {
         "", "Hungry", "Weak", "Faint"
     };
@@ -220,14 +219,4 @@ wait_for(int ch)
     else
         while (md_readchar() != ch)
             continue;
-}
-
-/*
- * show_win:
- *        Function used to display a window and wait before returning
- */
-void
-show_win(char *message)
-{
-    displayMessage(message);
 }

@@ -33,7 +33,7 @@
 0______)/\_//(\//\)/\/\/|_)______
  12345678901234567890123456789012
 */
-static char *rip[] = {
+static const char *rip[] = {
 "          ___________",
 "         /  REST IN  \\",
 "        /    PEACE    \\",
@@ -60,7 +60,7 @@ void score(int amount, int flags, char monst)
     SCORE *sc2;
     SCORE *top_ten, *endp;
     unsigned int uid;
-    static char *reason[] = {
+    static const char *reason[] = {
         "killed",
         "quit",
         "A total winner",
@@ -95,7 +95,7 @@ void score(int amount, int flags, char monst)
     sc2 = NULL;
     if (!noscore)
     {
-        uid = md_getuid();
+        uid = 0;
         for (scp = top_ten; scp < endp; scp++)
             if (amount > scp->sc_score)
                 break;
@@ -167,7 +167,7 @@ void score(int amount, int flags, char monst)
 
 void death(char monst)
 {
-    char **dp, *killer;
+    const char **dp, *killer;
 
     purse -= purse / 10;
     clearMapDisplay();
@@ -305,11 +305,10 @@ total_winner()
  * killname:
  *        Convert a code to a monster name
  */
-char *
-killname(char monst, bool doart)
+const char* killname(char monst, bool doart)
 {
     struct h_list *hp;
-    char *sp;
+    const char *sp;
     bool article;
     static struct h_list nlist[] = {
         {'a',        "arrow",                TRUE},

@@ -31,6 +31,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #ifdef USE_SDL
 #include <SDL/SDL.h>
 #else
@@ -54,47 +55,23 @@ void md_init()
 }
 
 int
-md_unlink(char *file)
+md_unlink(const char *file)
 {
     return(unlink(file));
 }
 
-int md_unlink_open_file(char *file, FILE *inf)
+int md_unlink_open_file(const char *file, FILE *inf)
 {
-#ifdef WIN32
+#ifdef __WIN32__
     fclose(inf);
 #endif
     return unlink(file);
 }
 
 int
-md_chmod(char *filename, int mode)
+md_chmod(const char *filename, int mode)
 {
     return 0;
-}
-
-int
-md_getuid()
-{
-    return 42;
-}
-
-int
-md_getpid()
-{
-    return 42;
-}
-
-char *
-md_getusername()
-{
-    return "Jedi";
-}
-
-char *
-md_gethomedir()
-{
-    return "";
 }
 
 int md_readchar()

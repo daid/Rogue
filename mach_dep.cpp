@@ -56,7 +56,7 @@
 # endif
 
 unsigned int numscores = NUMSCORES;
-char *Numname = NUMNAME;
+const char *Numname = NUMNAME;
 
 bool allscore = TRUE;
 
@@ -79,7 +79,7 @@ void
 open_score()
 {
 #ifdef SCOREFILE
-    char *scorefile = SCOREFILE;
+    const char *scorefile = SCOREFILE;
      /* 
       * We drop setgid privileges after opening the score file, so subsequent 
       * open()'s will fail.  Just reuse the earlier filehandle. 

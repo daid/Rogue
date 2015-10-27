@@ -72,7 +72,7 @@ static int endian = 0x01020304;
 #define  big_endian ( *((char *)&endian) == 0x01 )
 
 int
-rs_write(FILE *savef, void *ptr, size_t size)
+rs_write(FILE *savef, const void *ptr, size_t size)
 {
     if (write_error)
         return(WRITESTAT);
@@ -167,7 +167,7 @@ rs_read_char(FILE *inf, char *c)
 }
 
 int
-rs_write_chars(FILE *savef, char *c, int count)
+rs_write_chars(FILE *savef, const char *c, int count)
 {
     if (write_error)
         return(WRITESTAT);
@@ -505,7 +505,7 @@ rs_read_marker(FILE *inf, int id)
 /******************************************************************************/
 
 int
-rs_write_string(FILE *savef, char *s)
+rs_write_string(FILE *savef, const char *s)
 {
     int len = 0;
 
@@ -553,7 +553,7 @@ rs_read_new_string(FILE *inf, char **s)
         buf = NULL;
     else
     { 
-        buf = malloc(len);
+        buf = (char*)malloc(len);
 
         if (buf == NULL)            
             read_error = TRUE;
@@ -626,7 +626,7 @@ rs_read_new_strings(FILE *inf, char **s, int count)
 }
 
 int
-rs_write_string_index(FILE *savef, char *master[], int max, const char *str)
+rs_write_string_index(FILE *savef, const char *master[], int max, const char *str)
 {
     int i;
 
@@ -640,8 +640,7 @@ rs_write_string_index(FILE *savef, char *master[], int max, const char *str)
     return( rs_write_int(savef,-1) );
 }
 
-int
-rs_read_string_index(FILE *inf, char *master[], int maxindex, char **str)
+int rs_read_string_index(FILE *inf, const char *master[], int maxindex, const char **str)
 {
     int i;
 
@@ -768,8 +767,7 @@ rs_read_window(FILE *inf)
 
 /******************************************************************************/
 
-void *
-get_list_item(THING *l, int i)
+THING* get_list_item(THING *l, int i)
 {
     int count;
 
@@ -862,7 +860,7 @@ rs_write_stone_index(FILE *savef, STONE master[], int max, const char *str)
 }
 
 int
-rs_read_stone_index(FILE *inf, STONE master[], int maxindex, char **str)
+rs_read_stone_index(FILE *inf, STONE master[], int maxindex, const char **str)
 {
     int i = 0;
 
@@ -1412,7 +1410,7 @@ rs_read_object_list(FILE *inf, THING **list)
 
     for (i = 0; i < cnt; i++) 
     {
-        l = new_item(sizeof(THING));
+        l = new_item();
 
         memset(l,0,sizeof(THING));
 
@@ -1919,7 +1917,6 @@ rs_save_file(FILE *savef)
     rs_write_potions(savef);
     rs_write_chars(savef,prbuf,2*MAXSTR);
     rs_write_rings(savef);
-    rs_write_string(savef,release);
     rs_write_int(savef, runch);
     rs_write_scrolls(savef);
     rs_write_char(savef, take);
@@ -1931,7 +1928,6 @@ rs_save_file(FILE *savef)
     rs_write_int(savef,l_last_dir);
     rs_write_int(savef,last_comm);
     rs_write_int(savef,last_dir);
-    rs_write_strings(savef,tr_name,8);
     rs_write_int(savef,n_objs);
     rs_write_int(savef, ntraps);
     rs_write_int(savef, hungry_state);
@@ -1950,7 +1946,6 @@ rs_save_file(FILE *savef)
     rs_write_int(savef, quiet);
     rs_write_int(savef, vf_hit);
     rs_write_int(savef, dnum);
-    rs_write_int(savef, seed);
     rs_write_ints(savef, e_levels, 21);
     rs_write_coord(savef, delta);
     rs_write_coord(savef, oldpos);
@@ -2043,7 +2038,6 @@ rs_restore_file(FILE *inf)
     rs_read_potions(inf);
     rs_read_chars(inf, prbuf, 2*MAXSTR);
     rs_read_rings(inf);
-    rs_read_new_string(inf,&release);
     rs_read_int(inf, &runch);
     rs_read_scrolls(inf);
     rs_read_char(inf, &take);
@@ -2055,7 +2049,6 @@ rs_restore_file(FILE *inf)
     rs_read_int(inf, &l_last_dir);
     rs_read_int(inf, &last_comm);
     rs_read_int(inf, &last_dir);
-    rs_read_new_strings(inf,tr_name,8);
     rs_read_int(inf, &n_objs);
     rs_read_int(inf, &ntraps);
     rs_read_int(inf, &hungry_state);
@@ -2074,7 +2067,6 @@ rs_restore_file(FILE *inf)
     rs_read_int(inf, &quiet);
     rs_read_int(inf, &vf_hit);
     rs_read_int(inf, &dnum);
-    rs_read_int(inf, &seed);
     rs_read_ints(inf,e_levels,21);
     rs_read_coord(inf, &delta);
     rs_read_coord(inf, &oldpos);

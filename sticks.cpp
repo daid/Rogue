@@ -48,7 +48,7 @@ do_zap()
 {
     THING *obj, *tp;
     int y, x;
-    char *name;
+    const char *name;
     char monster, oldch;
     static THING bolt;
 
@@ -301,7 +301,7 @@ drain()
  */
 
 void
-fire_bolt(coord *start, coord *dir, char *name)
+fire_bolt(coord *start, coord *dir, const char *name)
 {
     coord *c1, *c2;
     THING *tp;
@@ -426,8 +426,7 @@ def:
  * charge_str:
  *        Return an appropriate string for a wand charge
  */
-char *
-charge_str(THING *obj)
+const char * charge_str(THING *obj)
 {
     static char buf[20];
 

@@ -161,8 +161,7 @@ out:
  *        See if there's room in the pack.  If not, print out an
  *        appropriate message
  */
-bool
-pack_room(bool from_floor, THING *obj)
+bool pack_room(bool from_floor, THING *obj)
 {
     if (++inpack > MAXPACK)
     {
@@ -392,7 +391,7 @@ picky_inven()
  *        Pick something out of a pack for a purpose
  */
 THING *
-get_item(char *purpose, int type)
+get_item(const char *purpose, int type)
 {
     THING *obj;
     int ch;

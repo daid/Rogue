@@ -356,7 +356,7 @@ check_level()
 void
 chg_str(int amt)
 {
-    auto str_t comp;
+    str_t comp;
 
     if (amt == 0)
         return;
@@ -426,8 +426,7 @@ aggravate()
  *      For printfs: if string starts with a vowel, return "n" for an
  *        "an".
  */
-char *
-vowelstr(char *str)
+const char * vowelstr(const char *str)
 {
     switch (*str)
     {
@@ -470,7 +469,7 @@ is_current(THING *obj)
 bool
 get_dir()
 {
-    char *prompt;
+    const char *prompt;
     bool gotit;
     static coord last_delt= {0,0};
 
@@ -566,7 +565,7 @@ call_it(struct obj_info *info)
         {
             if (info->oi_guess != NULL)
                 free(info->oi_guess);
-            info->oi_guess = malloc((unsigned int) strlen(prbuf) + 1);
+            info->oi_guess = (char*)malloc((unsigned int) strlen(prbuf) + 1);
             strcpy(info->oi_guess, prbuf);
         }
     }
@@ -596,8 +595,7 @@ rnd_thing()
  *        Choose the first or second string depending on whether it the
  *        player is tripping
  */
-char *
-choose_str(char *ts, char *ns)
+const char* choose_str(const char *ts, const char *ns)
 {
         return (on(player, ISHALU) ? ts : ns);
 }

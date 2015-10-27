@@ -150,7 +150,7 @@ wake_monster(int y, int x)
     THING *tp;
     struct room *rp;
     int ch;
-    char *mname;
+    const char *mname;
 
 #ifdef MASTER
     if ((tp = moat(y, x)) == NULL)

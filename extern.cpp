@@ -48,14 +48,14 @@ bool pack_used[26] = {                        /* Is the character used in the pa
 int dir_ch;                                /* Direction from last get_dir() call */
 char file_name[MAXSTR];                        /* Save file name */
 char huh[MAXSTR];                        /* The last message printed */
-char *p_colors[MAXPOTIONS];                /* Colors of the potions */
+const char *p_colors[MAXPOTIONS];                /* Colors of the potions */
 char prbuf[2*MAXSTR];                        /* buffer for sprintfs */
-char *r_stones[MAXRINGS];                /* Stone settings of the rings */
+const char *r_stones[MAXRINGS];                /* Stone settings of the rings */
 int runch;                                /* Direction player is running */
 char *s_names[MAXSCROLLS];                /* Names of the scrolls */
 char take;                                /* Thing she is taking */
-char *ws_made[MAXSTICKS];                /* What sticks are made of */
-char *ws_type[MAXSTICKS];                /* Is it a wand or a staff */
+const char *ws_made[MAXSTICKS];                /* What sticks are made of */
+const char *ws_type[MAXSTICKS];                /* Is it a wand or a staff */
 int  orig_dsusp;                        /* Original dsusp char */
 char fruit[MAXSTR] =                        /* Favorite fruit */
                 { 's', 'l', 'i', 'm', 'e', '-', 'm', 'o', 'l', 'd', '\0' };
@@ -64,7 +64,7 @@ int l_last_comm = '\0';                /* Last last_comm */
 int l_last_dir = '\0';                        /* Last last_dir */
 int last_comm = '\0';                        /* Last command typed */
 int last_dir = '\0';                        /* Last direction given */
-char *tr_name[] = {                        /* Names of the traps */
+const char *tr_name[] = {                        /* Names of the traps */
         "a trapdoor",
         "an arrow trap",
         "a sleeping gas trap",
@@ -107,7 +107,6 @@ int quiet = 0;                                /* Number of quiet turns */
 int vf_hit = 0;                                /* Number of time flytrap has hit */
 
 int dnum;                                /* Dungeon number */
-int seed;                                /* Random number seed */
 int e_levels[] = {
         10L,
         20L,
@@ -148,7 +147,7 @@ THING *mlist = NULL;                        /* List of monsters on the level */
 THING player;                                /* His stats */
                                         /* restart of game */
 
-#define INIT_STATS { 16, 0, 1, 10, 12, "1x4", 12 }
+#define INIT_STATS { 16, 0, 1, 10, 16, "1x4", 16 }
 
 struct stats max_stats = INIT_STATS;        /* The maximum for the player */
 

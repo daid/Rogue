@@ -18,8 +18,8 @@
 void
 wear()
 {
-    register THING *obj;
-    register char *sp;
+    THING *obj;
+    const char *sp;
 
     if ((obj = get_item("wear", ARMOR)) == NULL)
         return;

@@ -17,7 +17,7 @@
 
 #define        EQSTR(a, b)        (strcmp(a, b) == 0)
 
-char *h_names[] = {                /* strings for hitting */
+const char *h_names[] = {                /* strings for hitting */
         " scored an excellent hit on ",
         " hit ",
         " have injured ",
@@ -28,7 +28,7 @@ char *h_names[] = {                /* strings for hitting */
         " swings and hits "
 };
 
-char *m_names[] = {                /* strings for missing */
+const char *m_names[] = {                /* strings for missing */
         " miss",
         " swing and miss",
         " barely miss",
@@ -64,7 +64,8 @@ fight(coord *mp, THING *weap, bool thrown)
 {
     register THING *tp;
     register bool did_hit = TRUE;
-    register char *mname, ch;
+    const char *mname;
+    int ch;
 
     /*
      * Find the monster we want to fight
@@ -107,7 +108,7 @@ fight(coord *mp, THING *weap, bool thrown)
         if (thrown)
             thunk(weap, mname, terse);
         else
-            hit((char *) NULL, mname, terse);
+            hit(NULL, mname, terse);
         if (on(player, CANHUH))
         {
             did_hit = TRUE;
@@ -127,7 +128,7 @@ fight(coord *mp, THING *weap, bool thrown)
         if (thrown)
             bounce(weap, mname, terse);
         else
-            miss((char *) NULL, mname, terse);
+            miss(NULL, mname, terse);
     return did_hit;
 }
 
@@ -138,8 +139,8 @@ fight(coord *mp, THING *weap, bool thrown)
 int
 attack(THING *mp)
 {
-    register char *mname;
-    register int oldhp;
+    const char *mname;
+    int oldhp;
 
     /*
      * Since this is an attack, stop running and any healing that was
@@ -167,7 +168,7 @@ attack(THING *mp)
         {
             if (has_hit)
                 addmsg(".  ");
-            hit(mname, (char *) NULL, FALSE);
+            hit(mname, NULL, FALSE);
         }
         else
             if (has_hit)
@@ -328,7 +329,7 @@ attack(THING *mp)
             if (pstats.s_hpt <= 0)
                 death(mp->t_type);        /* Bye bye life ... */
         }
-        miss(mname, (char *) NULL, FALSE);
+        miss(mname, NULL, FALSE);
     }
     if (fight_flush && !to_death)
         flush_type();
@@ -344,11 +345,10 @@ attack(THING *mp)
  * set_mname:
  *        return the monster name for the given monster
  */
-char *
-set_mname(THING *tp)
+const char* set_mname(THING *tp)
 {
     int ch;
-    char *mname;
+    const char *mname;
     static char tbuf[MAXSTR] = { 't', 'h', 'e', ' ' };
 
     if (!see_monst(tp) && !on(player, SEEMONST))
@@ -485,8 +485,7 @@ roll_em(THING *thatt, THING *thdef, THING *weap, bool hurl)
  * prname:
  *        The print name of a combatant
  */
-char *
-prname(char *mname, bool upper)
+const char * prname(const char *mname, bool upper)
 {
     static char tbuf[MAXSTR];
 
@@ -504,8 +503,7 @@ prname(char *mname, bool upper)
  * thunk:
  *        A missile hits a monster
  */
-void
-thunk(THING *weap, char *mname, bool noend)
+void thunk(THING *weap, const char *mname, bool noend)
 {
     if (to_death)
         return;
@@ -524,11 +522,10 @@ thunk(THING *weap, char *mname, bool noend)
  */
 
 void
-hit(char *er, char *ee, bool noend)
+hit(const char *er, const char *ee, bool noend)
 {
     int i;
-    char *s;
-    extern char *h_names[];
+    const char *s;
 
     if (to_death)
         return;
@@ -553,11 +550,9 @@ hit(char *er, char *ee, bool noend)
  * miss:
  *        Print a message to indicate a poor swing
  */
-void
-miss(char *er, char *ee, bool noend)
+void miss(const char *er, const char *ee, bool noend)
 {
     int i;
-    extern char *m_names[];
 
     if (to_death)
         return;
@@ -579,8 +574,7 @@ miss(char *er, char *ee, bool noend)
  * bounce:
  *        A missile misses a monster
  */
-void
-bounce(THING *weap, char *mname, bool noend)
+void bounce(THING *weap, const char *mname, bool noend)
 {
     if (to_death)
         return;
@@ -632,7 +626,7 @@ remove_mon(coord *mp, THING *tp, bool waskill)
 void
 killed(THING *tp, bool pr)
 {
-    char *mname;
+    const char *mname;
 
     pstats.s_exp += tp->t_stats.s_exp;
 

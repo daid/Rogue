@@ -20,8 +20,6 @@
  */
 int main(int argc, char **argv)
 {
-    int lowtime;
-
     md_init();
     initJedi();
 
@@ -29,19 +27,7 @@ int main(int argc, char **argv)
      * get home and options from environment
      */
 
-    strncpy(home, md_gethomedir(), MAXSTR);
-
-    strcpy(file_name, home);
-    strcat(file_name, "rogue.save");
-
-    lowtime = (int) time(NULL);
-#ifdef MASTER
-    if (wizard && getenv("SEED") != NULL)
-        dnum = atoi(getenv("SEED"));
-    else
-#endif
-        dnum = lowtime + md_getpid();
-    seed = dnum;
+    strcpy(file_name, "rogue.save");
 
     open_score();
 

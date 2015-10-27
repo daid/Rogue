@@ -16,8 +16,7 @@
  * doctor:
  *        A healing daemon that restors hit points after rest
  */
-void
-doctor()
+int doctor(int arg)
 {
     register int lv, ohp;
 
@@ -42,16 +41,17 @@ doctor()
             pstats.s_hpt = max_hp;
         quiet = 0;
     }
+    return 0;
 }
 
 /*
  * Swander:
  *        Called when it is time to start rolling for wandering monsters
  */
-void
-swander()
+int swander(int arg)
 {
     start_daemon(rollwand, 0, BEFORE);
+    return 0;
 }
 
 /*
@@ -59,8 +59,7 @@ swander()
  *        Called to roll to see if a wandering monster starts up
  */
 int between = 0;
-void
-rollwand()
+int rollwand(int arg)
 {
 
     if (++between >= 4)
@@ -73,25 +72,25 @@ rollwand()
         }
         between = 0;
     }
+    return 0;
 }
 
 /*
  * unconfuse:
  *        Release the poor player from his confusion
  */
-void
-unconfuse()
+int unconfuse(int arg)
 {
     player.t_flags &= ~ISHUH;
     msg("you feel less %s now", choose_str("trippy", "confused"));
+    return 0;
 }
 
 /*
  * unsee:
  *        Turn off the ability to see invisible
  */
-void
-unsee()
+int unsee(int arg)
 {
     register THING *th;
 
@@ -99,14 +98,14 @@ unsee()
         if (on(*th, ISINVIS) && see_monst(th))
             setMapDisplay(th->t_pos.x, th->t_pos.y, th->t_oldch);
     player.t_flags &= ~CANSEE;
+    return 0;
 }
 
 /*
  * sight:
  *        He gets his sight back
  */
-void
-sight()
+int sight(int arg)
 {
     if (on(player, ISBLIND))
     {
@@ -117,25 +116,25 @@ sight()
         msg(choose_str("far out!  Everything is all cosmic again",
                        "the veil of darkness lifts"));
     }
+    return 0;
 }
 
 /*
  * nohaste:
  *        End the hasting
  */
-void
-nohaste()
+int nohaste(int arg)
 {
     player.t_flags &= ~ISHASTE;
     msg("you feel yourself slowing down");
+    return 0;
 }
 
 /*
  * stomach:
  *        Digest the hero's food
  */
-void
-stomach()
+int stomach(int arg)
 {
     register int oldfood;
     int orig_hungry = hungry_state;
@@ -148,7 +147,7 @@ stomach()
          * the hero is fainting
          */
         if (no_command || rnd(5) != 0)
-            return;
+            return 0;
         no_command += rnd(8) + 4;
         hungry_state = 3;
         if (!terse)
@@ -182,27 +181,27 @@ stomach()
         running = FALSE; 
         to_death = FALSE; 
         count = 0; 
-    } 
+    }
+    return 0;
 }
 
 /*
  * come_down:
  *        Take the hero down off her acid trip.
  */
-void
-come_down()
+int come_down(int arg)
 {
     register THING *tp;
     register bool seemonst;
 
     if (!on(player, ISHALU))
-        return;
+        return 0;
 
     kill_daemon(visuals);
     player.t_flags &= ~ISHALU;
 
     if (on(player, ISBLIND))
-        return;
+        return 0;
 
     /*
      * undo the things
@@ -230,20 +229,20 @@ come_down()
         }
     }
     msg("Everything looks SO boring now.");
+    return 0;
 }
 
 /*
  * visuals:
  *        change the characters for the player
  */
-void
-visuals()
+int visuals(int arg)
 {
     register THING *tp;
     register bool seemonst;
 
     if (!after || (running && jump))
-        return;
+        return 0;
     /*
      * change the things
      */
@@ -275,16 +274,17 @@ visuals()
             setMapDisplay(tp->t_pos.x, tp->t_pos.y, (rnd(26) + 'A') | DISPLAY_INVERT);
         }
     }
+    return 0;
 }
 
 /*
  * land:
  *        Land from a levitation potion
  */
-void
-land()
+int land(int arg)
 {
     player.t_flags &= ~ISLEVIT;
     msg(choose_str("bummer!  You've hit the ground",
                    "you float gently to the ground"));
+    return 0;
 }

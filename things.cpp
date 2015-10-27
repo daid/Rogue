@@ -20,12 +20,11 @@
  *        Return the name of something as it would appear in an
  *        inventory.
  */
-char *
-inv_name(THING *obj, bool drop)
+const char * inv_name(THING *obj, bool drop)
 {
     char *pb;
     struct obj_info *op;
-    char *sp;
+    const char *sp;
     int which;
 
     pb = prbuf;
@@ -200,7 +199,7 @@ dropcheck(THING *obj)
                 chg_str(-obj->o_arm);
                 break;
             case R_SEEINVIS:
-                unsee();
+                unsee(0);
                 extinguish(unsee);
                 break;
         }
@@ -398,8 +397,7 @@ void print_disc(char type)
  *        Set up order for list
  */
 
-void
-set_order(int *order, int numthings)
+void set_order(int *order, int numthings)
 {
     int i, r, t;
 
@@ -419,10 +417,10 @@ set_order(int *order, int numthings)
  * nothing:
  *        Set up prbuf so that message for "nothing found" is there
  */
-char *
-nothing(char type)
+const char * nothing(char type)
 {
-    char *sp, *tystr = NULL;
+    char *sp;
+    const char *tystr = NULL;
 
     if (terse)
         sprintf(prbuf, "Nothing");
@@ -448,9 +446,7 @@ nothing(char type)
  *        Give the proper name to a potion, stick, or ring
  */
 
-void
-nameit(THING *obj, char *type, char *which, struct obj_info *op,
-    char *(*prfunc)(THING *))
+void nameit(THING *obj, const char *type, const char *which, struct obj_info *op, const char *(*prfunc)(THING *))
 {
     char *pb;
 
@@ -476,8 +472,7 @@ nameit(THING *obj, char *type, char *which, struct obj_info *op,
  * nullstr:
  *        Return a pointer to a null-length string
  */
-char *
-nullstr(THING *ignored)
+const char * nullstr(THING *ignored)
 {
     return "";
 }

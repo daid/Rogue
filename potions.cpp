@@ -16,9 +16,9 @@
 typedef struct
 {
     int pa_flags;
-    void (*pa_daemon)();
+    daemon_function_t pa_daemon;
     int pa_time;
-    char *pa_high, *pa_straight;
+    const char *pa_high, *pa_straight;
 } PACT;
 
 static PACT p_actions[] =
@@ -96,13 +96,13 @@ quaff()
             {
                 chg_str(-(rnd(3) + 1));
                 msg("you feel very sick now");
-                come_down();
+                come_down(0);
             }
         when P_HEALING:
             pot_info[P_HEALING].oi_know = TRUE;
             if ((pstats.s_hpt += roll(pstats.s_lvl, 4)) > max_hp)
                 pstats.s_hpt = ++max_hp;
-            sight();
+            sight(0);
             msg("you begin to feel better");
         when P_STRENGTH:
             pot_info[P_STRENGTH].oi_know = TRUE;
@@ -110,7 +110,7 @@ quaff()
             msg("you feel stronger, now.  What bulging muscles!");
         when P_MFIND:
             player.t_flags |= SEEMONST;
-            fuse((void(*)())turn_see, TRUE, HUHDURATION, AFTER);
+            fuse(turn_see, TRUE, HUHDURATION, AFTER);
             if (!turn_see(FALSE))
                 msg("you have a %s feeling for a moment, then it passes",
                     choose_str("normal", "strange"));
@@ -145,7 +145,7 @@ quaff()
             if (show)
             {
                 pot_info[P_TFIND].oi_know = TRUE;
-                show_win("You sense the presence of magic on this level.--More--");
+                displayMessage("You sense the presence of magic on this level.");
             }
             else
                 msg("you have a %s feeling for a moment, then it passes",
@@ -165,7 +165,7 @@ quaff()
             do_pot(P_SEEINVIS, FALSE);
             if (!show)
                 invis_on();
-            sight();
+            sight(0);
         when P_RAISE:
             pot_info[P_RAISE].oi_know = TRUE;
             msg("you suddenly feel much more skillful");
@@ -178,8 +178,8 @@ quaff()
                     ++max_hp;
                 pstats.s_hpt = ++max_hp;
             }
-            sight();
-            come_down();
+            sight(0);
+            come_down(0);
             msg("you begin to feel much better");
         when P_HASTE:
             pot_info[P_HASTE].oi_know = TRUE;
@@ -263,8 +263,7 @@ invis_on()
  * turn_see:
  *        Put on or off seeing monsters on this level
  */
-bool
-turn_see(bool turn_off)
+int turn_see(int turn_off)
 {
     THING *mp;
     bool can_see, add_new;

@@ -77,7 +77,7 @@ init_player()
  * potions and scrolls
  */
 
-char *rainbow[] = {
+const char *rainbow[] = {
     "amber",
     "aquamarine",
     "black",
@@ -110,7 +110,7 @@ char *rainbow[] = {
 #define NCOLORS (sizeof rainbow / sizeof (char *))
 int cNCOLORS = NCOLORS;
 
-static char *sylls[] = {
+static const char *sylls[] = {
     "a", "ab", "ag", "aks", "ala", "an", "app", "arg", "arze", "ash",
     "bek", "bie", "bit", "bjor", "blu", "bot", "bu", "byt", "comp",
     "con", "cos", "cre", "dalf", "dan", "den", "do", "e", "eep", "el",
@@ -161,7 +161,7 @@ STONE stones[] = {
 #define NSTONES (sizeof stones / sizeof (STONE))
 int cNSTONES = NSTONES;
 
-char *wood[] = {
+const char *wood[] = {
     "avocado wood",
     "balsa",
     "bamboo",
@@ -200,7 +200,7 @@ char *wood[] = {
 #define NWOOD (sizeof wood / sizeof (char *))
 int cNWOOD = NWOOD;
 
-char *metal[] = {
+const char *metal[] = {
     "aluminum",
     "beryllium",
     "bone",
@@ -238,7 +238,7 @@ static bool used[MAX3(NCOLORS, NSTONES, NWOOD)];
 void
 init_colors()
 {
-    register int i, j;
+    unsigned int i, j;
 
     for (i = 0; i < NCOLORS; i++)
         used[i] = FALSE;
@@ -261,9 +261,10 @@ init_colors()
 void
 init_names()
 {
-    register int nsyl;
-    register char *cp, *sp;
-    register int i, nwords;
+    int nsyl;
+    char *cp;
+    const char *sp;
+    int i, nwords;
 
     for (i = 0; i < MAXSCROLLS; i++)
     {
@@ -295,7 +296,7 @@ init_names()
 void
 init_stones()
 {
-    register int i, j;
+    unsigned int i, j;
 
     for (i = 0; i < NSTONES; i++)
         used[i] = FALSE;
@@ -317,8 +318,8 @@ init_stones()
 void
 init_materials()
 {
-    register int i, j;
-    register char *str;
+    unsigned int i, j;
+    const char *str;
     static bool metused[NMETAL];
 
     for (i = 0; i < NWOOD; i++)
@@ -439,8 +440,7 @@ badcheck(char *name, struct obj_info *info, int bound)
  *        If he is halucinating, pick a random color name and return it,
  *        otherwise return the given color.
  */
-char *
-pick_color(char *col)
+const char* pick_color(const char* col)
 {
     return (on(player, ISHALU) ? rainbow[rnd(NCOLORS)] : col);
 }

@@ -286,7 +286,7 @@ over:
                     refreshMap();
                 when 'v':
                     after = FALSE;
-                    msg("version %s. (daid was here)", release);
+                    msg("version %s.", release);
                 when 'M':
                     after = FALSE;
                     displayLargeMap();
@@ -551,9 +551,10 @@ void help()
 void
 identify()
 {
-    register int ch;
-    register struct h_list *hp;
-    register char *str;
+    int ch;
+    struct h_list *hp;
+    const char *str;
+    
     static struct h_list ident_list[] = {
         {WALL_H,             "wall of a room",                FALSE},
         {WALL_V,             "wall of a room",                FALSE},
@@ -669,7 +670,8 @@ call()
 {
     register THING *obj;
     register struct obj_info *op = NULL;
-    register char **guess, *elsewise = NULL;
+    register char **guess;
+    const char* elsewise = NULL;
     register bool *know;
 
     obj = get_item("call", CALLABLE);
@@ -729,7 +731,7 @@ norm:
     {
         if (*guess != NULL)
             free(*guess);
-        *guess = malloc((unsigned int) strlen(prbuf) + 1);
+        *guess = (char*)malloc((unsigned int) strlen(prbuf) + 1);
         strcpy(*guess, prbuf);
     }
 }
@@ -739,7 +741,7 @@ norm:
  *        Print the current weapon/armor
  */
 void
-current(THING *cur, char *how, char *where)
+current(THING *cur, const char *how, const char *where)
 {
     after = FALSE;
     if (cur != NULL)

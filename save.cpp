@@ -22,8 +22,6 @@
 
 typedef struct stat STAT;
 
-extern char version[], encstr[];
-
 static STAT sbuf;
 
 /*
@@ -36,7 +34,7 @@ save_game()
 {
     FILE *savef;
     int c;
-    auto char buf[MAXSTR];
+    char buf[MAXSTR];
 
     /*
      * get file name
@@ -116,11 +114,10 @@ save_file(FILE *savef)
  *        Restore a saved game from a file with elaborate checks for file
  *        integrity from cheaters
  */
-bool
-restore(char *file)
+bool restore(const char *file)
 {
     FILE *inf;
-    auto char buf[MAXSTR];
+    char buf[MAXSTR];
     int lines, cols;
 
     if (strcmp(file, "-r") == 0)
@@ -191,8 +188,7 @@ restore(char *file)
  *        Perform an encrypted write
  */
 
-size_t
-encwrite(char *start, size_t size, FILE *outf)
+size_t encwrite(const void *start, size_t size, FILE *outf)
 {
     return fwrite(start, 1, size, outf);
 }
@@ -201,8 +197,7 @@ encwrite(char *start, size_t size, FILE *outf)
  * encread:
  *        Perform an encrypted read
  */
-size_t
-encread(char *start, size_t size, FILE *inf)
+size_t encread(void *start, size_t size, FILE *inf)
 {
     return fread(start, 1, size, inf);
 }

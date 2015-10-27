@@ -19,8 +19,8 @@
 int group = 2;
 
 static struct init_weaps {
-    char *iw_dam;        /* Damage when wielded (or thrown damage when bow required but not using a bow) */
-    char *iw_hrl;        /* Damage when thrown (or fired from a bow) */
+    const char *iw_dam;        /* Damage when wielded (or thrown damage when bow required but not using a bow) */
+    const char *iw_hrl;        /* Damage when thrown (or fired from a bow) */
     char iw_launch;        /* Launching weapon */
     int iw_flags;        /* Miscellaneous flags */
 } init_dam[MAXWEAPONS] = {
@@ -206,8 +206,7 @@ hit_monster(int y, int x, THING *obj)
  * num:
  *        Figure out the plus number for armor/weapons
  */
-char *
-num(int n1, int n2, char type)
+const char* num(int n1, int n2, char type)
 {
     static char numbuf[10];
 
@@ -226,7 +225,7 @@ void
 wield()
 {
     THING *obj, *oweapon;
-    char *sp;
+    const char *sp;
 
     oweapon = cur_weapon;
     if (!dropcheck(cur_weapon))

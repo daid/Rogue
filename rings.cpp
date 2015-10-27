@@ -177,8 +177,7 @@ ring_eat(int hand)
  * ring_num:
  *        Print ring bonuses
  */
-char *
-ring_num(THING *obj)
+const char * ring_num(THING *obj)
 {
     static char buf[10];
 

@@ -21,7 +21,7 @@ int group = 2;
 static struct init_weaps {
     const char *iw_dam;        /* Damage when wielded (or thrown damage when bow required but not using a bow) */
     const char *iw_hrl;        /* Damage when thrown (or fired from a bow) */
-    char iw_launch;        /* Launching weapon */
+    int iw_launch;        /* Launching weapon */
     int iw_flags;        /* Miscellaneous flags */
 } init_dam[MAXWEAPONS] = {
     { "2x4",        "1x3",        NO_WEAPON,        0,                },        /* Mace */

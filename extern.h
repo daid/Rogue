@@ -36,6 +36,8 @@
 #undef CTRL
 #endif
 #define CTRL(c)                ((c) | 0x1000)
+
+//Custom key codes returned from md_readchar()
 #define K_UP_LEFT                0x101
 #define K_UP                     0x102
 #define K_UP_RIGHT               0x103
@@ -44,14 +46,16 @@
 #define K_DOWN_LEFT              0x106
 #define K_DOWN                   0x107
 #define K_DOWN_RIGHT             0x108
-#define K_SHIFT_UP_LEFT                0x201
-#define K_SHIFT_UP                     0x202
-#define K_SHIFT_UP_RIGHT               0x203
-#define K_SHIFT_LEFT                   0x204
-#define K_SHIFT_RIGHT                  0x205
-#define K_SHIFT_DOWN_LEFT              0x206
-#define K_SHIFT_DOWN                   0x207
-#define K_SHIFT_DOWN_RIGHT             0x208
+#define K_SHIFT_UP_LEFT          0x201
+#define K_SHIFT_UP               0x202
+#define K_SHIFT_UP_RIGHT         0x203
+#define K_SHIFT_LEFT             0x204
+#define K_SHIFT_RIGHT            0x205
+#define K_SHIFT_DOWN_LEFT        0x206
+#define K_SHIFT_DOWN             0x207
+#define K_SHIFT_DOWN_RIGHT       0x208
+
+#define K_EXIT                   0x300
 /*
  * Now all the global variables
  */

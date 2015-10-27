@@ -132,7 +132,7 @@ gethand()
     for (;;)
     {
         c = displayMessage(terse ? "left or right ring?" : "left hand or right hand?");
-        if (c == ESCAPE)
+        if (c == ESCAPE || c == K_EXIT)
             return -1;
         if (c == 'l' || c == 'L')
             return LEFT;

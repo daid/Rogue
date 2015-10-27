@@ -148,7 +148,7 @@ read_scroll()
         case S_ID_ARMOR:
         case S_ID_R_OR_S:
         {
-            static char id_type[S_ID_R_OR_S + 1] =
+            static int id_type[S_ID_R_OR_S + 1] =
                 { 0, 0, 0, 0, 0, POTION, SCROLL, WEAPON, ARMOR, R_OR_S };
             /*
              * Identify, let him figure something out

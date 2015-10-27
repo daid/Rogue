@@ -291,6 +291,7 @@ over:
                     after = FALSE;
                     displayLargeMap();
                 when 'S': 
+                case K_EXIT:
                     after = FALSE;
                     save_game();
                 when '.': ;                        /* Rest command */

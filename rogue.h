@@ -674,7 +674,6 @@ void        u_level();
 void        uncurse(THING *obj);
 void        unlock_sc();
 void        vert(struct room *rp, int startx);
-void        wait_for(int ch);
 THING  *wake_monster(int y, int x);
 void        wanderer();
 void        waste_time();

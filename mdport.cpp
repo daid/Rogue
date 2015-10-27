@@ -166,7 +166,7 @@ int md_readchar()
     const int ANY_CTRL = LEFT_CTRL | RIGHT_CTRL;
     const int LEFT_ALT = 0x10;
     const int RIGHT_ALT = 0x20;
-    const int ANT_ALT = LEFT_ALT | RIGHT_ALT;
+    const int ANY_ALT = LEFT_ALT | RIGHT_ALT;
 
 #define HANDLE_MOD_KEY(k, m) \
     if (event.code == (k)) { if (event.value) { mods |= (m); } else { mods &=~(m); } continue; }
@@ -182,7 +182,7 @@ int md_readchar()
 
     if (handle == -1)
     {
-        handle = open("/dev/input4", O_RDWR);
+        handle = open("/dev/input/event5", O_RDWR);
     }
 
     struct input_event event;
@@ -197,7 +197,7 @@ int md_readchar()
             HANDLE_MOD_KEY(KEY_LEFTALT, LEFT_ALT);
             HANDLE_MOD_KEY(KEY_RIGHTALT, RIGHT_ALT);
 
-            HANDLE_KEY(KEY_ESC, ESCAPE, 27, 0, 0);
+            HANDLE_KEY(KEY_ESC, 27, 0, 0, 0);
             HANDLE_KEY(KEY_1, '1', '!', 0, 0);
             HANDLE_KEY(KEY_2, '2', '@', 0, 0);
             HANDLE_KEY(KEY_3, '3', '#', 0, 0);
@@ -293,7 +293,7 @@ int md_readchar()
             HANDLE_KEY(KEY_SYSRQ, 0, 0, 0, 0);
             HANDLE_KEY(KEY_LINEFEED, 0, 0, 0, 0);
             HANDLE_KEY(KEY_HOME, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_UP, KEY_UP, K_SHIFT_UP, CTRL(K_SHIFT_UP), 0);
+            HANDLE_KEY(KEY_UP, K_UP, K_SHIFT_UP, CTRL(K_SHIFT_UP), 0);
             HANDLE_KEY(KEY_PAGEUP, 0, 0, 0, 0);
             HANDLE_KEY(KEY_LEFT, K_LEFT, K_SHIFT_LEFT, CTRL(K_SHIFT_LEFT), 0);
             HANDLE_KEY(KEY_RIGHT, K_RIGHT, K_SHIFT_RIGHT, CTRL(K_SHIFT_RIGHT), 0);
@@ -347,7 +347,7 @@ int md_readchar()
             HANDLE_KEY(KEY_MSDOS, 0, 0, 0, 0);
             HANDLE_KEY(KEY_COFFEE, 0, 0, 0, 0);
             HANDLE_KEY(KEY_SCREENLOCK, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_ROTATE_DISPLAY, 0, 0, 0, 0);
+            //HANDLE_KEY(KEY_ROTATE_DISPLAY, 0, 0, 0, 0);
             HANDLE_KEY(KEY_DIRECTION, 0, 0, 0, 0);
             HANDLE_KEY(KEY_CYCLEWINDOWS, 0, 0, 0, 0);
             HANDLE_KEY(KEY_MAIL, 0, 0, 0, 0);
@@ -455,8 +455,9 @@ int md_readchar()
             HANDLE_KEY(KEY_MICMUTE, 0, 0, 0, 0);
         }
     }
-    printf("Failed to read input device?\n");
-    return 0;
+    printf("Failed to read input device\n");
+    printf("Force a save&exit\n");
+    return K_EXIT;
 #endif
 }
 

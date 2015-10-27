@@ -33,58 +33,16 @@ void
 save_game()
 {
     FILE *savef;
-    int c;
-    char buf[MAXSTR];
 
     /*
-     * get file name
+     * test to see if the file exists
      */
-over:
-    for (;;)
+    if (stat(file_name, &sbuf) >= 0)
     {
-        c = displayMessage("Save and exit?");
-        if (c == ESCAPE)
-        {
-            msg("");
-            return;
-        }
-        else if (c == 'n' || c == 'N' || c == 'y' || c == 'Y')
-            break;
-        else
-            msg("please answer Y or N");
+        md_unlink(file_name);
     }
-    if (c == 'y' || c == 'Y')
-    {
-        strcpy(buf, file_name);
-        goto gotfile;
-    }
-
-    do
-    {
-gotfile:
-        /*
-         * test to see if the file exists
-         */
-        if (stat(buf, &sbuf) >= 0)
-        {
-            for (;;)
-            {
-                c = displayMessage("File exists.  Do you wish to overwrite it?");
-                if (c == ESCAPE)
-                    return;
-                if (c == 'y' || c == 'Y')
-                    break;
-                else if (c == 'n' || c == 'N')
-                    goto over;
-                else
-                    msg("Please answer Y or N");
-            }
-            md_unlink(file_name);
-        }
-        strcpy(file_name, buf);
-        if ((savef = fopen(file_name, "wb")) == NULL)
-            msg(strerror(errno));
-    } while (savef == NULL);
+    if ((savef = fopen(file_name, "wb")) == NULL)
+        return;
 
     save_file(savef);
     /* NOTREACHED */
@@ -95,8 +53,7 @@ gotfile:
  *        Write the saved game on the file
  */
 
-void
-save_file(FILE *savef)
+void save_file(FILE *savef)
 {
     char buf[80];
     md_chmod(file_name, 0400);

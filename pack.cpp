@@ -416,7 +416,7 @@ get_item(const char *purpose, int type)
             /*
              * Give the poor player a chance to abort the command
              */
-            if (ch == ESCAPE)
+            if (ch == ESCAPE || ch == K_EXIT)
             {
                 reset_last();
                 after = FALSE;

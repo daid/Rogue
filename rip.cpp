@@ -20,6 +20,8 @@
 #include "rogue.h"
 #include "score.h"
 /**
+The 1980 date is a wink to the first release date of rogue.
+
  12345678901234567890123456789012
 1          ___________
 2         /  REST IN  \
@@ -214,8 +216,7 @@ void death(char monst)
  *        Code for a winner
  */
 
-void
-total_winner()
+void total_winner()
 {
     THING *obj;
     struct obj_info *op;
@@ -230,10 +231,9 @@ total_winner()
     //addstr("\nYou have joined the elite ranks of those who have escaped the\n");
     //addstr("Dungeons of Doom alive.  You journey home and sell all your loot at\n");
     //addstr("a great profit and are admitted to the Fighters' Guild.\n");
-    //mvaddstr(LINES - 1, 0, "--Press space to continue--");
-    //wait_for(' ');
-    //clear();
-    //mvaddstr(0, 0, "   Worth  Item\n");
+    
+    startDisplayOfStringList();
+    displayStringListItem("   Worth  Item");
     oldpurse = purse;
     for (obj = pack; obj != NULL; obj = next(obj))
     {
@@ -292,11 +292,11 @@ total_winner()
         }
         if (worth < 0)
             worth = 0;
-        //printw("%c) %5d  %s\n", obj->o_packch, worth, inv_name(obj, FALSE));
+        displayStringListItem("%c) %5d  %s", obj->o_packch, worth, inv_name(obj, FALSE));
         purse += worth;
     }
-    //printw("   %5d  Gold Pieces          ", oldpurse);
-    //refresh();
+    displayStringListItem("   %5d  Gold Pieces          ", oldpurse);
+    finishDisplayOfStringList();
     score(purse, 2, ' ');
     my_exit(0);
 }

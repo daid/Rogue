@@ -194,7 +194,10 @@ status()
         char* c = status_line + sprintf(status_line, "Hp: %3d/%3d Ac: %2d ", pstats.s_hpt, max_hp, 10 - s_arm);
         if (hungry_state == 0)
         {
-            sprintf(c, "Xp: %3d/%2d", pstats.s_exp, pstats.s_lvl);
+            if (pstats.s_exp < 2000)
+                sprintf(c, "Xp: %3d/%2d", pstats.s_exp, pstats.s_lvl);
+            else
+                sprintf(c, "Xp: %3dk/%2d", pstats.s_exp / 1000, pstats.s_lvl);
         }
         else
         {
@@ -202,21 +205,4 @@ status()
         }
         setStatusLine(status_line);
     }
-}
-
-/*
- * wait_for
- *        Sit around until the guy types the right key
- */
-void
-wait_for(int ch)
-{
-    register char c;
-
-    if (ch == '\n')
-        while ((c = md_readchar()) != '\n' && c != '\r')
-            continue;
-    else
-        while (md_readchar() != ch)
-            continue;
 }

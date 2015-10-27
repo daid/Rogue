@@ -3,6 +3,12 @@
 #include <string.h>
 #ifdef USE_SDL
 #include <SDL/SDL.h>
+#else
+#include <unistd.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #endif
 
 #include "jedi.h"
@@ -62,6 +68,7 @@ static void drawMore(int y)
 
 static void refreshDisplay()
 {
+#ifdef USE_SDL
     SDL_Surface* screen = SDL_GetVideoSurface();
     for(int x=0; x<DISPLAY_WIDTH; x++)
     {
@@ -73,6 +80,34 @@ static void refreshDisplay()
         }
     }
     SDL_Flip(screen);
+#else
+    static int surface_handle = -1;
+    static uint8_t* surface_buffer;
+    if (surface_handle == -1)
+    {
+        surface_handle = open("/dev/fb0", O_RDWR);
+        surface_buffer = (uint8_t*)mmap(NULL, DISPLAY_WIDTH * DISPLAY_HEIGHT, PROT_READ | PROT_WRITE, MAP_SHARED, surface_handle, 0);
+    }
+
+    uint8_t* src = jedi_screen_buffer;
+    uint8_t* dst = surface_buffer;
+    for(int y=0; y<DISPLAY_HEIGHT; y++)
+    {
+        for(int x=0; x<DISPLAY_WIDTH/8; x++)
+        {
+            uint8_t b = 0;
+            if (*src++ > 128) b |= 0x01;
+            if (*src++ > 128) b |= 0x02;
+            if (*src++ > 128) b |= 0x04;
+            if (*src++ > 128) b |= 0x08;
+            if (*src++ > 128) b |= 0x10;
+            if (*src++ > 128) b |= 0x20;
+            if (*src++ > 128) b |= 0x40;
+            if (*src++ > 128) b |= 0x80;
+            *dst++ = b;
+        }
+    }
+#endif
 }
 
 static void drawMap()
@@ -140,7 +175,11 @@ void refreshMap()
 
 void animationDelay()
 {
+#ifdef USE_SDL
     SDL_Delay(30);
+#else
+    usleep(30 * 1000);
+#endif
 }
 
 void displayLargeMap()

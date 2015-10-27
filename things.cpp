@@ -290,7 +290,6 @@ new_thing()
 #ifdef MASTER
         otherwise:
             debug("Picked a bad kind of object");
-            wait_for(' ');
 #endif
     }
     return cur;

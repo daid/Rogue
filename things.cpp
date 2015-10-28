@@ -20,7 +20,7 @@
  *        Return the name of something as it would appear in an
  *        inventory.
  */
-const char * inv_name(THING *obj, bool drop)
+const char * inv_name(ITEM_THING *obj, bool drop)
 {
     char *pb;
     struct obj_info *op;
@@ -28,8 +28,8 @@ const char * inv_name(THING *obj, bool drop)
     int which;
 
     pb = prbuf;
-    which = obj->o_which;
-    switch (obj->o_type)
+    which = obj->which;
+    switch (obj->type)
     {
         case POTION:
             nameit(obj, "potion", p_colors[which], &pot_info[which], nullstr);
@@ -38,14 +38,14 @@ const char * inv_name(THING *obj, bool drop)
         when STICK:
             nameit(obj, ws_type[which], ws_made[which], &ws_info[which], charge_str);
         when SCROLL:
-            if (obj->o_count == 1)
+            if (obj->count == 1)
             {
                 strcpy(pb, "A scroll ");
                 pb = &prbuf[9];
             }
             else
             {
-                sprintf(pb, "%d scrolls ", obj->o_count);
+                sprintf(pb, "%d scrolls ", obj->count);
                 pb = &prbuf[strlen(prbuf)];
             }
             op = &scr_info[which];
@@ -57,59 +57,59 @@ const char * inv_name(THING *obj, bool drop)
                 sprintf(pb, "titled '%s'", s_names[which]);
         when FOOD:
             if (which == 1)
-                if (obj->o_count == 1)
+                if (obj->count == 1)
                     sprintf(pb, "A%s %s", vowelstr(fruit), fruit);
                 else
-                    sprintf(pb, "%d %ss", obj->o_count, fruit);
+                    sprintf(pb, "%d %ss", obj->count, fruit);
             else
-                if (obj->o_count == 1)
+                if (obj->count == 1)
                     strcpy(pb, "Some food");
                 else
-                    sprintf(pb, "%d rations of food", obj->o_count);
+                    sprintf(pb, "%d rations of food", obj->count);
         when WEAPON:
             sp = weap_info[which].oi_name;
-            if (obj->o_count > 1)
-                sprintf(pb, "%d ", obj->o_count);
+            if (obj->count > 1)
+                sprintf(pb, "%d ", obj->count);
             else
                 sprintf(pb, "A%s ", vowelstr(sp));
             pb = &prbuf[strlen(prbuf)];
-            if (obj->o_flags & ISKNOW)
-                sprintf(pb, "%s %s", num(obj->o_hplus,obj->o_dplus,WEAPON), sp);
+            if (obj->flags & ISKNOW)
+                sprintf(pb, "%s %s", num(obj->hplus,obj->dplus,WEAPON), sp);
             else
                 sprintf(pb, "%s", sp);
-            if (obj->o_count > 1)
+            if (obj->count > 1)
                 strcat(pb, "s");
-            if (obj->o_label != NULL)
+            if (obj->label != NULL)
             {
                 pb = &prbuf[strlen(prbuf)];
-                sprintf(pb, " called %s", obj->o_label);
+                sprintf(pb, " called %s", obj->label);
             }
         when ARMOR:
             sp = arm_info[which].oi_name;
-            if (obj->o_flags & ISKNOW)
+            if (obj->flags & ISKNOW)
             {
                 sprintf(pb, "%s %s [",
-                    num(a_class[which] - obj->o_arm, 0, ARMOR), sp);
+                    num(a_class[which] - obj->arm, 0, ARMOR), sp);
                 if (!terse)
                     strcat(pb, "protection ");
                 pb = &prbuf[strlen(prbuf)];
-                sprintf(pb, "%d]", 10 - obj->o_arm);
+                sprintf(pb, "%d]", 10 - obj->arm);
             }
             else
                 sprintf(pb, "%s", sp);
-            if (obj->o_label != NULL)
+            if (obj->label != NULL)
             {
                 pb = &prbuf[strlen(prbuf)];
-                sprintf(pb, " called %s", obj->o_label);
+                sprintf(pb, " called %s", obj->label);
             }
         when AMULET:
             strcpy(pb, "The Amulet of Yendor");
         when GOLD:
-            sprintf(prbuf, "%d Gold pieces", obj->o_goldval);
+            sprintf(prbuf, "%d Gold pieces", obj->arm); //gold value is stored in arm field.
 #ifdef MASTER
         otherwise:
-            debug("Picked up something funny %s", unctrl(obj->o_type));
-            sprintf(pb, "Something bizarre %s", unctrl(obj->o_type));
+            debug("Picked up something funny %s", unctrl(obj->type));
+            sprintf(pb, "Something bizarre %s", unctrl(obj->type));
 #endif
     }
     if (inv_describe)
@@ -140,7 +140,7 @@ void
 drop()
 {
     int ch;
-    THING *obj;
+    ITEM_THING *obj;
 
     ch = chat(hero.y, hero.x);
     if (ch != FLOOR && ch != PASSAGE)
@@ -153,15 +153,15 @@ drop()
         return;
     if (!dropcheck(obj))
         return;
-    obj = leave_pack(obj, TRUE, (bool)!ISMULT(obj->o_type));
+    obj = leave_pack(obj, TRUE, (bool)!ISMULT(obj->type));
     /*
      * Link it into the level object list
      */
     attach(lvl_obj, obj);
-    chat(hero.y, hero.x) = (char) obj->o_type;
+    chat(hero.y, hero.x) = (char) obj->type;
     flat(hero.y, hero.x) |= F_DROPPED;
-    obj->o_pos = hero;
-    if (obj->o_type == AMULET)
+    obj->pos = hero;
+    if (obj->type == AMULET)
         amulet = FALSE;
     msg("dropped %s", inv_name(obj, TRUE));
 }
@@ -171,14 +171,14 @@ drop()
  *        Do special checks for dropping or unweilding|unwearing|unringing
  */
 bool
-dropcheck(THING *obj)
+dropcheck(ITEM_THING *obj)
 {
     if (obj == NULL)
         return TRUE;
     if (obj != cur_armor && obj != cur_weapon
         && obj != cur_ring[LEFT] && obj != cur_ring[RIGHT])
             return TRUE;
-    if (obj->o_flags & ISCURSED)
+    if (obj->flags & ISCURSED)
     {
         msg("you can't.  It appears to be cursed");
         return FALSE;
@@ -193,10 +193,10 @@ dropcheck(THING *obj)
     else
     {
         cur_ring[obj == cur_ring[LEFT] ? LEFT : RIGHT] = NULL;
-        switch (obj->o_which)
+        switch (obj->which)
         {
             case R_ADDSTR:
-                chg_str(-obj->o_arm);
+                chg_str(-obj->arm);
                 break;
             case R_SEEINVIS:
                 unsee(0);
@@ -211,21 +211,20 @@ dropcheck(THING *obj)
  * new_thing:
  *        Return a new thing
  */
-THING *
-new_thing()
+ITEM_THING* new_thing()
 {
-    THING *cur;
+    ITEM_THING *cur;
     int r;
 
     cur = new_item();
-    cur->o_hplus = 0;
-    cur->o_dplus = 0;
-    strncpy(cur->o_damage, "0x0", sizeof(cur->o_damage));
-    strncpy(cur->o_hurldmg, "0x0", sizeof(cur->o_hurldmg));
-    cur->o_arm = 11;
-    cur->o_count = 1;
-    cur->o_group = 0;
-    cur->o_flags = 0;
+    cur->hplus = 0;
+    cur->dplus = 0;
+    strncpy(cur->damage, "0x0", sizeof(cur->damage));
+    strncpy(cur->hurldmg, "0x0", sizeof(cur->hurldmg));
+    cur->arm = 11;
+    cur->count = 1;
+    cur->group = 0;
+    cur->flags = 0;
     /*
      * Decide what kind of object it will be
      * If we haven't had food for a while, let it be food.
@@ -233,59 +232,59 @@ new_thing()
     switch (no_food > 3 ? 2 : pick_one(things, NUMTHINGS))
     {
         case 0:
-            cur->o_type = POTION;
-            cur->o_which = pick_one(pot_info, MAXPOTIONS);
+            cur->type = POTION;
+            cur->which = pick_one(pot_info, MAXPOTIONS);
         when 1:
-            cur->o_type = SCROLL;
-            cur->o_which = pick_one(scr_info, MAXSCROLLS);
+            cur->type = SCROLL;
+            cur->which = pick_one(scr_info, MAXSCROLLS);
         when 2:
-            cur->o_type = FOOD;
+            cur->type = FOOD;
             no_food = 0;
             if (rnd(10) != 0)
-                cur->o_which = 0;
+                cur->which = 0;
             else
-                cur->o_which = 1;
+                cur->which = 1;
         when 3:
             init_weapon(cur, pick_one(weap_info, MAXWEAPONS));
             if ((r = rnd(100)) < 10)
             {
-                cur->o_flags |= ISCURSED;
-                cur->o_hplus -= rnd(3) + 1;
+                cur->flags |= ISCURSED;
+                cur->hplus -= rnd(3) + 1;
             }
             else if (r < 15)
-                cur->o_hplus += rnd(3) + 1;
+                cur->hplus += rnd(3) + 1;
         when 4:
-            cur->o_type = ARMOR;
-            cur->o_which = pick_one(arm_info, MAXARMORS);
-            cur->o_arm = a_class[cur->o_which];
+            cur->type = ARMOR;
+            cur->which = pick_one(arm_info, MAXARMORS);
+            cur->arm = a_class[cur->which];
             if ((r = rnd(100)) < 20)
             {
-                cur->o_flags |= ISCURSED;
-                cur->o_arm += rnd(3) + 1;
+                cur->flags |= ISCURSED;
+                cur->arm += rnd(3) + 1;
             }
             else if (r < 28)
-                cur->o_arm -= rnd(3) + 1;
+                cur->arm -= rnd(3) + 1;
         when 5:
-            cur->o_type = RING;
-            cur->o_which = pick_one(ring_info, MAXRINGS);
-            switch (cur->o_which)
+            cur->type = RING;
+            cur->which = pick_one(ring_info, MAXRINGS);
+            switch (cur->which)
             {
                 case R_ADDSTR:
                 case R_PROTECT:
                 case R_ADDHIT:
                 case R_ADDDAM:
-                    if ((cur->o_arm = rnd(3)) == 0)
+                    if ((cur->arm = rnd(3)) == 0)
                     {
-                        cur->o_arm = -1;
-                        cur->o_flags |= ISCURSED;
+                        cur->arm = -1;
+                        cur->flags |= ISCURSED;
                     }
                 when R_AGGR:
                 case R_TELEPORT:
-                    cur->o_flags |= ISCURSED;
+                    cur->flags |= ISCURSED;
             }
         when 6:
-            cur->o_type = STICK;
-            cur->o_which = pick_one(ws_info, MAXSTICKS);
+            cur->type = STICK;
+            cur->which = pick_one(ws_info, MAXSTICKS);
             fix_stick(cur);
 #ifdef MASTER
         otherwise:
@@ -350,7 +349,7 @@ void print_disc(char type)
 {
     struct obj_info *info = NULL;
     int i, maxnum = 0, num_found;
-    static THING obj;
+    static ITEM_THING obj;
     static int order[MAX4(MAXSCROLLS, MAXPOTIONS, MAXRINGS, MAXSTICKS)];
 
     switch (type)
@@ -373,16 +372,16 @@ void print_disc(char type)
             break;
     }
     set_order(order, maxnum);
-    obj.o_count = 1;
-    obj.o_flags = 0;
+    obj.count = 1;
+    obj.flags = 0;
     num_found = 0;
     
     startDisplayOfStringList();
     for (i = 0; i < maxnum; i++)
         if (info[order[i]].oi_know || info[order[i]].oi_guess)
         {
-            obj.o_type = type;
-            obj.o_which = order[i];
+            obj.type = type;
+            obj.which = order[i];
             displayStringListItem("%s", inv_name(&obj, FALSE));
             num_found++;
         }
@@ -445,33 +444,33 @@ const char * nothing(char type)
  *        Give the proper name to a potion, stick, or ring
  */
 
-void nameit(THING *obj, const char *type, const char *which, struct obj_info *op, const char *(*prfunc)(THING *))
+void nameit(ITEM_THING *obj, const char *type, const char *which, struct obj_info *op, const char *(*prfunc)(ITEM_THING *))
 {
     char *pb;
 
     if (op->oi_know || op->oi_guess)
     {
-        if (obj->o_count == 1)
+        if (obj->count == 1)
             sprintf(prbuf, "A %s ", type);
         else
-            sprintf(prbuf, "%d %ss ", obj->o_count, type);
+            sprintf(prbuf, "%d %ss ", obj->count, type);
         pb = &prbuf[strlen(prbuf)];
         if (op->oi_know)
             sprintf(pb, "of %s%s(%s)", op->oi_name, (*prfunc)(obj), which);
         else if (op->oi_guess)
             sprintf(pb, "called %s%s(%s)", op->oi_guess, (*prfunc)(obj), which);
     }
-    else if (obj->o_count == 1)
+    else if (obj->count == 1)
         sprintf(prbuf, "A%s %s %s", vowelstr(which), which, type);
     else
-        sprintf(prbuf, "%d %s %ss", obj->o_count, which, type);
+        sprintf(prbuf, "%d %s %ss", obj->count, which, type);
 }
 
 /*
  * nullstr:
  *        Return a pointer to a null-length string
  */
-const char * nullstr(THING *ignored)
+const char * nullstr(ITEM_THING *ignored)
 {
     return "";
 }

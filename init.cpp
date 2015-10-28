@@ -22,26 +22,26 @@
 void
 init_player()
 {
-    register THING *obj;
+    ITEM_THING *obj;
 
-    pstats = max_stats;
+    player.stats = max_stats;
     food_left = HUNGERTIME;
     /*
      * Give him some food
      */
     obj = new_item();
-    obj->o_type = FOOD;
-    obj->o_count = 1;
+    obj->type = FOOD;
+    obj->count = 1;
     add_pack(obj, TRUE);
     /*
      * And his suit of armor
      */
     obj = new_item();
-    obj->o_type = ARMOR;
-    obj->o_which = RING_MAIL;
-    obj->o_arm = a_class[RING_MAIL] - 1;
-    obj->o_flags |= ISKNOW;
-    obj->o_count = 1;
+    obj->type = ARMOR;
+    obj->which = RING_MAIL;
+    obj->arm = a_class[RING_MAIL] - 1;
+    obj->flags |= ISKNOW;
+    obj->count = 1;
     cur_armor = obj;
     add_pack(obj, TRUE);
     /*
@@ -49,9 +49,9 @@ init_player()
      */
     obj = new_item();
     init_weapon(obj, MACE);
-    obj->o_hplus = 1;
-    obj->o_dplus = 1;
-    obj->o_flags |= ISKNOW;
+    obj->hplus = 1;
+    obj->dplus = 1;
+    obj->flags |= ISKNOW;
     add_pack(obj, TRUE);
     cur_weapon = obj;
     /*
@@ -59,16 +59,16 @@ init_player()
      */
     obj = new_item();
     init_weapon(obj, BOW);
-    obj->o_hplus = 1;
-    obj->o_flags |= ISKNOW;
+    obj->hplus = 1;
+    obj->flags |= ISKNOW;
     add_pack(obj, TRUE);
     /*
      * Now some arrows
      */
     obj = new_item();
     init_weapon(obj, ARROW);
-    obj->o_count = rnd(15) + 25;
-    obj->o_flags |= ISKNOW;
+    obj->count = rnd(15) + 25;
+    obj->flags |= ISKNOW;
     add_pack(obj, TRUE);
 }
 

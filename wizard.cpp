@@ -24,9 +24,9 @@
 void
 whatis(bool insist, int type)
 {
-    THING *obj;
+    ITEM_THING *obj;
 
-    if (pack == NULL)
+    if (player.pack == NULL)
     {
         msg("you don't have anything in your pack to identify");
         return;
@@ -41,8 +41,8 @@ whatis(bool insist, int type)
                 return;
             else if (obj == NULL)
                 msg("you must identify something");
-            else if (type && obj->o_type != type &&
-               !(type == R_OR_S && (obj->o_type == RING || obj->o_type == STICK)) )
+            else if (type && obj->type != type &&
+               !(type == R_OR_S && (obj->type == RING || obj->type == STICK)) )
                     msg("you must identify a %s", type_name(type));
             else
                 break;
@@ -54,7 +54,7 @@ whatis(bool insist, int type)
     if (obj == NULL)
         return;
 
-    switch (obj->o_type)
+    switch (obj->type)
     {
         case SCROLL:
             set_know(obj, scr_info);
@@ -64,7 +64,7 @@ whatis(bool insist, int type)
             set_know(obj, ws_info);
         when WEAPON:
         case ARMOR:
-            obj->o_flags |= ISKNOW;
+            obj->flags |= ISKNOW;
         when RING:
             set_know(obj, ring_info);
     }
@@ -77,13 +77,13 @@ whatis(bool insist, int type)
  */
 
 void
-set_know(THING *obj, struct obj_info *info)
+set_know(ITEM_THING *obj, struct obj_info *info)
 {
     char **guess;
 
-    info[obj->o_which].oi_know = TRUE;
-    obj->o_flags |= ISKNOW;
-    guess = &info[obj->o_which].oi_guess;
+    info[obj->which].oi_know = TRUE;
+    obj->flags |= ISKNOW;
+    guess = &info[obj->which].oi_guess;
     if (*guess)
     {
         free(*guess);
@@ -130,39 +130,39 @@ create_obj()
 
     obj = new_item();
     msg("type of item: ");
-    obj->o_type = md_readchar();
+    obj->type = md_readchar();
     mpos = 0;
-    msg("which %c do you want? (0-f)", obj->o_type);
-    obj->o_which = (isdigit((ch = readchar())) ? ch - '0' : ch - 'a' + 10);
-    obj->o_group = 0;
-    obj->o_count = 1;
+    msg("which %c do you want? (0-f)", obj->type);
+    obj->which = (isdigit((ch = readchar())) ? ch - '0' : ch - 'a' + 10);
+    obj->group = 0;
+    obj->count = 1;
     mpos = 0;
-    if (obj->o_type == WEAPON || obj->o_type == ARMOR)
+    if (obj->type == WEAPON || obj->type == ARMOR)
     {
         msg("blessing? (+,-,n)");
         bless = readchar();
         mpos = 0;
         if (bless == '-')
-            obj->o_flags |= ISCURSED;
-        if (obj->o_type == WEAPON)
+            obj->flags |= ISCURSED;
+        if (obj->type == WEAPON)
         {
-            init_weapon(obj, obj->o_which);
+            init_weapon(obj, obj->which);
             if (bless == '-')
-                obj->o_hplus -= rnd(3)+1;
+                obj->hplus -= rnd(3)+1;
             if (bless == '+')
-                obj->o_hplus += rnd(3)+1;
+                obj->hplus += rnd(3)+1;
         }
         else
         {
-            obj->o_arm = a_class[obj->o_which];
+            obj->arm = a_class[obj->which];
             if (bless == '-')
-                obj->o_arm += rnd(3)+1;
+                obj->arm += rnd(3)+1;
             if (bless == '+')
-                obj->o_arm -= rnd(3)+1;
+                obj->arm -= rnd(3)+1;
         }
     }
-    else if (obj->o_type == RING)
-        switch (obj->o_which)
+    else if (obj->type == RING)
+        switch (obj->which)
         {
             case R_PROTECT:
             case R_ADDSTR:
@@ -172,18 +172,18 @@ create_obj()
                 bless = readchar();
                 mpos = 0;
                 if (bless == '-')
-                    obj->o_flags |= ISCURSED;
-                obj->o_arm = (bless == '-' ? -1 : rnd(2) + 1);
+                    obj->flags |= ISCURSED;
+                obj->arm = (bless == '-' ? -1 : rnd(2) + 1);
             when R_AGGR:
             case R_TELEPORT:
-                obj->o_flags |= ISCURSED;
+                obj->flags |= ISCURSED;
         }
-    else if (obj->o_type == STICK)
+    else if (obj->type == STICK)
         fix_stick(obj);
-    else if (obj->o_type == GOLD)
+    else if (obj->type == GOLD)
     {
         msg("how much?");
-        get_num(&obj->o_goldval, stdscr);
+        get_num(&obj->goldval, stdscr);
     }
     add_pack(obj, FALSE);
 }
@@ -201,7 +201,7 @@ teleport()
 
     setMapDisplay(hero.x, hero.y, floor_at());
     find_floor((struct room *) NULL, &c, FALSE, TRUE);
-    if (roomin(&c) != proom)
+    if (roomin(&c) != player.room)
     {
         leave_room(&hero);
         hero = c;
@@ -218,7 +218,7 @@ teleport()
      * a Flytrap
      */
     if (on(player, ISHELD)) {
-        player.t_flags &= ~ISHELD;
+        player.flags &= ~ISHELD;
         vf_hit = 0;
         strcpy(monsters['F'-'A'].m_stats.s_dmg, "000x0");
     }

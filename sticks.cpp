@@ -21,20 +21,20 @@
  */
 
 void
-fix_stick(THING *cur)
+fix_stick(ITEM_THING *cur)
 {
-    if (strcmp(ws_type[cur->o_which], "staff") == 0)
-        strncpy(cur->o_damage,"2x3",sizeof(cur->o_damage));
+    if (strcmp(ws_type[cur->which], "staff") == 0)
+        strncpy(cur->damage,"2x3",sizeof(cur->damage));
     else
-        strncpy(cur->o_damage,"1x1",sizeof(cur->o_damage));
-    strncpy(cur->o_hurldmg,"1x1",sizeof(cur->o_hurldmg));
+        strncpy(cur->damage,"1x1",sizeof(cur->damage));
+    strncpy(cur->hurldmg,"1x1",sizeof(cur->hurldmg));
 
-    switch (cur->o_which)
+    switch (cur->which)
     {
         case WS_LIGHT:
-            cur->o_charges = rnd(10) + 10;
+            cur->arm = rnd(10) + 10; //amount of charges is stored in arm field
         otherwise:
-            cur->o_charges = rnd(5) + 3;
+            cur->arm = rnd(5) + 3; //amount of charges is stored in arm field
     }
 }
 
@@ -46,15 +46,16 @@ fix_stick(THING *cur)
 void
 do_zap()
 {
-    THING *obj, *tp;
+    ITEM_THING *obj;
+    MONSTER_THING *tp;
     int y, x;
     const char *name;
     char monster, oldch;
-    static THING bolt;
+    static ITEM_THING bolt;
 
     if ((obj = get_item("zap with", STICK)) == NULL)
         return;
-    if (obj->o_type != STICK)
+    if (obj->type != STICK)
     {
         after = FALSE;
         msg("you can't zap with that!");
@@ -65,23 +66,23 @@ do_zap()
         after = FALSE;
         return;
     }
-    if (obj->o_charges == 0)
+    if (obj->arm == 0) //amount of charges is stored in the arm field.
     {
         msg("nothing happens");
         return;
     }
-    switch (obj->o_which)
+    switch (obj->which)
     {
         case WS_LIGHT:
             /*
              * Reddy Kilowat wand.  Light up the room
              */
             ws_info[WS_LIGHT].oi_know = TRUE;
-            if (proom->r_flags & ISGONE)
+            if (player.room->r_flags & ISGONE)
                 msg("the corridor glows and then fades");
             else
             {
-                proom->r_flags &= ~ISDARK;
+                player.room->r_flags &= ~ISDARK;
                 /*
                  * Light the room and put the player back up
                  */
@@ -97,7 +98,7 @@ do_zap()
              * evenly from the monsters in the room (or next to hero
              * if he is in a passage)
              */
-            if (pstats.s_hpt < 2)
+            if (player.stats.s_hpt < 2)
             {
                 msg("you are too weak to use it");
                 return;
@@ -118,47 +119,47 @@ do_zap()
             }
             if ((tp = moat(y, x)) != NULL)
             {
-                monster = tp->t_type;
+                monster = tp->type;
                 if (monster == 'F')
-                    player.t_flags &= ~ISHELD;
-                switch (obj->o_which) {
+                    player.flags &= ~ISHELD;
+                switch (obj->which) {
                     case WS_INVIS:
-                        tp->t_flags |= ISINVIS;
+                        tp->flags |= ISINVIS;
                         if (cansee(y, x))
-                            setMapDisplay(x, y, tp->t_oldch);
+                            setMapDisplay(x, y, tp->oldch);
                         break;
                     case WS_POLYMORPH:
                     {
-                        THING *pp;
+                        ITEM_THING *pp;
 
-                        pp = tp->t_pack;
+                        pp = tp->pack;
                         detach(mlist, tp);
                         if (see_monst(tp))
                             setMapDisplay(x, y, chat(y, x));
-                        oldch = tp->t_oldch;
+                        oldch = tp->oldch;
                         delta.y = y;
                         delta.x = x;
                         new_monster(tp, monster = (char)(rnd(26) + 'A'), &delta);
                         if (see_monst(tp))
                             setMapDisplay(x, y, monster);
-                        tp->t_oldch = oldch;
-                        tp->t_pack = pp;
+                        tp->oldch = oldch;
+                        tp->pack = pp;
                         ws_info[WS_POLYMORPH].oi_know |= see_monst(tp);
                         break;
                     }
                     case WS_CANCEL:
-                        tp->t_flags |= ISCANC;
-                        tp->t_flags &= ~(ISINVIS|CANHUH);
-                        tp->t_disguise = tp->t_type;
+                        tp->flags |= ISCANC;
+                        tp->flags &= ~(ISINVIS|CANHUH);
+                        tp->disguise = tp->type;
                         if (see_monst(tp))
-                            setMapDisplay(x, y, tp->t_disguise);
+                            setMapDisplay(x, y, tp->disguise);
                         break;
                     case WS_TELAWAY:
                     case WS_TELTO:
                     {
                         coord new_pos;
 
-                        if (obj->o_which == WS_TELAWAY)
+                        if (obj->which == WS_TELAWAY)
                         {
                             do
                             {
@@ -170,25 +171,25 @@ do_zap()
                             new_pos.y = hero.y + delta.y;
                             new_pos.x = hero.x + delta.x;
                         }
-                        tp->t_dest = &hero;
-                        tp->t_flags |= ISRUN;
+                        tp->dest = &hero;
+                        tp->flags |= ISRUN;
                         relocate(tp, &new_pos);
                     }
                 }
             }
         when WS_MISSILE:
             ws_info[WS_MISSILE].oi_know = TRUE;
-            bolt.o_type = '*';
-            strncpy(bolt.o_hurldmg,"1x4",sizeof(bolt.o_hurldmg));
-            bolt.o_hplus = 100;
-            bolt.o_dplus = 1;
-            bolt.o_flags = ISMISL;
+            bolt.type = '*';
+            strncpy(bolt.hurldmg,"1x4",sizeof(bolt.hurldmg));
+            bolt.hplus = 100;
+            bolt.dplus = 1;
+            bolt.flags = ISMISL;
             if (cur_weapon != NULL)
-                bolt.o_launch = cur_weapon->o_which;
+                bolt.launch = cur_weapon->which;
             do_motion(&bolt, delta.y, delta.x);
-            if ((tp = moat(bolt.o_pos.y, bolt.o_pos.x)) != NULL
+            if ((tp = moat(bolt.pos.y, bolt.pos.x)) != NULL
                 && !save_throw(VS_MAGIC, tp))
-                    hit_monster(unc(bolt.o_pos), &bolt);
+                    hit_monster(unc(bolt.pos), &bolt);
             else if (terse)
                 msg("missle vanishes");
             else
@@ -204,20 +205,20 @@ do_zap()
             }
             if ((tp = moat(y, x)) != NULL)
             {
-                if (obj->o_which == WS_HASTE_M)
+                if (obj->which == WS_HASTE_M)
                 {
                     if (on(*tp, ISSLOW))
-                        tp->t_flags &= ~ISSLOW;
+                        tp->flags &= ~ISSLOW;
                     else
-                        tp->t_flags |= ISHASTE;
+                        tp->flags |= ISHASTE;
                 }
                 else
                 {
                     if (on(*tp, ISHASTE))
-                        tp->t_flags &= ~ISHASTE;
+                        tp->flags &= ~ISHASTE;
                     else
-                        tp->t_flags |= ISSLOW;
-                    tp->t_turn = TRUE;
+                        tp->flags |= ISSLOW;
+                    tp->turn = TRUE;
                 }
                 delta.y = y;
                 delta.x = x;
@@ -226,14 +227,14 @@ do_zap()
         when WS_ELECT:
         case WS_FIRE:
         case WS_COLD:
-            if (obj->o_which == WS_ELECT)
+            if (obj->which == WS_ELECT)
                 name = "bolt";
-            else if (obj->o_which == WS_FIRE)
+            else if (obj->which == WS_FIRE)
                 name = "flame";
             else
                 name = "ice";
             fire_bolt(&hero, &delta, name);
-            ws_info[obj->o_which].oi_know = TRUE;
+            ws_info[obj->which].oi_know = TRUE;
         when WS_NOP:
             break;
 #ifdef MASTER
@@ -241,7 +242,7 @@ do_zap()
             msg("what a bizarre schtick!");
 #endif
     }
-    obj->o_charges--;
+    obj->arm--;//amount of charges left is stored in the arm field
 }
 
 /*
@@ -252,12 +253,12 @@ do_zap()
 void
 drain()
 {
-    THING *mp;
+    MONSTER_THING *mp;
     struct room *corp;
-    THING **dp;
+    MONSTER_THING **dp;
     int cnt;
     bool inpass;
-    static THING *drainee[40];
+    static MONSTER_THING* drainee[40];
 
     /*
      * First cnt how many things we need to spread the hit points among
@@ -267,12 +268,12 @@ drain()
         corp = &passages[flat(hero.y, hero.x) & F_PNUM];
     else
         corp = NULL;
-    inpass = (bool)(proom->r_flags & ISGONE);
+    inpass = (bool)(player.room->r_flags & ISGONE);
     dp = drainee;
-    for (mp = mlist; mp != NULL; mp = next(mp))
-        if (mp->t_room == proom || mp->t_room == corp ||
-            (inpass && chat(mp->t_pos.y, mp->t_pos.x) == DOOR &&
-            &passages[flat(mp->t_pos.y, mp->t_pos.x) & F_PNUM] == proom))
+    for (mp = mlist; mp != NULL; mp = mp->next)
+        if (mp->room == player.room || mp->room == corp ||
+            (inpass && chat(mp->pos.y, mp->pos.x) == DOOR &&
+            &passages[flat(mp->pos.y, mp->pos.x) & F_PNUM] == player.room))
                 *dp++ = mp;
     if ((cnt = (int)(dp - drainee)) == 0)
     {
@@ -280,18 +281,18 @@ drain()
         return;
     }
     *dp = NULL;
-    pstats.s_hpt /= 2;
-    cnt = pstats.s_hpt / cnt;
+    player.stats.s_hpt /= 2;
+    cnt = player.stats.s_hpt / cnt;
     /*
      * Now zot all of the monsters
      */
     for (dp = drainee; *dp; dp++)
     {
         mp = *dp;
-        if ((mp->t_stats.s_hpt -= cnt) <= 0)
+        if ((mp->stats.s_hpt -= cnt) <= 0)
             killed(mp, see_monst(mp));
         else
-            runto(&mp->t_pos);
+            runto(&mp->pos);
     }
 }
 
@@ -304,18 +305,18 @@ void
 fire_bolt(coord *start, coord *dir, const char *name)
 {
     coord *c1, *c2;
-    THING *tp;
+    MONSTER_THING *tp;
     char dirch = 0, ch;
     bool hit_hero, used, changed;
     static coord pos;
     static coord spotpos[BOLT_LENGTH];
-    THING bolt;
+    ITEM_THING bolt;
 
-    bolt.o_type = WEAPON;
-    bolt.o_which = FLAME;
-    strncpy(bolt.o_hurldmg,"6x6",sizeof(bolt.o_hurldmg));
-    bolt.o_hplus = 100;
-    bolt.o_dplus = 0;
+    bolt.type = WEAPON;
+    bolt.which = FLAME;
+    strncpy(bolt.hurldmg,"6x6",sizeof(bolt.hurldmg));
+    bolt.hplus = 100;
+    bolt.dplus = 0;
     weap_info[FLAME].oi_name = name;
     switch (dir->y + dir->x)
     {
@@ -367,12 +368,12 @@ def:
                 {
                     hit_hero = TRUE;
                     changed = !changed;
-                    tp->t_oldch = chat(pos.y, pos.x);
+                    tp->oldch = chat(pos.y, pos.x);
                     if (!save_throw(VS_MAGIC, tp))
                     {
-                        bolt.o_pos = pos;
+                        bolt.pos = pos;
                         used = TRUE;
-                        if (tp->t_type == 'D' && strcmp(name, "flame") == 0)
+                        if (tp->type == 'D' && strcmp(name, "flame") == 0)
                         {
                             addmsg("the flame bounces");
                             if (!terse)
@@ -382,7 +383,7 @@ def:
                         else
                             hit_monster(unc(pos), &bolt);
                     }
-                    else if (ch != 'M' || tp->t_disguise == 'M')
+                    else if (ch != 'M' || tp->disguise == 'M')
                     {
                         if (start == &hero)
                             runto(&pos);
@@ -398,12 +399,12 @@ def:
                     changed = !changed;
                     if (!save(VS_MAGIC))
                     {
-                        if ((pstats.s_hpt -= roll(6, 6)) <= 0)
+                        if ((player.stats.s_hpt -= roll(6, 6)) <= 0)
                         {
                             if (start == &hero)
                                 death('b');
                             else
-                                death(moat(start->y, start->x)->t_type);
+                                death(moat(start->y, start->x)->type);
                         }
                         used = TRUE;
                         if (terse)
@@ -426,15 +427,15 @@ def:
  * charge_str:
  *        Return an appropriate string for a wand charge
  */
-const char * charge_str(THING *obj)
+const char * charge_str(ITEM_THING *obj)
 {
     static char buf[20];
 
-    if (!(obj->o_flags & ISKNOW))
+    if (!(obj->flags & ISKNOW))
         buf[0] = '\0';
     else if (terse)
-        sprintf(buf, " [%d]", obj->o_charges);
+        sprintf(buf, " [%d]", obj->arm);//amount of charges is stored in the arm field
     else
-        sprintf(buf, " [%d charges]", obj->o_charges);
+        sprintf(buf, " [%d charges]", obj->arm);
     return buf;
 }

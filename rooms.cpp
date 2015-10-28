@@ -31,7 +31,7 @@ do_rooms()
 {
     int i;
     struct room *rp;
-    THING *tp;
+    MONSTER_THING *tp;
     int left_out;
     static coord top;
     coord bsze;                                /* maximum room size */
@@ -117,16 +117,16 @@ do_rooms()
          */
         if (rnd(2) == 0 && (!amulet || level >= max_level))
         {
-            THING *gold;
+            ITEM_THING *gold;
 
             gold = new_item();
-            gold->o_goldval = rp->r_goldval = GOLDCALC;
+            gold->arm = rp->r_goldval = GOLDCALC;//gold value is stored in arm field (used to be handled with ugly define)
             find_floor(rp, &rp->r_gold, FALSE, FALSE);
-            gold->o_pos = rp->r_gold;
+            gold->pos = rp->r_gold;
             chat(rp->r_gold.y, rp->r_gold.x) = GOLD;
-            gold->o_flags = ISMANY;
-            gold->o_group = GOLDGRP;
-            gold->o_type = GOLD;
+            gold->flags = ISMANY;
+            gold->group = GOLDGRP;
+            gold->type = GOLD;
             attach(lvl_obj, gold);
         }
         /*
@@ -134,7 +134,7 @@ do_rooms()
          */
         if (rnd(100) < (rp->r_goldval > 0 ? 80 : 25))
         {
-            tp = new_item();
+            tp = new_monster_thing();
             find_floor(rp, &mp, FALSE, TRUE);
             new_monster(tp, randmonster(FALSE), &mp);
             give_pack(tp);
@@ -377,11 +377,11 @@ void
 enter_room(coord *cp)
 {
     struct room *rp;
-    THING *tp;
+    MONSTER_THING *tp;
     int y, x;
     int ch;
 
-    rp = proom = roomin(cp);
+    rp = player.room = roomin(cp);
     door_open(rp);
     if (!(rp->r_flags & ISDARK) && !on(player, ISBLIND))
         for (y = rp->r_pos.y; y < rp->r_max.y + rp->r_pos.y; y++)
@@ -394,14 +394,14 @@ enter_room(coord *cp)
                     setMapDisplay(x, y, ch);
                 else
                 {
-                    tp->t_oldch = ch;
+                    tp->oldch = ch;
                     if (!see_monst(tp))
                         if (on(player, SEEMONST))
-                            setMapDisplay(x, y, tp->t_disguise | DISPLAY_INVERT);
+                            setMapDisplay(x, y, tp->disguise | DISPLAY_INVERT);
                         else
                             setMapDisplay(x, y, ch);
                     else
-                        setMapDisplay(x, y, tp->t_disguise);
+                        setMapDisplay(x, y, tp->disguise);
                 }
             }
         }
@@ -421,7 +421,7 @@ leave_room(coord *cp)
     char floor;
     int ch;
 
-    rp = proom;
+    rp = player.room;
 
     if (rp->r_flags & ISMAZE)
         return;
@@ -433,7 +433,7 @@ leave_room(coord *cp)
     else
         floor = ' ';
 
-    proom = &passages[flat(cp->y, cp->x) & F_PNUM];
+    player.room = &passages[flat(cp->y, cp->x) & F_PNUM];
     for (y = rp->r_pos.y; y < rp->r_max.y + rp->r_pos.y; y++)
         for (x = rp->r_pos.x; x < rp->r_max.x + rp->r_pos.x; x++)
         {

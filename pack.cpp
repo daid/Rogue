@@ -21,10 +21,10 @@
  *        it off the ground.
  */
 
-void
-add_pack(THING *obj, bool silent)
+void add_pack(ITEM_THING *obj, bool silent)
 {
-    THING *op, *lp;
+    ITEM_THING *op, *lp;
+    MONSTER_THING *mp;
     bool from_floor;
 
     from_floor = FALSE;
@@ -38,71 +38,71 @@ add_pack(THING *obj, bool silent)
     /*
      * Check for and deal with scare monster scrolls
      */
-    if (obj->o_type == SCROLL && obj->o_which == S_SCARE)
-        if (obj->o_flags & ISFOUND)
+    if (obj->type == SCROLL && obj->which == S_SCARE)
+        if (obj->flags & ISFOUND)
         {
             detach(lvl_obj, obj);
             setMapDisplay(hero.x, hero.y, floor_ch());
-            chat(hero.y, hero.x) = (proom->r_flags & ISGONE) ? PASSAGE : FLOOR;
+            chat(hero.y, hero.x) = (player.room->r_flags & ISGONE) ? PASSAGE : FLOOR;
             discard(obj);
             msg("the scroll turns to dust as you pick it up");
             return;
         }
 
-    if (pack == NULL)
+    if (player.pack == NULL)
     {
-        pack = obj;
-        obj->o_packch = pack_char();
+        player.pack = obj;
+        obj->packch = pack_char();
         inpack++;
     }
     else
     {
         lp = NULL;
-        for (op = pack; op != NULL; op = next(op))
+        for (op = player.pack; op != NULL; op = op->next)
         {
-            if (op->o_type != obj->o_type)
+            if (op->type != obj->type)
                 lp = op;
             else
             {
-                while (op->o_type == obj->o_type && op->o_which != obj->o_which)
+                while (op->type == obj->type && op->which != obj->which)
                 {
                     lp = op;
-                    if (next(op) == NULL)
+                    if (op->next == NULL)
                         break;
                     else
-                        op = next(op);
+                        op = op->next;
                 }
-                if (op->o_type == obj->o_type && op->o_which == obj->o_which)
+                if (op->type == obj->type && op->which == obj->which)
                 {
-                    if (ISMULT(op->o_type))
+                    if (ISMULT(op->type))
                     {
                         if (!pack_room(from_floor, obj))
                             return;
-                        op->o_count++;
+                        op->count++;
 dump_it:
                         discard(obj);
                         obj = op;
                         lp = NULL;
                         goto out;
                     }
-                    else if (obj->o_group)
+                    else if (obj->group)
                     {
                         lp = op;
-                        while (op->o_type == obj->o_type
-                            && op->o_which == obj->o_which
-                            && op->o_group != obj->o_group)
+                        while (op->type == obj->type
+                            && op->which == obj->which
+                            && op->group != obj->group)
                         {
                             lp = op;
-                            if (next(op) == NULL)
+                            if (op->next == NULL)
                                 break;
                             else
-                                op = next(op);
+                                op = op->next;
                         }
-                        if (op->o_type == obj->o_type
-                            && op->o_which == obj->o_which
-                            && op->o_group == obj->o_group)
+                        if (op->type == obj->type
+                            && op->which == obj->which
+                            && op->group == obj->group)
                         {
-                                op->o_count += obj->o_count;
+                                op->count += obj->count;
                                 inpack--;
                                 if (!pack_room(from_floor, obj))
                                     return;
@@ -123,27 +123,27 @@ out:
                 return;
             else
             {
-                obj->o_packch = pack_char();
-                next(obj) = next(lp);
-                prev(obj) = lp;
-                if (next(lp) != NULL)
-                    prev(next(lp)) = obj;
-                next(lp) = obj;
+                obj->packch = pack_char();
+                obj->next = lp->next;
+                obj->prev = lp;
+                if (lp->next != NULL)
+                    lp->next->prev = obj;
+                lp->next = obj;
             }
         }
     }
 
-    obj->o_flags |= ISFOUND;
+    obj->flags |= ISFOUND;
 
     /*
      * If this was the object of something's desire, that monster will
      * get mad and run at the hero.
      */
-    for (op = mlist; op != NULL; op = next(op))
-        if (op->t_dest == &obj->o_pos)
-            op->t_dest = &hero;
+    for (mp = mlist; mp != NULL; mp = mp->next)
+        if (mp->dest == &obj->pos)
+            mp->dest = &hero;
 
-    if (obj->o_type == AMULET)
+    if (obj->type == AMULET)
         amulet = TRUE;
     /*
      * Notify the user
@@ -152,7 +152,7 @@ out:
     {
         if (!terse)
             addmsg("you now have ");
-        msg("%s (%c)", inv_name(obj, !terse), obj->o_packch);
+        msg("%s (%c)", inv_name(obj, !terse), obj->packch);
     }
 }
 
@@ -161,7 +161,7 @@ out:
  *        See if there's room in the pack.  If not, print out an
  *        appropriate message
  */
-bool pack_room(bool from_floor, THING *obj)
+bool pack_room(bool from_floor, ITEM_THING *obj)
 {
     if (++inpack > MAXPACK)
     {
@@ -181,7 +181,7 @@ bool pack_room(bool from_floor, THING *obj)
     {
         detach(lvl_obj, obj);
         setMapDisplay(hero.x, hero.y, floor_ch());
-        chat(hero.y, hero.x) = (proom->r_flags & ISGONE) ? PASSAGE : FLOOR;
+        chat(hero.y, hero.x) = (player.room->r_flags & ISGONE) ? PASSAGE : FLOOR;
     }
 
     return TRUE;
@@ -191,33 +191,32 @@ bool pack_room(bool from_floor, THING *obj)
  * leave_pack:
  *        take an item out of the pack
  */
-THING *
-leave_pack(THING *obj, bool newobj, bool all)
+ITEM_THING * leave_pack(ITEM_THING *obj, bool newobj, bool all)
 {
-    THING *nobj;
+    ITEM_THING *nobj;
 
     inpack--;
     nobj = obj;
-    if (obj->o_count > 1 && !all)
+    if (obj->count > 1 && !all)
     {
         last_pick = obj;
-        obj->o_count--;
-        if (obj->o_group)
+        obj->count--;
+        if (obj->group)
             inpack++;
         if (newobj)
         {
             nobj = new_item();
             *nobj = *obj;
-            next(nobj) = NULL;
-            prev(nobj) = NULL;
-            nobj->o_count = 1;
+            nobj->next = NULL;
+            nobj->prev = NULL;
+            nobj->count = 1;
         }
     }
     else
     {
         last_pick = NULL;
-        pack_used[obj->o_packch - 'a'] = FALSE;
-        detach(pack, obj);
+        pack_used[obj->packch - 'a'] = FALSE;
+        detach(player.pack, obj);
     }
     return nobj;
 }
@@ -242,44 +241,44 @@ pack_char()
  *        List what is in the pack.  Return TRUE if there is something of
  *        the given type.
  */
-int inventory(THING *list_start, int type)
+int inventory(ITEM_THING *list_start, int type)
 {
     int ch;
-    THING *list;
-    THING *list2;
+    ITEM_THING *list;
+    ITEM_THING *list2;
     
     startDisplayOfStringList();
     n_objs = 0;
-    for (list=list_start; list != NULL; list = next(list))
+    for (list=list_start; list != NULL; list = list->next)
     {
-        if (type && type != list->o_type && !(type == CALLABLE &&
-            list->o_type != FOOD && list->o_type != AMULET) &&
-            !(type == R_OR_S && (list->o_type == RING || list->o_type == STICK)))
+        if (type && type != list->type && !(type == CALLABLE &&
+            list->type != FOOD && list->type != AMULET) &&
+            !(type == R_OR_S && (list->type == RING || list->type == STICK)))
                 continue;
         n_objs++;
-        ch = displayStringListItem("%c) %s", list->o_packch, inv_name(list, FALSE));
+        ch = displayStringListItem("%c) %s", list->packch, inv_name(list, FALSE));
         if (ch == ESCAPE)
             return ch;
-        for (list2=list_start; list2 != NULL && list2 != next(list); list2 = next(list2))
+        for (list2=list_start; list2 != NULL && list2 != list->next; list2 = list2->next)
         {
-            if (type && type != list2->o_type && !(type == CALLABLE &&
-                list2->o_type != FOOD && list2->o_type != AMULET) &&
-                !(type == R_OR_S && (list2->o_type == RING || list2->o_type == STICK)))
+            if (type && type != list2->type && !(type == CALLABLE &&
+                list2->type != FOOD && list2->type != AMULET) &&
+                !(type == R_OR_S && (list2->type == RING || list2->type == STICK)))
                     continue;
-            if (list2->o_packch == ch)
+            if (list2->packch == ch)
                 return ch;
         }
     }
     ch = finishDisplayOfStringList();
     if (ch == ESCAPE)
         return ch;
-    for (list=list_start; list != NULL; list = next(list))
+    for (list=list_start; list != NULL; list = list->next)
     {
-        if (type && type != list->o_type && !(type == CALLABLE &&
-            list->o_type != FOOD && list->o_type != AMULET) &&
-            !(type == R_OR_S && (list->o_type == RING || list->o_type == STICK)))
+        if (type && type != list->type && !(type == CALLABLE &&
+            list->type != FOOD && list->type != AMULET) &&
+            !(type == R_OR_S && (list->type == RING || list->type == STICK)))
                 continue;
-        if (list->o_packch == ch)
+        if (list->packch == ch)
             return ch;
     }
     
@@ -302,10 +301,9 @@ int inventory(THING *list_start, int type)
  *        Add something to characters pack.
  */
 
-void
-pick_up(int ch)
+void pick_up(int ch)
 {
-    THING *obj;
+    ITEM_THING *obj;
 
     if (on(player, ISLEVIT))
         return;
@@ -319,10 +317,10 @@ pick_up(int ch)
             case GOLD:
                 if (obj == NULL)
                     return;
-                money(obj->o_goldval);
+                money(obj->arm);//gold value is stored in "arm" field (used to be handled with an ugly define)
                 detach(lvl_obj, obj);
                 discard(obj);
-                proom->r_goldval = 0;
+                player.room->r_goldval = 0;
                 break;
             default:
 #ifdef MASTER
@@ -336,7 +334,7 @@ pick_up(int ch)
             case AMULET:
             case RING:
             case STICK:
-                add_pack((THING *) NULL, FALSE);
+                add_pack(NULL, FALSE);
                 break;
         }
 }
@@ -347,7 +345,7 @@ pick_up(int ch)
  */
 
 void
-move_msg(THING *obj)
+move_msg(ITEM_THING *obj)
 {
     if (!terse)
         addmsg("you ");
@@ -362,13 +360,13 @@ move_msg(THING *obj)
 void
 picky_inven()
 {
-    THING *obj;
+    ITEM_THING *obj;
     char mch;
 
-    if (pack == NULL)
+    if (player.pack == NULL)
         msg("you aren't carrying anything");
-    else if (next(pack) == NULL)
-        msg("a) %s", inv_name(pack, FALSE));
+    else if (player.pack->next == NULL)
+        msg("a) %s", inv_name(player.pack, FALSE));
     else
     {
         mch = displayMessage(terse ? "item:" : "which item do you wish to inventory:");
@@ -376,8 +374,8 @@ picky_inven()
         {
             return;
         }
-        for (obj = pack; obj != NULL; obj = next(obj))
-            if (mch == obj->o_packch)
+        for (obj = player.pack; obj != NULL; obj = obj->next)
+            if (mch == obj->packch)
             {
                 msg("%c) %s", mch, inv_name(obj, FALSE));
                 return;
@@ -390,13 +388,13 @@ picky_inven()
  * get_item:
  *        Pick something out of a pack for a purpose
  */
-THING *
+ITEM_THING *
 get_item(const char *purpose, int type)
 {
-    THING *obj;
+    ITEM_THING *obj;
     int ch;
 
-    if (pack == NULL)
+    if (player.pack == NULL)
         msg("you aren't carrying anything");
     else if (again)
         if (last_pick)
@@ -424,7 +422,7 @@ get_item(const char *purpose, int type)
             }
             if (ch == '*')
             {
-                ch = inventory(pack, type);
+                ch = inventory(player.pack, type);
                 if (ch == ESCAPE)
                 {
                     after = FALSE;
@@ -436,8 +434,8 @@ get_item(const char *purpose, int type)
                     continue;
                 }
             }
-            for (obj = pack; obj != NULL; obj = next(obj))
-                if (obj->o_packch == ch)
+            for (obj = player.pack; obj != NULL; obj = obj->next)
+                if (obj->packch == ch)
                     break;
             if (obj == NULL)
             {
@@ -461,7 +459,7 @@ money(int value)
 {
     purse += value;
     setMapDisplay(hero.x, hero.y, floor_ch());
-    chat(hero.y, hero.x) = (proom->r_flags & ISGONE) ? PASSAGE : FLOOR;
+    chat(hero.y, hero.x) = (player.room->r_flags & ISGONE) ? PASSAGE : FLOOR;
     if (value > 0)
     {
         if (!terse)
@@ -477,7 +475,7 @@ money(int value)
 char
 floor_ch()
 {
-    if (proom->r_flags & ISGONE)
+    if (player.room->r_flags & ISGONE)
         return PASSAGE;
     return (show_floor() ? FLOOR : ' ');
 }

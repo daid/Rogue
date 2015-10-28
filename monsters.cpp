@@ -56,8 +56,7 @@ randmonster(bool wander)
  *        Pick a new monster and add it to the list
  */
 
-void
-new_monster(THING *tp, char type, coord *cp)
+void new_monster(MONSTER_THING *tp, char type, coord *cp)
 {
     struct monster *mp;
     int lev_add;
@@ -65,28 +64,28 @@ new_monster(THING *tp, char type, coord *cp)
     if ((lev_add = level - AMULETLEVEL) < 0)
         lev_add = 0;
     attach(mlist, tp);
-    tp->t_type = type;
-    tp->t_disguise = type;
-    tp->t_pos = *cp;
-    tp->t_oldch = getMapDisplay(cp->x, cp->y);
-    tp->t_room = roomin(cp);
+    tp->type = type;
+    tp->disguise = type;
+    tp->pos = *cp;
+    tp->oldch = getMapDisplay(cp->x, cp->y);
+    tp->room = roomin(cp);
     moat(cp->y, cp->x) = tp;
-    mp = &monsters[tp->t_type-'A'];
-    tp->t_stats.s_lvl = mp->m_stats.s_lvl + lev_add;
-    tp->t_stats.s_maxhp = tp->t_stats.s_hpt = roll(tp->t_stats.s_lvl, 8);
-    tp->t_stats.s_arm = mp->m_stats.s_arm - lev_add;
-    strcpy(tp->t_stats.s_dmg,mp->m_stats.s_dmg);
-    tp->t_stats.s_str = mp->m_stats.s_str;
-    tp->t_stats.s_exp = mp->m_stats.s_exp + lev_add * 10 + exp_add(tp);
-    tp->t_flags = mp->m_flags;
+    mp = &monsters[tp->type-'A'];
+    tp->stats.s_lvl = mp->m_stats.s_lvl + lev_add;
+    tp->stats.s_maxhp = tp->stats.s_hpt = roll(tp->stats.s_lvl, 8);
+    tp->stats.s_arm = mp->m_stats.s_arm - lev_add;
+    strcpy(tp->stats.s_dmg,mp->m_stats.s_dmg);
+    tp->stats.s_str = mp->m_stats.s_str;
+    tp->stats.s_exp = mp->m_stats.s_exp + lev_add * 10 + exp_add(tp);
+    tp->flags = mp->m_flags;
     if (level > 29)
-        tp->t_flags |= ISHASTE;
-    tp->t_turn = TRUE;
-    tp->t_pack = NULL;
+        tp->flags |= ISHASTE;
+    tp->turn = TRUE;
+    tp->pack = NULL;
     if (ISWEARING(R_AGGR))
         runto(cp);
     if (type == 'X')
-        tp->t_disguise = rnd_thing();
+        tp->disguise = rnd_thing();
 }
 
 /*
@@ -94,17 +93,17 @@ new_monster(THING *tp, char type, coord *cp)
  *        Experience to add for this monster's level/hit points
  */
 int
-exp_add(THING *tp)
+exp_add(MONSTER_THING *tp)
 {
     int mod;
 
-    if (tp->t_stats.s_lvl == 1)
-        mod = tp->t_stats.s_maxhp / 8;
+    if (tp->stats.s_lvl == 1)
+        mod = tp->stats.s_maxhp / 8;
     else
-        mod = tp->t_stats.s_maxhp / 6;
-    if (tp->t_stats.s_lvl > 9)
+        mod = tp->stats.s_maxhp / 6;
+    if (tp->stats.s_lvl > 9)
         mod *= 20;
-    else if (tp->t_stats.s_lvl > 6)
+    else if (tp->stats.s_lvl > 6)
         mod *= 4;
     return mod;
 }
@@ -117,26 +116,26 @@ exp_add(THING *tp)
 void
 wanderer()
 {
-    THING *tp;
+    MONSTER_THING *tp;
     static coord cp;
 
-    tp = new_item();
+    tp = new_monster_thing();
     do
     {
         find_floor((struct room *) NULL, &cp, FALSE, TRUE);
-    } while (roomin(&cp) == proom);
+    } while (roomin(&cp) == player.room);
     new_monster(tp, randmonster(TRUE), &cp);
     if (on(player, SEEMONST))
     {
         if (!on(player, ISHALU))
-            setMapDisplay(cp.x, cp.y, tp->t_type | DISPLAY_INVERT);
+            setMapDisplay(cp.x, cp.y, tp->type | DISPLAY_INVERT);
         else
             setMapDisplay(cp.x, cp.y, (rnd(26) + 'A') | DISPLAY_INVERT);
     }
-    runto(&tp->t_pos);
+    runto(&tp->pos);
 #ifdef MASTER
     if (wizard)
-        msg("started a wandering %s", monsters[tp->t_type-'A'].m_name);
+        msg("started a wandering %s", monsters[tp->type-'A'].m_name);
 #endif
 }
 
@@ -144,10 +143,9 @@ wanderer()
  * wake_monster:
  *        What to do when the hero steps next to a monster
  */
-THING *
-wake_monster(int y, int x)
+MONSTER_THING* wake_monster(int y, int x)
 {
-    THING *tp;
+    MONSTER_THING *tp;
     struct room *rp;
     int ch;
     const char *mname;
@@ -159,31 +157,31 @@ wake_monster(int y, int x)
     tp = moat(y, x);
     assert(tp != NULL);
 #endif
-    ch = tp->t_type;
+    ch = tp->type;
     /*
      * Every time he sees mean monster, it might start chasing him
      */
     if (!on(*tp, ISRUN) && rnd(3) != 0 && on(*tp, ISMEAN) && !on(*tp, ISHELD)
         && !ISWEARING(R_STEALTH) && !on(player, ISLEVIT))
     {
-        tp->t_dest = &hero;
-        tp->t_flags |= ISRUN;
+        tp->dest = &hero;
+        tp->flags |= ISRUN;
     }
     if (ch == 'M' && !on(player, ISBLIND) && !on(player, ISHALU)
         && !on(*tp, ISFOUND) && !on(*tp, ISCANC) && on(*tp, ISRUN))
     {
-        rp = proom;
+        rp = player.room;
         if ((rp != NULL && !(rp->r_flags & ISDARK))
             || dist(y, x, hero.y, hero.x) < LAMPDIST)
         {
-            tp->t_flags |= ISFOUND;
+            tp->flags |= ISFOUND;
             if (!save(VS_MAGIC))
             {
                 if (on(player, ISHUH))
                     lengthen(unconfuse, spread(HUHDURATION));
                 else
                     fuse(unconfuse, 0, spread(HUHDURATION), AFTER);
-                player.t_flags |= ISHUH;
+                player.flags |= ISHUH;
                 mname = set_mname(tp);
                 addmsg("%s", mname);
                 if (strcmp(mname, "it") != 0)
@@ -197,11 +195,11 @@ wake_monster(int y, int x)
      */
     if (on(*tp, ISGREED) && !on(*tp, ISRUN))
     {
-        tp->t_flags |= ISRUN;
-        if (proom->r_goldval)
-            tp->t_dest = &proom->r_gold;
+        tp->flags |= ISRUN;
+        if (player.room->r_goldval)
+            tp->dest = &player.room->r_gold;
         else
-            tp->t_dest = &hero;
+            tp->dest = &hero;
     }
     return tp;
 }
@@ -212,10 +210,10 @@ wake_monster(int y, int x)
  */
 
 void
-give_pack(THING *tp)
+give_pack(MONSTER_THING *tp)
 {
-    if (level >= max_level && rnd(100) < monsters[tp->t_type-'A'].m_carry)
-        attach(tp->t_pack, new_thing());
+    if (level >= max_level && rnd(100) < monsters[tp->type-'A'].m_carry)
+        attach(tp->pack, new_thing());
 }
 
 /*
@@ -223,11 +221,11 @@ give_pack(THING *tp)
  *        See if a creature save against something
  */
 int
-save_throw(int which, THING *tp)
+save_throw(int which, MONSTER_THING *tp)
 {
     int need;
 
-    need = 14 + which - tp->t_stats.s_lvl / 2;
+    need = 14 + which - tp->stats.s_lvl / 2;
     return (roll(1, 20) >= need);
 }
 
@@ -235,15 +233,14 @@ save_throw(int which, THING *tp)
  * save:
  *        See if he saves against various nasty things
  */
-int
-save(int which)
+int save(int which)
 {
     if (which == VS_MAGIC)
     {
         if (ISRING(LEFT, R_PROTECT))
-            which -= cur_ring[LEFT]->o_arm;
+            which -= cur_ring[LEFT]->arm;
         if (ISRING(RIGHT, R_PROTECT))
-            which -= cur_ring[RIGHT]->o_arm;
+            which -= cur_ring[RIGHT]->arm;
     }
     return save_throw(which, &player);
 }

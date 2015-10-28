@@ -20,7 +20,7 @@
 void
 ring_on()
 {
-    THING *obj;
+    ITEM_THING *obj;
     int ring;
 
     obj = get_item("put on", RING);
@@ -29,7 +29,7 @@ ring_on()
      */
     if (obj == NULL)
         return;
-    if (obj->o_type != RING)
+    if (obj->type != RING)
     {
         if (!terse)
             msg("it would be difficult to wrap that around a finger");
@@ -66,10 +66,10 @@ ring_on()
     /*
      * Calculate the effect it has on the poor guy.
      */
-    switch (obj->o_which)
+    switch (obj->which)
     {
         case R_ADDSTR:
-            chg_str(obj->o_arm);
+            chg_str(obj->arm);
             break;
         case R_SEEINVIS:
             invis_on();
@@ -81,7 +81,7 @@ ring_on()
 
     if (!terse)
         addmsg("you are now wearing ");
-    msg("%s (%c)", inv_name(obj, TRUE), obj->o_packch);
+    msg("%s (%c)", inv_name(obj, TRUE), obj->packch);
 }
 
 /*
@@ -93,7 +93,7 @@ void
 ring_off()
 {
     int ring;
-    THING *obj;
+    ITEM_THING *obj;
 
     if (cur_ring[LEFT] == NULL && cur_ring[RIGHT] == NULL)
     {
@@ -117,7 +117,7 @@ ring_off()
         return;
     }
     if (dropcheck(obj))
-        msg("was wearing %s(%c)", inv_name(obj, TRUE), obj->o_packch);
+        msg("was wearing %s(%c)", inv_name(obj, TRUE), obj->packch);
 }
 
 /*
@@ -152,7 +152,7 @@ gethand()
 int
 ring_eat(int hand)
 {
-    THING *ring;
+    ITEM_THING *ring;
     int eat;
     static int uses[] = {
          1,        /* R_PROTECT */                 1,        /* R_ADDSTR */
@@ -166,9 +166,9 @@ ring_eat(int hand)
 
     if ((ring = cur_ring[hand]) == NULL)
         return 0;
-    if ((eat = uses[ring->o_which]) < 0)
+    if ((eat = uses[ring->which]) < 0)
         eat = (rnd(-eat) == 0);
-    if (ring->o_which == R_DIGEST)
+    if (ring->which == R_DIGEST)
         eat = -eat;
     return eat;
 }
@@ -177,19 +177,19 @@ ring_eat(int hand)
  * ring_num:
  *        Print ring bonuses
  */
-const char * ring_num(THING *obj)
+const char * ring_num(ITEM_THING *obj)
 {
     static char buf[10];
 
-    if (!(obj->o_flags & ISKNOW))
+    if (!(obj->flags & ISKNOW))
         return "";
-    switch (obj->o_which)
+    switch (obj->which)
     {
         case R_PROTECT:
         case R_ADDSTR:
         case R_ADDDAM:
         case R_ADDHIT:
-            sprintf(buf, " [%s]", num(obj->o_arm, 0, RING));
+            sprintf(buf, " [%s]", num(obj->arm, 0, RING));
         otherwise:
             return "";
     }

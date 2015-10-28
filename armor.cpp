@@ -18,7 +18,7 @@
 void
 wear()
 {
-    THING *obj;
+    ITEM_THING *obj;
     const char *sp;
 
     if ((obj = get_item("wear", ARMOR)) == NULL)
@@ -32,13 +32,13 @@ wear()
         after = FALSE;
         return;
     }
-    if (obj->o_type != ARMOR)
+    if (obj->type != ARMOR)
     {
         msg("you can't wear that");
         return;
     }
     waste_time();
-    obj->o_flags |= ISKNOW;
+    obj->flags |= ISKNOW;
     sp = inv_name(obj, TRUE);
     cur_armor = obj;
     if (!terse)
@@ -53,7 +53,7 @@ wear()
 void
 take_off()
 {
-    register THING *obj;
+    ITEM_THING *obj;
 
     if ((obj = cur_armor) == NULL)
     {
@@ -71,7 +71,7 @@ take_off()
         addmsg("was");
     else
         addmsg("you used to be");
-    msg(" wearing %c) %s", obj->o_packch, inv_name(obj, TRUE));
+    msg(" wearing %c) %s", obj->packch, inv_name(obj, TRUE));
 }
 
 /*

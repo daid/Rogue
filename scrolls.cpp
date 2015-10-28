@@ -21,20 +21,21 @@
 void
 read_scroll()
 {
-    THING *obj;
+    ITEM_THING *obj;
+    MONSTER_THING* m_obj;
     PLACE *pp;
     int y, x;
     int ch;
     int i;
     bool discardit = FALSE;
     struct room *cur_room;
-    THING *orig_obj;
+    ITEM_THING *orig_obj;
     static coord mp;
 
     obj = get_item("read", SCROLL);
     if (obj == NULL)
         return;
-    if (obj->o_type != SCROLL)
+    if (obj->type != SCROLL)
     {
         if (!terse)
             msg("there is nothing on it to read");
@@ -50,23 +51,23 @@ read_scroll()
     /*
      * Get rid of the thing
      */
-    discardit = (bool)(obj->o_count == 1);
+    discardit = (bool)(obj->count == 1);
     leave_pack(obj, FALSE, FALSE);
     orig_obj = obj;
 
-    switch (obj->o_which)
+    switch (obj->which)
     {
         case S_CONFUSE:
             /*
              * Scroll of monster confusion.  Give him that power.
              */
-            player.t_flags |= CANHUH;
+            player.flags |= CANHUH;
             msg("your hands begin to glow %s", pick_color("red"));
         when S_ARMOR:
             if (cur_armor != NULL)
             {
-                cur_armor->o_arm--;
-                cur_armor->o_flags &= ~ISCURSED;
+                cur_armor->arm--;
+                cur_armor->flags &= ~ISCURSED;
                 msg("your armor glows %s for a moment", pick_color("silver"));
             }
         when S_HOLD:
@@ -80,10 +81,10 @@ read_scroll()
                 if (x >= 0 && x < NUMCOLS)
                     for (y = hero.y - 2; y <= hero.y + 2; y++)
                         if (y >= 0 && y <= NUMLINES - 1)
-                            if ((obj = moat(y, x)) != NULL && on(*obj, ISRUN))
+                            if ((m_obj = moat(y, x)) != NULL && on(*m_obj, ISRUN))
                             {
-                                obj->t_flags &= ~ISRUN;
-                                obj->t_flags |= ISHELD;
+                                m_obj->flags &= ~ISRUN;
+                                m_obj->flags |= ISHELD;
                                 ch++;
                             }
             if (ch)
@@ -105,7 +106,7 @@ read_scroll()
              */
             scr_info[S_SLEEP].oi_know = TRUE;
             no_command += rnd(SLEEPTIME) + 4;
-            player.t_flags &= ~ISRUN;
+            player.flags &= ~ISRUN;
             msg("you fall asleep");
         when S_CREATE:
             /*
@@ -127,7 +128,7 @@ read_scroll()
                     else if (step_ok(ch = winat(y, x)))
                     {
                         if (ch == SCROLL
-                            && find_obj(y, x)->o_which == S_SCARE)
+                            && find_obj(y, x)->which == S_SCARE)
                                 continue;
                         else if (rnd(++i) == 0)
                         {
@@ -139,8 +140,8 @@ read_scroll()
                 msg("you hear a faint cry of anguish in the distance");
             else
             {
-                obj = new_item();
-                new_monster(obj, randmonster(FALSE), &mp);
+                m_obj = new_monster_thing();
+                new_monster(m_obj, randmonster(FALSE), &mp);
             }
         when S_ID_POTION:
         case S_ID_SCROLL:
@@ -153,9 +154,9 @@ read_scroll()
             /*
              * Identify, let him figure something out
              */
-            scr_info[obj->o_which].oi_know = TRUE;
-            msg("this scroll is an %s scroll", scr_info[obj->o_which].oi_name);
-            whatis(TRUE, id_type[obj->o_which]);
+            scr_info[obj->which].oi_know = TRUE;
+            msg("this scroll is an %s scroll", scr_info[obj->which].oi_name);
+            whatis(TRUE, id_type[obj->which]);
         }
         when S_MAP:
             /*
@@ -226,9 +227,9 @@ def:
                     }
                     if (ch != ' ')
                     {
-                        if ((obj = pp->p_monst) != NULL)
-                            obj->t_oldch = ch;
-                        if (obj == NULL || !on(player, SEEMONST))
+                        if ((m_obj = pp->p_monst) != NULL)
+                            m_obj->oldch = ch;
+                        if (m_obj == NULL || !on(player, SEEMONST))
                             setMapDisplay(x, y, ch);
                     }
                 }
@@ -237,11 +238,11 @@ def:
              * Potion of gold detection
              */
             ch = FALSE;
-            for (obj = lvl_obj; obj != NULL; obj = next(obj))
-                if (obj->o_type == FOOD)
+            for (obj = lvl_obj; obj != NULL; obj = obj->next)
+                if (obj->type == FOOD)
                 {
                     ch = TRUE;
-                    setMapDisplay(obj->o_pos.x, obj->o_pos.y, FOOD);
+                    setMapDisplay(obj->pos.x, obj->pos.y, FOOD);
                 }
             if (ch)
             {
@@ -256,23 +257,23 @@ def:
              * Make him dissapear and reappear
              */
             {
-                cur_room = proom;
+                cur_room = player.room;
                 teleport();
-                if (cur_room != proom)
+                if (cur_room != player.room)
                     scr_info[S_TELEP].oi_know = TRUE;
             }
         when S_ENCH:
-            if (cur_weapon == NULL || cur_weapon->o_type != WEAPON)
+            if (cur_weapon == NULL || cur_weapon->type != WEAPON)
                 msg("you feel a strange sense of loss");
             else
             {
-                cur_weapon->o_flags &= ~ISCURSED;
+                cur_weapon->flags &= ~ISCURSED;
                 if (rnd(2) == 0)
-                    cur_weapon->o_hplus++;
+                    cur_weapon->hplus++;
                 else
-                    cur_weapon->o_dplus++;
+                    cur_weapon->dplus++;
                 msg("your %s glows %s for a moment",
-                    weap_info[cur_weapon->o_which].oi_name, pick_color("blue"));
+                    weap_info[cur_weapon->which].oi_name, pick_color("blue"));
             }
         when S_SCARE:
             /*
@@ -297,7 +298,7 @@ def:
         when S_PROTECT:
             if (cur_armor != NULL)
             {
-                cur_armor->o_flags |= ISPROT;
+                cur_armor->flags |= ISPROT;
                 msg("your armor is covered by a shimmering %s shield",
                     pick_color("gold"));
             }
@@ -313,7 +314,7 @@ def:
     look(TRUE);        /* put the result of the scroll on the screen */
     status();
     
-    call_it(&scr_info[obj->o_which]);
+    call_it(&scr_info[obj->which]);
 
     if (discardit)
         discard(obj);
@@ -325,8 +326,8 @@ def:
  */
 
 void
-uncurse(THING *obj)
+uncurse(ITEM_THING *obj)
 {
     if (obj != NULL)
-        obj->o_flags &= ~ISCURSED;
+        obj->flags &= ~ISCURSED;
 }

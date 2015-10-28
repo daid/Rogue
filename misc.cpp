@@ -27,7 +27,7 @@ look(bool wakeup)
 {
     int x, y;
     int ch;
-    THING *tp;
+    MONSTER_THING *tp;
     PLACE *pp;
     struct room *rp;
     int ey, ex;
@@ -42,7 +42,7 @@ look(bool wakeup)
     done = TRUE;
 # endif /* DEBUG */
     passcount = 0;
-    rp = proom;
+    rp = player.room;
     if (!ce(oldpos, hero))
     {
         erase_lamp(&oldpos, oldrp);
@@ -107,13 +107,13 @@ look(bool wakeup)
                         if (on(player, ISHALU))
                             ch = rnd(26) + 'A';
                         else
-                            ch = tp->t_disguise;
+                            ch = tp->disguise;
                     }
                 }
             if (on(player, ISBLIND) && (y != hero.y || x != hero.x))
                 continue;
 
-            if ((proom->r_flags & ISDARK) && !see_floor && ch == FLOOR)
+            if ((player.room->r_flags & ISDARK) && !see_floor && ch == FLOOR)
                 ch = ' ';
 
             if (tp != NULL || ch != getMapDisplay(x, y))
@@ -251,7 +251,7 @@ erase_lamp(coord *pos, struct room *rp)
 bool
 show_floor()
 {
-    if ((proom->r_flags & (ISGONE|ISDARK)) == ISDARK && !on(player, ISBLIND))
+    if ((player.room->r_flags & (ISGONE|ISDARK)) == ISDARK && !on(player, ISBLIND))
         return see_floor;
     else
         return TRUE;
@@ -261,14 +261,13 @@ show_floor()
  * find_obj:
  *        Find the unclaimed object at y, x
  */
-THING *
-find_obj(int y, int x)
+ITEM_THING* find_obj(int y, int x)
 {
-    THING *obj;
+    ITEM_THING* obj;
 
-    for (obj = lvl_obj; obj != NULL; obj = next(obj))
+    for (obj = lvl_obj; obj != NULL; obj = obj->next)
     {
-        if (obj->o_pos.y == y && obj->o_pos.x == x)
+        if (obj->pos.y == y && obj->pos.x == x)
                 return obj;
     }
 #ifdef MASTER
@@ -289,11 +288,11 @@ find_obj(int y, int x)
 void
 eat()
 {
-    THING *obj;
+    ITEM_THING *obj;
 
     if ((obj = get_item("eat", FOOD)) == NULL)
         return;
-    if (obj->o_type != FOOD)
+    if (obj->type != FOOD)
     {
         if (!terse)
             msg("ugh, you would get ill if you ate that");
@@ -308,12 +307,12 @@ eat()
     hungry_state = 0;
     if (obj == cur_weapon)
         cur_weapon = NULL;
-    if (obj->o_which == 1)
+    if (obj->which == 1)
         msg("my, that was a yummy %s", fruit);
     else
         if (rnd(100) > 70)
         {
-            pstats.s_exp++;
+            player.stats.s_exp++;
             msg("%s, this food tastes awful", choose_str("bummer", "yuk"));
             check_level();
         }
@@ -333,16 +332,16 @@ check_level()
     int i, add, olevel;
 
     for (i = 0; e_levels[i] != 0; i++)
-        if (e_levels[i] > pstats.s_exp)
+        if (e_levels[i] > player.stats.s_exp)
             break;
     i++;
-    olevel = pstats.s_lvl;
-    pstats.s_lvl = i;
+    olevel = player.stats.s_lvl;
+    player.stats.s_lvl = i;
     if (i > olevel)
     {
         add = (i - olevel) * 5 + roll(i - olevel, 5);
-        max_hp += add;
-        pstats.s_hpt += add;
+        player.stats.s_maxhp += add;
+        player.stats.s_hpt += add;
         msg("welcome to level %d", i);
     }
 }
@@ -360,12 +359,12 @@ chg_str(int amt)
 
     if (amt == 0)
         return;
-    add_str(&pstats.s_str, amt);
-    comp = pstats.s_str;
+    add_str(&player.stats.s_str, amt);
+    comp = player.stats.s_str;
     if (ISRING(LEFT, R_ADDSTR))
-        add_str(&comp, -cur_ring[LEFT]->o_arm);
+        add_str(&comp, -cur_ring[LEFT]->arm);
     if (ISRING(RIGHT, R_ADDSTR))
-        add_str(&comp, -cur_ring[RIGHT]->o_arm);
+        add_str(&comp, -cur_ring[RIGHT]->arm);
     if (comp > max_stats.s_str)
         max_stats.s_str = comp;
 }
@@ -393,14 +392,14 @@ add_haste(bool potion)
     if (on(player, ISHASTE))
     {
         no_command += rnd(8);
-        player.t_flags &= ~(ISRUN|ISHASTE);
+        player.flags &= ~(ISRUN|ISHASTE);
         extinguish(nohaste);
         msg("you faint from exhaustion");
         return FALSE;
     }
     else
     {
-        player.t_flags |= ISHASTE;
+        player.flags |= ISHASTE;
         if (potion)
             fuse(nohaste, 0, rnd(4)+4, AFTER);
         return TRUE;
@@ -415,10 +414,10 @@ add_haste(bool potion)
 void
 aggravate()
 {
-    THING *mp;
+    MONSTER_THING *mp;
 
-    for (mp = mlist; mp != NULL; mp = next(mp))
-        runto(&mp->t_pos);
+    for (mp = mlist; mp != NULL; mp = mp->next)
+        runto(&mp->pos);
 }
 
 /*
@@ -446,7 +445,7 @@ const char * vowelstr(const char *str)
  *        See if the object is one of the currently used items
  */
 bool
-is_current(THING *obj)
+is_current(ITEM_THING *obj)
 {
     if (obj == NULL)
         return FALSE;

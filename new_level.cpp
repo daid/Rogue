@@ -21,12 +21,12 @@
 void
 new_level()
 {
-    THING *tp;
+    MONSTER_THING *tp;
     PLACE *pp;
     char *sp;
     int i;
 
-    player.t_flags &= ~ISHELD;        /* unhold when you go down just in case */
+    player.flags &= ~ISHELD;        /* unhold when you go down just in case */
     if (level > max_level)
         max_level = level;
     /*
@@ -42,8 +42,8 @@ new_level()
     /*
      * Free up the monsters on the last level
      */
-    for (tp = mlist; tp != NULL; tp = next(tp))
-        free_list(tp->t_pack);
+    for (tp = mlist; tp != NULL; tp = tp->next)
+        free_list(tp->pack);
     free_list(mlist);
     /*
      * Throw away stuff left on the previous level (if anything)
@@ -86,8 +86,8 @@ new_level()
     chat(stairs.y, stairs.x) = STAIRS;
     seenstairs = FALSE;
 
-    for (tp = mlist; tp != NULL; tp = next(tp))
-        tp->t_room = roomin(&tp->t_pos);
+    for (tp = mlist; tp != NULL; tp = tp->next)
+        tp->room = roomin(&tp->pos);
 
     find_floor((struct room *) NULL, &hero, FALSE, TRUE);
     enter_room(&hero);
@@ -123,7 +123,7 @@ void
 put_things()
 {
     int i;
-    THING *obj;
+    ITEM_THING *obj;
 
     /*
      * Once you have found the amulet, the only way to get new stuff is
@@ -150,8 +150,8 @@ put_things()
             /*
              * Put it somewhere
              */
-            find_floor((struct room *) NULL, &obj->o_pos, FALSE, FALSE);
-            chat(obj->o_pos.y, obj->o_pos.x) = (char) obj->o_type;
+            find_floor((struct room *) NULL, &obj->pos, FALSE, FALSE);
+            chat(obj->pos.y, obj->pos.x) = (char) obj->type;
         }
     /*
      * If he is really deep in the dungeon and he hasn't found the
@@ -161,17 +161,17 @@ put_things()
     {
         obj = new_item();
         attach(lvl_obj, obj);
-        obj->o_hplus = 0;
-        obj->o_dplus = 0;
-        strncpy(obj->o_damage,"0x0",sizeof(obj->o_damage));
-        strncpy(obj->o_hurldmg,"0x0",sizeof(obj->o_hurldmg));
-        obj->o_arm = 11;
-        obj->o_type = AMULET;
+        obj->hplus = 0;
+        obj->dplus = 0;
+        strncpy(obj->damage,"0x0",sizeof(obj->damage));
+        strncpy(obj->hurldmg,"0x0",sizeof(obj->hurldmg));
+        obj->arm = 11;
+        obj->type = AMULET;
         /*
          * Put it somewhere
          */
-        find_floor((struct room *) NULL, &obj->o_pos, FALSE, FALSE);
-        chat(obj->o_pos.y, obj->o_pos.x) = AMULET;
+        find_floor((struct room *) NULL, &obj->pos, FALSE, FALSE);
+        chat(obj->pos.y, obj->pos.x) = AMULET;
     }
 }
 
@@ -186,7 +186,8 @@ void
 treas_room()
 {
     int nm;
-    THING *tp;
+    ITEM_THING *tp;
+    MONSTER_THING *monster_p;
     struct room *rp;
     int spots, num_monst;
     static coord mp;
@@ -200,9 +201,9 @@ treas_room()
     {
         find_floor(rp, &mp, 2 * MAXTRIES, FALSE);
         tp = new_thing();
-        tp->o_pos = mp;
+        tp->pos = mp;
         attach(lvl_obj, tp);
-        chat(mp.y, mp.x) = (char) tp->o_type;
+        chat(mp.y, mp.x) = (char) tp->type;
     }
 
     /*
@@ -220,10 +221,10 @@ treas_room()
         spots = 0;
         if (find_floor(rp, &mp, MAXTRIES, TRUE))
         {
-            tp = new_item();
-            new_monster(tp, randmonster(FALSE), &mp);
-            tp->t_flags |= ISMEAN;        /* no sloughers in THIS room */
-            give_pack(tp);
+            monster_p = new_monster_thing();
+            new_monster(monster_p, randmonster(FALSE), &mp);
+            monster_p->flags |= ISMEAN;        /* no sloughers in THIS room */
+            give_pack(monster_p);
         }
     }
     level--;

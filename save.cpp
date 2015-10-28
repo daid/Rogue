@@ -126,7 +126,7 @@ bool restore(const char *file)
         return FALSE;
     }
 
-    if (pstats.s_hpt <= 0)
+    if (player.stats.s_hpt <= 0)
     {
         printf("\n\"He's dead, Jim\"\n");
         return FALSE;

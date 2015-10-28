@@ -20,25 +20,25 @@ int doctor(int arg)
 {
     register int lv, ohp;
 
-    lv = pstats.s_lvl;
-    ohp = pstats.s_hpt;
+    lv = player.stats.s_lvl;
+    ohp = player.stats.s_hpt;
     quiet++;
     if (lv < 8)
     {
         if (quiet + (lv << 1) > 20)
-            pstats.s_hpt++;
+            player.stats.s_hpt++;
     }
     else
         if (quiet >= 3)
-            pstats.s_hpt += rnd(lv - 7) + 1;
+            player.stats.s_hpt += rnd(lv - 7) + 1;
     if (ISRING(LEFT, R_REGEN))
-        pstats.s_hpt++;
+        player.stats.s_hpt++;
     if (ISRING(RIGHT, R_REGEN))
-        pstats.s_hpt++;
-    if (ohp != pstats.s_hpt)
+        player.stats.s_hpt++;
+    if (ohp != player.stats.s_hpt)
     {
-        if (pstats.s_hpt > max_hp)
-            pstats.s_hpt = max_hp;
+        if (player.stats.s_hpt > player.stats.s_maxhp)
+            player.stats.s_hpt = player.stats.s_maxhp;
         quiet = 0;
     }
     return 0;
@@ -81,7 +81,7 @@ int rollwand(int arg)
  */
 int unconfuse(int arg)
 {
-    player.t_flags &= ~ISHUH;
+    player.flags &= ~ISHUH;
     msg("you feel less %s now", choose_str("trippy", "confused"));
     return 0;
 }
@@ -92,12 +92,12 @@ int unconfuse(int arg)
  */
 int unsee(int arg)
 {
-    register THING *th;
+    MONSTER_THING *th;
 
-    for (th = mlist; th != NULL; th = next(th))
+    for (th = mlist; th != NULL; th = th->next)
         if (on(*th, ISINVIS) && see_monst(th))
-            setMapDisplay(th->t_pos.x, th->t_pos.y, th->t_oldch);
-    player.t_flags &= ~CANSEE;
+            setMapDisplay(th->pos.x, th->pos.y, th->oldch);
+    player.flags &= ~CANSEE;
     return 0;
 }
 
@@ -110,8 +110,8 @@ int sight(int arg)
     if (on(player, ISBLIND))
     {
         extinguish(sight);
-        player.t_flags &= ~ISBLIND;
-        if (!(proom->r_flags & ISGONE))
+        player.flags &= ~ISBLIND;
+        if (!(player.room->r_flags & ISGONE))
             enter_room(&hero);
         msg(choose_str("far out!  Everything is all cosmic again",
                        "the veil of darkness lifts"));
@@ -125,7 +125,7 @@ int sight(int arg)
  */
 int nohaste(int arg)
 {
-    player.t_flags &= ~ISHASTE;
+    player.flags &= ~ISHASTE;
     msg("you feel yourself slowing down");
     return 0;
 }
@@ -177,7 +177,7 @@ int stomach(int arg)
         }
     }
     if (hungry_state != orig_hungry) { 
-        player.t_flags &= ~ISRUN; 
+        player.flags &= ~ISRUN; 
         running = FALSE; 
         to_death = FALSE; 
         count = 0; 
@@ -191,14 +191,15 @@ int stomach(int arg)
  */
 int come_down(int arg)
 {
-    register THING *tp;
-    register bool seemonst;
+    ITEM_THING *tp;
+    MONSTER_THING *mp;
+    bool seemonst;
 
     if (!on(player, ISHALU))
         return 0;
 
     kill_daemon(visuals);
-    player.t_flags &= ~ISHALU;
+    player.flags &= ~ISHALU;
 
     if (on(player, ISBLIND))
         return 0;
@@ -206,26 +207,26 @@ int come_down(int arg)
     /*
      * undo the things
      */
-    for (tp = lvl_obj; tp != NULL; tp = next(tp))
-        if (cansee(tp->o_pos.y, tp->o_pos.x))
-            setMapDisplay(tp->o_pos.x, tp->o_pos.y, tp->o_type);
+    for (tp = lvl_obj; tp != NULL; tp = tp->next)
+        if (cansee(tp->pos.y, tp->pos.x))
+            setMapDisplay(tp->pos.x, tp->pos.y, tp->type);
 
     /*
      * undo the monsters
      */
     seemonst = on(player, SEEMONST);
-    for (tp = mlist; tp != NULL; tp = next(tp))
+    for (mp = mlist; mp != NULL; mp = mp->next)
     {
-        if (cansee(tp->t_pos.y, tp->t_pos.x))
+        if (cansee(mp->pos.y, mp->pos.x))
         {
-            if (!on(*tp, ISINVIS) || on(player, CANSEE))
-                setMapDisplay(tp->t_pos.x, tp->t_pos.y, tp->t_disguise);
+            if (!on(*mp, ISINVIS) || on(player, CANSEE))
+                setMapDisplay(mp->pos.x, mp->pos.y, mp->disguise);
             else
-                setMapDisplay(tp->t_pos.x, tp->t_pos.y, chat(tp->t_pos.y, tp->t_pos.x));
+                setMapDisplay(mp->pos.x, mp->pos.y, chat(mp->pos.y, mp->pos.x));
         }
         else if (seemonst)
         {
-            setMapDisplay(tp->t_pos.x, tp->t_pos.y, tp->t_type | DISPLAY_INVERT);
+            setMapDisplay(mp->pos.x, mp->pos.y, mp->type | DISPLAY_INVERT);
         }
     }
     msg("Everything looks SO boring now.");
@@ -238,7 +239,8 @@ int come_down(int arg)
  */
 int visuals(int arg)
 {
-    register THING *tp;
+    ITEM_THING *tp;
+    MONSTER_THING *mp;
     register bool seemonst;
 
     if (!after || (running && jump))
@@ -246,9 +248,9 @@ int visuals(int arg)
     /*
      * change the things
      */
-    for (tp = lvl_obj; tp != NULL; tp = next(tp))
-        if (cansee(tp->o_pos.y, tp->o_pos.x))
-            setMapDisplay(tp->o_pos.x, tp->o_pos.y, rnd_thing());
+    for (tp = lvl_obj; tp != NULL; tp = tp->next)
+        if (cansee(tp->pos.y, tp->pos.x))
+            setMapDisplay(tp->pos.x, tp->pos.y, rnd_thing());
 
     /*
      * change the stairs
@@ -260,18 +262,18 @@ int visuals(int arg)
      * change the monsters
      */
     seemonst = on(player, SEEMONST);
-    for (tp = mlist; tp != NULL; tp = next(tp))
+    for (mp = mlist; mp != NULL; mp = mp->next)
     {
-        if (see_monst(tp))
+        if (see_monst(mp))
         {
-            if (tp->t_type == 'X' && tp->t_disguise != 'X')
-                setMapDisplay(tp->t_pos.x, tp->t_pos.y, rnd_thing());
+            if (mp->type == 'X' && mp->disguise != 'X')
+                setMapDisplay(mp->pos.x, mp->pos.y, rnd_thing());
             else
-                setMapDisplay(tp->t_pos.x, tp->t_pos.y, rnd(26) + 'A');
+                setMapDisplay(mp->pos.x, mp->pos.y, rnd(26) + 'A');
         }
         else if (seemonst)
         {
-            setMapDisplay(tp->t_pos.x, tp->t_pos.y, (rnd(26) + 'A') | DISPLAY_INVERT);
+            setMapDisplay(mp->pos.x, mp->pos.y, (rnd(26) + 'A') | DISPLAY_INVERT);
         }
     }
     return 0;
@@ -283,7 +285,7 @@ int visuals(int arg)
  */
 int land(int arg)
 {
-    player.t_flags &= ~ISLEVIT;
+    player.flags &= ~ISLEVIT;
     msg(choose_str("bummer!  You've hit the ground",
                    "you float gently to the ground"));
     return 0;

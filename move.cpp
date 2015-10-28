@@ -112,7 +112,7 @@ over:
         case WALL_BL:
         case WALL_BR:
 hit_bound:
-            if (passgo && running && (proom->r_flags & ISGONE)
+            if (passgo && running && (player.room->r_flags & ISGONE)
                 && !on(player, ISBLIND))
             {
                 bool        b1, b2;
@@ -177,9 +177,9 @@ hit_bound:
              * when you're in a corridor, you don't know if you're in
              * a maze room or not, and there ain't no way to find out
              * if you're leaving a maze room, so it is necessary to
-             * always recalculate proom.
+             * always recalculate player.room.
              */
-            proom = roomin(&hero);
+            player.room = roomin(&hero);
             goto move_stuff;
         case FLOOR:
             if (!(fl & F_REAL))
@@ -266,7 +266,7 @@ char
 be_trapped(coord *tc)
 {
     PLACE *pp;
-    THING *arrow;
+    ITEM_THING *arrow;
     char tr;
 
     if (on(player, ISLEVIT))
@@ -303,13 +303,13 @@ be_trapped(coord *tc)
             }
         when T_SLEEP:
             no_command += SLEEPTIME;
-            player.t_flags &= ~ISRUN;
+            player.flags &= ~ISRUN;
             msg("a strange white mist envelops you and you fall asleep");
         when T_ARROW:
-            if (swing(pstats.s_lvl - 1, pstats.s_arm, 1))
+            if (swing(player.stats.s_lvl - 1, player.stats.s_arm, 1))
             {
-                pstats.s_hpt -= roll(1, 6);
-                if (pstats.s_hpt <= 0)
+                player.stats.s_hpt -= roll(1, 6);
+                if (player.stats.s_hpt <= 0)
                 {
                     msg("an arrow killed you");
                     death('a');
@@ -321,8 +321,8 @@ be_trapped(coord *tc)
             {
                 arrow = new_item();
                 init_weapon(arrow, ARROW);
-                arrow->o_count = 1;
-                arrow->o_pos = hero;
+                arrow->count = 1;
+                arrow->pos = hero;
                 fall(arrow, FALSE);
                 msg("an arrow shoots past you");
             }
@@ -334,12 +334,12 @@ be_trapped(coord *tc)
             teleport();
             setMapDisplay(tc->x, tc->y, TRAP);
         when T_DART:
-            if (!swing(pstats.s_lvl+1, pstats.s_arm, 1))
+            if (!swing(player.stats.s_lvl+1, player.stats.s_arm, 1))
                 msg("a small dart whizzes by your ear and vanishes");
             else
             {
-                pstats.s_hpt -= roll(1, 4);
-                if (pstats.s_hpt <= 0)
+                player.stats.s_hpt -= roll(1, 4);
+                if (player.stats.s_hpt <= 0)
                 {
                     msg("a poisoned dart killed you");
                     death('d');
@@ -360,23 +360,22 @@ be_trapped(coord *tc)
  * rndmove:
  *        Move in a random direction if the monster/person is confused
  */
-coord *
-rndmove(THING *who)
+coord* rndmove(MONSTER_THING *who)
 {
-    THING *obj;
+    ITEM_THING *obj;
     int x, y;
     int ch;
     static coord ret;  /* what we will be returning */
 
-    y = ret.y = who->t_pos.y + rnd(3) - 1;
-    x = ret.x = who->t_pos.x + rnd(3) - 1;
+    y = ret.y = who->pos.y + rnd(3) - 1;
+    x = ret.x = who->pos.x + rnd(3) - 1;
     /*
      * Now check to see if that's a legal move.  If not, don't move.
      * (I.e., bump into the wall or whatever)
      */
-    if (y == who->t_pos.y && x == who->t_pos.x)
+    if (y == who->pos.y && x == who->pos.x)
         return &ret;
-    if (!diag_ok(&who->t_pos, &ret))
+    if (!diag_ok(&who->pos, &ret))
         goto bad;
     else
     {
@@ -385,17 +384,17 @@ rndmove(THING *who)
             goto bad;
         if (ch == SCROLL)
         {
-            for (obj = lvl_obj; obj != NULL; obj = next(obj))
-                if (y == obj->o_pos.y && x == obj->o_pos.x)
+            for (obj = lvl_obj; obj != NULL; obj = obj->next)
+                if (y == obj->pos.y && x == obj->pos.x)
                     break;
-            if (obj != NULL && obj->o_which == S_SCARE)
+            if (obj != NULL && obj->which == S_SCARE)
                 goto bad;
         }
     }
     return &ret;
 
 bad:
-    ret = who->t_pos;
+    ret = who->pos;
     return &ret;
 }
 
@@ -405,21 +404,20 @@ bad:
  *        aren't wearing a magic ring.
  */
 
-void
-rust_armor(THING *arm)
+void rust_armor(ITEM_THING *arm)
 {
-    if (arm == NULL || arm->o_type != ARMOR || arm->o_which == LEATHER ||
-        arm->o_arm >= 9)
+    if (arm == NULL || arm->type != ARMOR || arm->which == LEATHER ||
+        arm->arm >= 9)
             return;
 
-    if ((arm->o_flags & ISPROT) || ISWEARING(R_SUSTARM))
+    if ((arm->flags & ISPROT) || ISWEARING(R_SUSTARM))
     {
         if (!to_death)
             msg("the rust vanishes instantly");
     }
     else
     {
-        arm->o_arm++;
+        arm->arm++;
         if (!terse)
             msg("your armor appears to be weaker now. Oh my!");
         else

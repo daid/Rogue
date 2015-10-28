@@ -23,26 +23,26 @@ static coord ch_ret;                                /* Where chasing takes you *
  */
 int runners(int arg)
 {
-    register THING *tp;
-    THING *next;
+    MONSTER_THING *tp;
+    MONSTER_THING *next;
     bool wastarget;
     static coord orig_pos;
 
     for (tp = mlist; tp != NULL; tp = next)
     {
         /* remember this in case the monster's "next" is changed */
-        next = next(tp);
+        next = tp->next;
         if (!on(*tp, ISHELD) && on(*tp, ISRUN))
         {
-            orig_pos = tp->t_pos;
+            orig_pos = tp->pos;
             wastarget = on(*tp, ISTARGET);
             if (move_monst(tp) == -1)
                 continue;
-            if (on(*tp, ISFLY) && dist_cp(&hero, &tp->t_pos) >= 3)
+            if (on(*tp, ISFLY) && dist_cp(&hero, &tp->pos) >= 3)
                 move_monst(tp);
-            if (wastarget && !ce(orig_pos, tp->t_pos))
+            if (wastarget && !ce(orig_pos, tp->pos))
             {
-                tp->t_flags &= ~ISTARGET;
+                tp->flags &= ~ISTARGET;
                 to_death = FALSE;
             }
         }
@@ -59,16 +59,15 @@ int runners(int arg)
  * move_monst:
  *        Execute a single turn of running for a monster
  */
-int
-move_monst(THING *tp)
+int move_monst(MONSTER_THING *tp)
 {
-    if (!on(*tp, ISSLOW) || tp->t_turn)
+    if (!on(*tp, ISSLOW) || tp->turn)
         if (do_chase(tp) == -1)
             return(-1);
     if (on(*tp, ISHASTE))
         if (do_chase(tp) == -1)
             return(-1);
-    tp->t_turn = !tp->t_turn;
+    tp->turn = !tp->turn;
     return(0);
 }
 
@@ -77,29 +76,28 @@ move_monst(THING *tp)
  *        Make the monster's new location be the specified one, updating
  *        all the relevant state.
  */
-void
-relocate(THING *th, coord *new_loc)
+void relocate(MONSTER_THING *th, coord *new_loc)
 {
     struct room *oroom;
 
-    if (!ce(*new_loc, th->t_pos))
+    if (!ce(*new_loc, th->pos))
     {
-        setMapDisplay(th->t_pos.x, th->t_pos.y, th->t_oldch);
-        th->t_room = roomin(new_loc);
+        setMapDisplay(th->pos.x, th->pos.y, th->oldch);
+        th->room = roomin(new_loc);
         set_oldch(th, new_loc);
-        oroom = th->t_room;
-        moat(th->t_pos.y, th->t_pos.x) = NULL;
+        oroom = th->room;
+        moat(th->pos.y, th->pos.x) = NULL;
 
-        if (oroom != th->t_room)
-            th->t_dest = find_dest(th);
-        th->t_pos = *new_loc;
+        if (oroom != th->room)
+            th->dest = find_dest(th);
+        th->pos = *new_loc;
         moat(new_loc->y, new_loc->x) = th;
     }
     if (see_monst(th))
-        setMapDisplay(new_loc->x, new_loc->y, th->t_disguise);
+        setMapDisplay(new_loc->x, new_loc->y, th->disguise);
     else if (on(player, SEEMONST))
     {
-        setMapDisplay(new_loc->x, new_loc->y, th->t_type | DISPLAY_INVERT);
+        setMapDisplay(new_loc->x, new_loc->y, th->type | DISPLAY_INVERT);
     }
 }
 
@@ -107,28 +105,27 @@ relocate(THING *th, coord *new_loc)
  * do_chase:
  *        Make one thing chase another.
  */
-int
-do_chase(THING *th)
+int do_chase(MONSTER_THING *th)
 {
-    register coord *cp;
-    register struct room *rer, *ree;        /* room of chaser, room of chasee */
-    register int mindist = 32767, curdist;
-    register bool stoprun = FALSE;        /* TRUE means we are there */
-    register bool door;
-    register THING *obj;
+    coord *cp;
+    struct room *rer, *ree;        /* room of chaser, room of chasee */
+    int mindist = 32767, curdist;
+    bool stoprun = FALSE;        /* TRUE means we are there */
+    bool door;
+    ITEM_THING *obj;
     static coord _this;                        /* Temporary destination for chaser */
 
-    rer = th->t_room;                /* Find room of chaser */
+    rer = th->room;                /* Find room of chaser */
     if (on(*th, ISGREED) && rer->r_goldval == 0)
-        th->t_dest = &hero;        /* If gold has been taken, run after hero */
-    if (th->t_dest == &hero)        /* Find room of chasee */
-        ree = proom;
+        th->dest = &hero;        /* If gold has been taken, run after hero */
+    if (th->dest == &hero)        /* Find room of chasee */
+        ree = player.room;
     else
-        ree = roomin(th->t_dest);
+        ree = roomin(th->dest);
     /*
      * We don't count doors as inside rooms for this routine
      */
-    door = (chat(th->t_pos.y, th->t_pos.x) == DOOR);
+    door = (chat(th->pos.y, th->pos.x) == DOOR);
     /*
      * If the object of our desire is in a different room,
      * and we are not in a corridor, run to the door nearest to
@@ -139,7 +136,7 @@ over:
     {
         for (cp = rer->r_exit; cp < &rer->r_exit[rer->r_nexits]; cp++)
         {
-            curdist = dist_cp(th->t_dest, cp);
+            curdist = dist_cp(th->dest, cp);
             if (curdist < mindist)
             {
                 _this = *cp;
@@ -148,29 +145,29 @@ over:
         }
         if (door)
         {
-            rer = &passages[flat(th->t_pos.y, th->t_pos.x) & F_PNUM];
+            rer = &passages[flat(th->pos.y, th->pos.x) & F_PNUM];
             door = FALSE;
             goto over;
         }
     }
     else
     {
-        _this = *th->t_dest;
+        _this = *th->dest;
         /*
          * For dragons check and see if (a) the hero is on a straight
          * line from it, and (b) that it is within shooting distance,
          * but outside of striking range.
          */
-        if (th->t_type == 'D' && (th->t_pos.y == hero.y || th->t_pos.x == hero.x
-            || abs(th->t_pos.y - hero.y) == abs(th->t_pos.x - hero.x))
-            && dist_cp(&th->t_pos, &hero) <= BOLT_LENGTH * BOLT_LENGTH
+        if (th->type == 'D' && (th->pos.y == hero.y || th->pos.x == hero.x
+            || abs(th->pos.y - hero.y) == abs(th->pos.x - hero.x))
+            && dist_cp(&th->pos, &hero) <= BOLT_LENGTH * BOLT_LENGTH
             && !on(*th, ISCANC) && rnd(DRAGONSHOT) == 0)
         {
-            delta.y = sign(hero.y - th->t_pos.y);
-            delta.x = sign(hero.x - th->t_pos.x);
+            delta.y = sign(hero.y - th->pos.y);
+            delta.x = sign(hero.x - th->pos.x);
             if (has_hit)
                 endmsg();
-            fire_bolt(&th->t_pos, &delta, "flame");
+            fire_bolt(&th->pos, &delta, "flame");
             running = FALSE;
             count = 0;
             quiet = 0;
@@ -193,33 +190,33 @@ over:
         {
             return( attack(th) );
         }
-        else if (ce(_this, *th->t_dest))
+        else if (ce(_this, *th->dest))
         {
-            for (obj = lvl_obj; obj != NULL; obj = next(obj))
-                if (th->t_dest == &obj->o_pos)
+            for (obj = lvl_obj; obj != NULL; obj = obj->next)
+                if (th->dest == &obj->pos)
                 {
                     detach(lvl_obj, obj);
-                    attach(th->t_pack, obj);
-                    chat(obj->o_pos.y, obj->o_pos.x) =
-                        (th->t_room->r_flags & ISGONE) ? PASSAGE : FLOOR;
-                    th->t_dest = find_dest(th);
+                    attach(th->pack, obj);
+                    chat(obj->pos.y, obj->pos.x) =
+                        (th->room->r_flags & ISGONE) ? PASSAGE : FLOOR;
+                    th->dest = find_dest(th);
                     break;
                 }
-            if (th->t_type != 'F')
+            if (th->type != 'F')
                 stoprun = TRUE;
         }
     }
     else
     {
-        if (th->t_type == 'F')
+        if (th->type == 'F')
             return(0);
     }
     relocate(th, &ch_ret);
     /*
      * And stop running if need be
      */
-    if (stoprun && ce(th->t_pos, *(th->t_dest)))
-        th->t_flags &= ~ISRUN;
+    if (stoprun && ce(th->pos, *(th->dest)))
+        th->flags &= ~ISRUN;
     return(0);
 }
 
@@ -228,22 +225,22 @@ over:
  *        Set the oldch character for the monster
  */
 void
-set_oldch(THING *tp, coord *cp)
+set_oldch(MONSTER_THING *tp, coord *cp)
 {
     char sch;
 
-    if (ce(tp->t_pos, *cp))
+    if (ce(tp->pos, *cp))
         return;
 
-    sch = tp->t_oldch;
-    tp->t_oldch = getMapDisplay(cp->x, cp->y);
+    sch = tp->oldch;
+    tp->oldch = getMapDisplay(cp->x, cp->y);
     if (!on(player, ISBLIND))
     {
-            if ((sch == FLOOR || tp->t_oldch == FLOOR) &&
-                (tp->t_room->r_flags & ISDARK))
-                    tp->t_oldch = ' ';
+            if ((sch == FLOOR || tp->oldch == FLOOR) &&
+                (tp->room->r_flags & ISDARK))
+                    tp->oldch = ' ';
             else if (dist_cp(cp, &hero) <= LAMPDIST && see_floor)
-                tp->t_oldch = chat(cp->y, cp->x);
+                tp->oldch = chat(cp->y, cp->x);
     }
 }
 
@@ -251,8 +248,7 @@ set_oldch(THING *tp, coord *cp)
  * see_monst:
  *        Return TRUE if the hero can see the monster
  */
-bool
-see_monst(THING *mp)
+bool see_monst(MONSTER_THING *mp)
 {
     int y, x;
 
@@ -260,8 +256,8 @@ see_monst(THING *mp)
         return FALSE;
     if (on(*mp, ISINVIS) && !on(player, CANSEE))
         return FALSE;
-    y = mp->t_pos.y;
-    x = mp->t_pos.x;
+    y = mp->pos.y;
+    x = mp->pos.x;
     if (dist(y, x, hero.y, hero.x) < LAMPDIST)
     {
         if (y != hero.y && x != hero.x &&
@@ -269,19 +265,18 @@ see_monst(THING *mp)
                 return FALSE;
         return TRUE;
     }
-    if (mp->t_room != proom)
+    if (mp->room != player.room)
         return FALSE;
-    return ((bool)!(mp->t_room->r_flags & ISDARK));
+    return ((bool)!(mp->room->r_flags & ISDARK));
 }
 
 /*
  * runto:
  *        Set a monster running after the hero.
  */
-void
-runto(coord *runner)
+void runto(coord *runner)
 {
-    register THING *tp;
+    MONSTER_THING *tp;
 
     /*
      * If we couldn't find him, something is funny
@@ -290,9 +285,9 @@ runto(coord *runner)
     /*
      * Start the beastie running
      */
-    tp->t_flags |= ISRUN;
-    tp->t_flags &= ~ISHELD;
-    tp->t_dest = find_dest(tp);
+    tp->flags |= ISRUN;
+    tp->flags &= ~ISHELD;
+    tp->dest = find_dest(tp);
 }
 
 /*
@@ -302,14 +297,14 @@ runto(coord *runner)
  *        FALSE if we reach the goal.
  */
 bool
-chase(THING *tp, coord *ee)
+chase(MONSTER_THING *tp, coord *ee)
 {
-    register THING *obj;
-    register int x, y;
-    register int curdist, thisdist;
-    register coord *er = &tp->t_pos;
-    register int ch;
-    register int plcnt = 1;
+    ITEM_THING *obj;
+    int x, y;
+    int curdist, thisdist;
+    coord *er = &tp->pos;
+    int ch;
+    int plcnt = 1;
     static coord tryp;
 
     /*
@@ -317,8 +312,8 @@ chase(THING *tp, coord *ee)
      * Stalkers are slightly confused all of the time, and bats are
      * quite confused all the time
      */
-    if ((on(*tp, ISHUH) && rnd(5) != 0) || (tp->t_type == 'P' && rnd(5) == 0)
-        || (tp->t_type == 'B' && rnd(2) == 0))
+    if ((on(*tp, ISHUH) && rnd(5) != 0) || (tp->type == 'P' && rnd(5) == 0)
+        || (tp->type == 'B' && rnd(2) == 0))
     {
         /*
          * get a valid random move
@@ -329,7 +324,7 @@ chase(THING *tp, coord *ee)
          * Small chance that it will become un-confused 
          */
         if (rnd(20) == 0)
-            tp->t_flags &= ~ISHUH;
+            tp->flags &= ~ISHUH;
     }
     /*
      * Otherwise, find the empty spot next to the chaser that is
@@ -371,18 +366,18 @@ chase(THING *tp, coord *ee)
                      */
                     if (ch == SCROLL)
                     {
-                        for (obj = lvl_obj; obj != NULL; obj = next(obj))
+                        for (obj = lvl_obj; obj != NULL; obj = obj->next)
                         {
-                            if (y == obj->o_pos.y && x == obj->o_pos.x)
+                            if (y == obj->pos.y && x == obj->pos.x)
                                 break;
                         }
-                        if (obj != NULL && obj->o_which == S_SCARE)
+                        if (obj != NULL && obj->which == S_SCARE)
                             continue;
                     }
                     /*
                      * It can also be a Xeroc, which we shouldn't step on
                      */
-                    if ((obj = moat(y, x)) != NULL && obj->t_type == 'X')
+                    if (moat(y, x) != NULL && moat(y, x)->type == 'X')
                         continue;
                     /*
                      * If we didn't find any scrolls at this place or it
@@ -472,33 +467,31 @@ cansee(int y, int x)
      */
     tp.y = y;
     tp.x = x;
-    return (bool)((rer = roomin(&tp)) == proom && !(rer->r_flags & ISDARK));
+    return (bool)((rer = roomin(&tp)) == player.room && !(rer->r_flags & ISDARK));
 }
 
 /*
  * find_dest:
  *        find the proper destination for the monster
  */
-coord *
-find_dest(THING *tp)
+coord* find_dest(MONSTER_THING *tp)
 {
-    register THING *obj;
-    register int prob;
+    ITEM_THING *obj;
+    int prob;
 
-    if ((prob = monsters[tp->t_type - 'A'].m_carry) <= 0 || tp->t_room == proom
-        || see_monst(tp))
-            return &hero;
-    for (obj = lvl_obj; obj != NULL; obj = next(obj))
+    if ((prob = monsters[tp->type - 'A'].m_carry) <= 0 || tp->room == player.room || see_monst(tp))
+        return &hero;
+    for (obj = lvl_obj; obj != NULL; obj = obj->next)
     {
-        if (obj->o_type == SCROLL && obj->o_which == S_SCARE)
+        if (obj->type == SCROLL && obj->which == S_SCARE)
             continue;
-        if (roomin(&obj->o_pos) == tp->t_room && rnd(100) < prob)
+        if (roomin(&obj->pos) == tp->room && rnd(100) < prob)
         {
-            for (tp = mlist; tp != NULL; tp = next(tp))
-                if (tp->t_dest == &obj->o_pos)
+            for (tp = mlist; tp != NULL; tp = tp->next)
+                if (tp->dest == &obj->pos)
                     break;
             if (tp == NULL)
-                return &obj->o_pos;
+                return &obj->pos;
         }
     }
     return &hero;

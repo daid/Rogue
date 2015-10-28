@@ -25,7 +25,7 @@ command()
     register int ch;
     register int ntimes = 1;                        /* Number of player moves */
     char *fp;
-    THING *mp;
+    MONSTER_THING *mp;
     static char countch, direction, newcount = FALSE;
 
     if (on(player, ISHASTE))
@@ -81,7 +81,7 @@ command()
         {
             if (--no_command == 0)
             {
-                player.t_flags |= ISRUN;
+                player.flags |= ISRUN;
                 msg("you can move again");
             }
         }
@@ -150,22 +150,22 @@ over:
             switch (ch)
             {
                 case ',': {
-                    THING *obj = NULL;
+                    ITEM_THING *obj = NULL;
                     int found = 0;
-                    for (obj = lvl_obj; obj != NULL; obj = next(obj))
-                            {
-                            if (obj->o_pos.y == hero.y && obj->o_pos.x == hero.x)
+                    for (obj = lvl_obj; obj != NULL; obj = obj->next)
+                        {
+                            if (obj->pos.y == hero.y && obj->pos.x == hero.x)
                             {
                                 found=1;
                                 break;
                             }
-                            }
+                        }
 
                     if (found) {
                         if (levit_check())
                             ;
                         else
-                            pick_up((char)obj->o_type);
+                            pick_up(obj->type);
                     }
                     else {
                         if (!terse)
@@ -234,7 +234,7 @@ over:
                     {
                         to_death = TRUE;
                         max_hit = 0;
-                        mp->t_flags |= ISTARGET;
+                        mp->flags |= ISTARGET;
                         runch = ch = dir_ch;
                         goto over;
                     }
@@ -261,7 +261,7 @@ over:
                     q_comm = TRUE;
                     quit(0);
                     q_comm = FALSE;
-                when 'i': after = FALSE; inventory(pack, 0);
+                when 'i': after = FALSE; inventory(player.pack, 0);
                 when 'I': after = FALSE; picky_inven();
                 when 'd': drop();
                 when 'r': read_scroll();
@@ -376,20 +376,20 @@ over:
                              */
                             obj = new_item();
                             init_weapon(obj, TWOSWORD);
-                            obj->o_hplus = 1;
-                            obj->o_dplus = 1;
+                            obj->hplus = 1;
+                            obj->dplus = 1;
                             add_pack(obj, TRUE);
                             cur_weapon = obj;
                             /*
                              * And his suit of armor
                              */
                             obj = new_item();
-                            obj->o_type = ARMOR;
-                            obj->o_which = PLATE_MAIL;
-                            obj->o_arm = -5;
-                            obj->o_flags |= ISKNOW;
-                            obj->o_count = 1;
-                            obj->o_group = 0;
+                            obj->type = ARMOR;
+                            obj->which = PLATE_MAIL;
+                            obj->arm = -5;
+                            obj->flags |= ISKNOW;
+                            obj->count = 1;
+                            obj->group = 0;
                             cur_armor = obj;
                             add_pack(obj, TRUE);
                         }
@@ -669,9 +669,9 @@ levit_check()
 void
 call()
 {
-    register THING *obj;
-    register struct obj_info *op = NULL;
-    register char **guess;
+    ITEM_THING *obj;
+    struct obj_info *op = NULL;
+    char **guess;
     const char* elsewise = NULL;
     register bool *know;
 
@@ -681,23 +681,23 @@ call()
      */
     if (obj == NULL)
         return;
-    switch (obj->o_type)
+    switch (obj->type)
     {
         case RING:
-            op = &ring_info[obj->o_which];
-            elsewise = r_stones[obj->o_which];
+            op = &ring_info[obj->which];
+            elsewise = r_stones[obj->which];
             goto norm;
         when POTION:
-            op = &pot_info[obj->o_which];
-            elsewise = p_colors[obj->o_which];
+            op = &pot_info[obj->which];
+            elsewise = p_colors[obj->which];
             goto norm;
         when SCROLL:
-            op = &scr_info[obj->o_which];
-            elsewise = s_names[obj->o_which];
+            op = &scr_info[obj->which];
+            elsewise = s_names[obj->which];
             goto norm;
         when STICK:
-            op = &ws_info[obj->o_which];
-            elsewise = ws_made[obj->o_which];
+            op = &ws_info[obj->which];
+            elsewise = ws_made[obj->which];
 norm:
             know = &op->oi_know;
             guess = &op->oi_guess;
@@ -707,9 +707,9 @@ norm:
             msg("you can't call that anything");
             return;
         otherwise:
-            guess = &obj->o_label;
+            guess = &obj->label;
             know = NULL;
-            elsewise = obj->o_label;
+            elsewise = obj->label;
     }
     if (know != NULL && *know)
     {
@@ -741,8 +741,7 @@ norm:
  * current:
  *        Print the current weapon/armor
  */
-void
-current(THING *cur, const char *how, const char *where)
+void current(ITEM_THING *cur, const char *how, const char *where)
 {
     after = FALSE;
     if (cur != NULL)
@@ -750,7 +749,7 @@ current(THING *cur, const char *how, const char *where)
         if (!terse)
             addmsg("you are %s (", how);
         inv_describe = FALSE;
-        addmsg("%c) %s", cur->o_packch, inv_name(cur, TRUE));
+        addmsg("%c) %s", cur->packch, inv_name(cur, TRUE));
         inv_describe = TRUE;
         if (where)
             addmsg(" %s", where);

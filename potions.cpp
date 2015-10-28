@@ -57,7 +57,8 @@ static PACT p_actions[] =
 void
 quaff()
 {
-    THING *obj, *tp, *mp;
+    ITEM_THING *obj, *tp;
+    MONSTER_THING *mp;
     bool discardit = FALSE;
     bool show, trip;
 
@@ -67,7 +68,7 @@ quaff()
      */
     if (obj == NULL)
         return;
-    if (obj->o_type != POTION)
+    if (obj->type != POTION)
     {
         if (!terse)
             msg("yuk! Why would you want to drink that?");
@@ -82,9 +83,9 @@ quaff()
      * Calculate the effect it has on the poor guy.
      */
     trip = on(player, ISHALU);
-    discardit = (bool)(obj->o_count == 1);
+    discardit = (bool)(obj->count == 1);
     leave_pack(obj, FALSE, FALSE);
-    switch (obj->o_which)
+    switch (obj->which)
     {
         case P_CONFUSE:
             do_pot(P_CONFUSE, !trip);
@@ -100,8 +101,8 @@ quaff()
             }
         when P_HEALING:
             pot_info[P_HEALING].oi_know = TRUE;
-            if ((pstats.s_hpt += roll(pstats.s_lvl, 4)) > max_hp)
-                pstats.s_hpt = ++max_hp;
+            if ((player.stats.s_hpt += roll(player.stats.s_lvl, 4)) > player.stats.s_maxhp)
+                player.stats.s_hpt = ++player.stats.s_maxhp;
             sight(0);
             msg("you begin to feel better");
         when P_STRENGTH:
@@ -109,7 +110,7 @@ quaff()
             chg_str(1);
             msg("you feel stronger, now.  What bulging muscles!");
         when P_MFIND:
-            player.t_flags |= SEEMONST;
+            player.flags |= SEEMONST;
             fuse(turn_see, TRUE, HUHDURATION, AFTER);
             if (!turn_see(FALSE))
                 msg("you have a %s feeling for a moment, then it passes",
@@ -121,23 +122,23 @@ quaff()
             show = FALSE;
             if (lvl_obj != NULL)
             {
-                for (tp = lvl_obj; tp != NULL; tp = next(tp))
+                for (tp = lvl_obj; tp != NULL; tp = tp->next)
                 {
                     if (is_magic(tp))
                     {
                         show = TRUE;
-                        setMapDisplay(tp->o_pos.x, tp->o_pos.y, MAGIC);
+                        setMapDisplay(tp->pos.x, tp->pos.y, MAGIC);
                         pot_info[P_TFIND].oi_know = TRUE;
                     }
                 }
-                for (mp = mlist; mp != NULL; mp = next(mp))
+                for (mp = mlist; mp != NULL; mp = mp->next)
                 {
-                    for (tp = mp->t_pack; tp != NULL; tp = next(tp))
+                    for (tp = mp->pack; tp != NULL; tp = tp->next)
                     {
                         if (is_magic(tp))
                         {
                             show = TRUE;
-                            setMapDisplay(mp->t_pos.x, mp->t_pos.y, MAGIC);
+                            setMapDisplay(mp->pos.x, mp->pos.y, MAGIC);
                         }
                     }
                 }
@@ -172,11 +173,11 @@ quaff()
             raise_level();
         when P_XHEAL:
             pot_info[P_XHEAL].oi_know = TRUE;
-            if ((pstats.s_hpt += roll(pstats.s_lvl, 8)) > max_hp)
+            if ((player.stats.s_hpt += roll(player.stats.s_lvl, 8)) > player.stats.s_maxhp)
             {
-                if (pstats.s_hpt > max_hp + pstats.s_lvl + 1)
-                    ++max_hp;
-                pstats.s_hpt = ++max_hp;
+                if (player.stats.s_hpt > player.stats.s_maxhp + player.stats.s_lvl + 1)
+                    ++player.stats.s_maxhp;
+                player.stats.s_hpt = ++player.stats.s_maxhp;
             }
             sight(0);
             come_down(0);
@@ -188,15 +189,15 @@ quaff()
                 msg("you feel yourself moving much faster");
         when P_RESTORE:
             if (ISRING(LEFT, R_ADDSTR))
-                add_str(&pstats.s_str, -cur_ring[LEFT]->o_arm);
+                add_str(&player.stats.s_str, -cur_ring[LEFT]->arm);
             if (ISRING(RIGHT, R_ADDSTR))
-                add_str(&pstats.s_str, -cur_ring[RIGHT]->o_arm);
-            if (pstats.s_str < max_stats.s_str)
-                pstats.s_str = max_stats.s_str;
+                add_str(&player.stats.s_str, -cur_ring[RIGHT]->arm);
+            if (player.stats.s_str < max_stats.s_str)
+                player.stats.s_str = max_stats.s_str;
             if (ISRING(LEFT, R_ADDSTR))
-                add_str(&pstats.s_str, cur_ring[LEFT]->o_arm);
+                add_str(&player.stats.s_str, cur_ring[LEFT]->arm);
             if (ISRING(RIGHT, R_ADDSTR))
-                add_str(&pstats.s_str, cur_ring[RIGHT]->o_arm);
+                add_str(&player.stats.s_str, cur_ring[RIGHT]->arm);
             msg("hey, this tastes great.  It make you feel warm all over");
         when P_BLIND:
             do_pot(P_BLIND, TRUE);
@@ -213,7 +214,7 @@ quaff()
      * Throw the item away
      */
 
-    call_it(&pot_info[obj->o_which]);
+    call_it(&pot_info[obj->which]);
 
     if (discardit)
         discard(obj);
@@ -225,14 +226,14 @@ quaff()
  *        Returns true if an object radiates magic
  */
 bool
-is_magic(THING *obj)
+is_magic(ITEM_THING *obj)
 {
-    switch (obj->o_type)
+    switch (obj->type)
     {
         case ARMOR:
-            return (bool)((obj->o_flags&ISPROT) || obj->o_arm != a_class[obj->o_which]);
+            return (bool)((obj->flags&ISPROT) || obj->arm != a_class[obj->which]);
         case WEAPON:
-            return (bool)(obj->o_hplus != 0 || obj->o_dplus != 0);
+            return (bool)(obj->hplus != 0 || obj->dplus != 0);
         case POTION:
         case SCROLL:
         case STICK:
@@ -251,12 +252,12 @@ is_magic(THING *obj)
 void
 invis_on()
 {
-    THING *mp;
+    MONSTER_THING *mp;
 
-    player.t_flags |= CANSEE;
-    for (mp = mlist; mp != NULL; mp = next(mp))
+    player.flags |= CANSEE;
+    for (mp = mlist; mp != NULL; mp = mp->next)
         if (on(*mp, ISINVIS) && see_monst(mp) && !on(player, ISHALU))
-            setMapDisplay(mp->t_pos.x, mp->t_pos.y, mp->t_disguise);
+            setMapDisplay(mp->pos.x, mp->pos.y, mp->disguise);
 }
 
 /*
@@ -265,39 +266,39 @@ invis_on()
  */
 int turn_see(int turn_off)
 {
-    THING *mp;
+    MONSTER_THING *mp;
     bool can_see, add_new;
 
     add_new = FALSE;
-    for (mp = mlist; mp != NULL; mp = next(mp))
+    for (mp = mlist; mp != NULL; mp = mp->next)
     {
         can_see = see_monst(mp);
         if (turn_off)
         {
             if (!can_see)
-                setMapDisplay(mp->t_pos.x, mp->t_pos.y, mp->t_oldch);
+                setMapDisplay(mp->pos.x, mp->pos.y, mp->oldch);
         }
         else
         {
             if (!can_see)
             {
                 if (!on(player, ISHALU))
-                    setMapDisplay(mp->t_pos.x, mp->t_pos.y, mp->t_type | DISPLAY_INVERT);
+                    setMapDisplay(mp->pos.x, mp->pos.y, mp->type | DISPLAY_INVERT);
                 else
-                    setMapDisplay(mp->t_pos.x, mp->t_pos.y, (rnd(26) + 'A')  | DISPLAY_INVERT);
+                    setMapDisplay(mp->pos.x, mp->pos.y, (rnd(26) + 'A')  | DISPLAY_INVERT);
                 add_new++;
             }else{
                 if (!on(player, ISHALU))
-                    setMapDisplay(mp->t_pos.x, mp->t_pos.y, mp->t_type);
+                    setMapDisplay(mp->pos.x, mp->pos.y, mp->type);
                 else
-                    setMapDisplay(mp->t_pos.x, mp->t_pos.y, rnd(26) + 'A');
+                    setMapDisplay(mp->pos.x, mp->pos.y, rnd(26) + 'A');
             }
         }
     }
     if (turn_off)
-        player.t_flags &= ~SEEMONST;
+        player.flags &= ~SEEMONST;
     else
-        player.t_flags |= SEEMONST;
+        player.flags |= SEEMONST;
     return add_new;
 }
 
@@ -308,7 +309,7 @@ int turn_see(int turn_off)
 bool
 seen_stairs()
 {
-    THING        *tp;
+    MONSTER_THING        *tp;
 
     if (getMapDisplay(stairs.x, stairs.y) == STAIRS)                        /* it's on the map */
         return TRUE;
@@ -324,7 +325,7 @@ seen_stairs()
             return TRUE;                        /* it must have moved there */
 
         if (on(player, SEEMONST)                /* if she can detect monster */
-            && tp->t_oldch == STAIRS)                /* and there once were stairs */
+            && tp->oldch == STAIRS)                /* and there once were stairs */
                 return TRUE;                        /* it must have moved there */
     }
     return FALSE;
@@ -338,7 +339,7 @@ seen_stairs()
 void
 raise_level()
 {
-    pstats.s_exp = e_levels[pstats.s_lvl-1] + 1L;
+    player.stats.s_exp = e_levels[player.stats.s_lvl-1] + 1L;
     check_level();
 }
 
@@ -360,7 +361,7 @@ do_pot(int type, bool knowit)
     t = spread(pp->pa_time);
     if (!on(player, pp->pa_flags))
     {
-        player.t_flags |= pp->pa_flags;
+        player.flags |= pp->pa_flags;
         fuse(pp->pa_daemon, 0, t, AFTER);
         look(FALSE);
     }

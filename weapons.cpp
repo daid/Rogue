@@ -43,7 +43,7 @@ static struct init_weaps {
 void
 missile(int ydelta, int xdelta)
 {
-    THING *obj;
+    ITEM_THING *obj;
 
     /*
      * Get which thing we are hurling
@@ -58,8 +58,8 @@ missile(int ydelta, int xdelta)
      * AHA! Here it has hit something.  If it is a wall or a door,
      * or if it misses (combat) the monster, put it on the floor
      */
-    if (moat(obj->o_pos.y, obj->o_pos.x) == NULL ||
-        !hit_monster(unc(obj->o_pos), obj))
+    if (moat(obj->pos.y, obj->pos.x) == NULL ||
+        !hit_monster(unc(obj->pos), obj))
             fall(obj, TRUE);
 }
 
@@ -70,40 +70,40 @@ missile(int ydelta, int xdelta)
  */
 
 void
-do_motion(THING *obj, int ydelta, int xdelta)
+do_motion(ITEM_THING *obj, int ydelta, int xdelta)
 {
     int ch;
 
     /*
      * Come fly with us ...
      */
-    obj->o_pos = hero;
+    obj->pos = hero;
     for (;;)
     {
         /*
          * Erase the old one
          */
-        if (!ce(obj->o_pos, hero) && cansee(unc(obj->o_pos)) && !terse)
+        if (!ce(obj->pos, hero) && cansee(unc(obj->pos)) && !terse)
         {
-            ch = chat(obj->o_pos.y, obj->o_pos.x);
+            ch = chat(obj->pos.y, obj->pos.x);
             if (ch == FLOOR && !show_floor())
                 ch = ' ';
-            setMapDisplay(obj->o_pos.x, obj->o_pos.y, ch);
+            setMapDisplay(obj->pos.x, obj->pos.y, ch);
         }
         /*
          * Get the new position
          */
-        obj->o_pos.y += ydelta;
-        obj->o_pos.x += xdelta;
-        if (step_ok(ch = winat(obj->o_pos.y, obj->o_pos.x)) && ch != DOOR)
+        obj->pos.y += ydelta;
+        obj->pos.x += xdelta;
+        if (step_ok(ch = winat(obj->pos.y, obj->pos.x)) && ch != DOOR)
         {
             /*
              * It hasn't hit anything yet, so display it
              * If it alright.
              */
-            if (cansee(unc(obj->o_pos)) && !terse)
+            if (cansee(unc(obj->pos)) && !terse)
             {
-                setMapDisplay(obj->o_pos.x, obj->o_pos.y, obj->o_type);
+                setMapDisplay(obj->pos.x, obj->pos.y, obj->type);
                 refreshMap();
                 animationDelay();
             }
@@ -119,22 +119,22 @@ do_motion(THING *obj, int ydelta, int xdelta)
  */
 
 void
-fall(THING *obj, bool pr)
+fall(ITEM_THING *obj, bool pr)
 {
     PLACE *pp;
     static coord fpos;
 
-    if (fallpos(&obj->o_pos, &fpos))
+    if (fallpos(&obj->pos, &fpos))
     {
         pp = INDEX(fpos.y, fpos.x);
-        pp->p_ch = (char) obj->o_type;
-        obj->o_pos = fpos;
+        pp->p_ch = (char) obj->type;
+        obj->pos = fpos;
         if (cansee(fpos.y, fpos.x))
         {
             if (pp->p_monst != NULL)
-                pp->p_monst->t_oldch = (char) obj->o_type;
+                pp->p_monst->oldch = (char) obj->type;
             else
-                setMapDisplay(fpos.x, fpos.y, obj->o_type);
+                setMapDisplay(fpos.x, fpos.y, obj->type);
         }
         attach(lvl_obj, obj);
         return;
@@ -147,7 +147,7 @@ fall(THING *obj, bool pr)
             has_hit = FALSE;
         }
         msg("the %s vanishes as it hits the ground",
-            weap_info[obj->o_which].oi_name);
+            weap_info[obj->which].oi_name);
     }
     discard(obj);
 }
@@ -158,33 +158,33 @@ fall(THING *obj, bool pr)
  */
 
 void
-init_weapon(THING *weap, int which)
+init_weapon(ITEM_THING *weap, int which)
 {
     struct init_weaps *iwp;
 
-    weap->o_type = WEAPON;
-    weap->o_which = which;
+    weap->type = WEAPON;
+    weap->which = which;
     iwp = &init_dam[which];
-    strncpy(weap->o_damage, iwp->iw_dam, sizeof(weap->o_damage));
-    strncpy(weap->o_hurldmg,iwp->iw_hrl, sizeof(weap->o_hurldmg));
-    weap->o_launch = iwp->iw_launch;
-    weap->o_flags = iwp->iw_flags;
-    weap->o_hplus = 0;
-    weap->o_dplus = 0;
+    strncpy(weap->damage, iwp->iw_dam, sizeof(weap->damage));
+    strncpy(weap->hurldmg,iwp->iw_hrl, sizeof(weap->hurldmg));
+    weap->launch = iwp->iw_launch;
+    weap->flags = iwp->iw_flags;
+    weap->hplus = 0;
+    weap->dplus = 0;
     if (which == DAGGER)
     {
-        weap->o_count = rnd(4) + 2;
-        weap->o_group = group++;
+        weap->count = rnd(4) + 2;
+        weap->group = group++;
     }
-    else if (weap->o_flags & ISMANY)
+    else if (weap->flags & ISMANY)
     {
-        weap->o_count = rnd(8) + 8;
-        weap->o_group = group++;
+        weap->count = rnd(8) + 8;
+        weap->group = group++;
     }
     else
     {
-        weap->o_count = 1;
-        weap->o_group = 0;
+        weap->count = 1;
+        weap->group = 0;
     }
 }
 
@@ -193,7 +193,7 @@ init_weapon(THING *weap, int which)
  *        Does the missile hit the monster?
  */
 int
-hit_monster(int y, int x, THING *obj)
+hit_monster(int y, int x, ITEM_THING *obj)
 {
     static coord mp;
 
@@ -224,7 +224,7 @@ const char* num(int n1, int n2, char type)
 void
 wield()
 {
-    THING *obj, *oweapon;
+    ITEM_THING *obj, *oweapon;
     const char *sp;
 
     oweapon = cur_weapon;
@@ -241,7 +241,7 @@ bad:
         return;
     }
 
-    if (obj->o_type == ARMOR)
+    if (obj->type == ARMOR)
     {
         msg("you can't wield armor");
         goto bad;
@@ -253,7 +253,7 @@ bad:
     cur_weapon = obj;
     if (!terse)
         addmsg("you are now ");
-    msg("wielding %s (%c)", sp, obj->o_packch);
+    msg("wielding %s (%c)", sp, obj->packch);
 }
 
 /*

@@ -218,7 +218,7 @@ void death(char monst)
 
 void total_winner()
 {
-    THING *obj;
+    ITEM_THING *obj;
     struct obj_info *op;
     int worth = 0;
     int oldpurse;
@@ -235,64 +235,64 @@ void total_winner()
     startDisplayOfStringList();
     displayStringListItem("   Worth  Item");
     oldpurse = purse;
-    for (obj = pack; obj != NULL; obj = next(obj))
+    for (obj = player.pack; obj != NULL; obj = obj->next)
     {
-        switch (obj->o_type)
+        switch (obj->type)
         {
             case FOOD:
-                worth = 2 * obj->o_count;
+                worth = 2 * obj->count;
             when WEAPON:
-                worth = weap_info[obj->o_which].oi_worth;
-                worth *= 3 * (obj->o_hplus + obj->o_dplus) + obj->o_count;
-                obj->o_flags |= ISKNOW;
+                worth = weap_info[obj->which].oi_worth;
+                worth *= 3 * (obj->hplus + obj->dplus) + obj->count;
+                obj->flags |= ISKNOW;
             when ARMOR:
-                worth = arm_info[obj->o_which].oi_worth;
-                worth += (9 - obj->o_arm) * 100;
-                worth += (10 * (a_class[obj->o_which] - obj->o_arm));
-                obj->o_flags |= ISKNOW;
+                worth = arm_info[obj->which].oi_worth;
+                worth += (9 - obj->arm) * 100;
+                worth += (10 * (a_class[obj->which] - obj->arm));
+                obj->flags |= ISKNOW;
             when SCROLL:
-                worth = scr_info[obj->o_which].oi_worth;
-                worth *= obj->o_count;
-                op = &scr_info[obj->o_which];
+                worth = scr_info[obj->which].oi_worth;
+                worth *= obj->count;
+                op = &scr_info[obj->which];
                 if (!op->oi_know)
                     worth /= 2;
                 op->oi_know = TRUE;
             when POTION:
-                worth = pot_info[obj->o_which].oi_worth;
-                worth *= obj->o_count;
-                op = &pot_info[obj->o_which];
+                worth = pot_info[obj->which].oi_worth;
+                worth *= obj->count;
+                op = &pot_info[obj->which];
                 if (!op->oi_know)
                     worth /= 2;
                 op->oi_know = TRUE;
             when RING:
-                op = &ring_info[obj->o_which];
+                op = &ring_info[obj->which];
                 worth = op->oi_worth;
-                if (obj->o_which == R_ADDSTR || obj->o_which == R_ADDDAM ||
-                    obj->o_which == R_PROTECT || obj->o_which == R_ADDHIT)
+                if (obj->which == R_ADDSTR || obj->which == R_ADDDAM ||
+                    obj->which == R_PROTECT || obj->which == R_ADDHIT)
                 {
-                        if (obj->o_arm > 0)
-                            worth += obj->o_arm * 100;
+                        if (obj->arm > 0)
+                            worth += obj->arm * 100;
                         else
                             worth = 10;
                 }
-                if (!(obj->o_flags & ISKNOW))
+                if (!(obj->flags & ISKNOW))
                     worth /= 2;
-                obj->o_flags |= ISKNOW;
+                obj->flags |= ISKNOW;
                 op->oi_know = TRUE;
             when STICK:
-                op = &ws_info[obj->o_which];
+                op = &ws_info[obj->which];
                 worth = op->oi_worth;
-                worth += 20 * obj->o_charges;
-                if (!(obj->o_flags & ISKNOW))
+                worth += 20 * obj->arm; //amount of charges is stored in arm field
+                if (!(obj->flags & ISKNOW))
                     worth /= 2;
-                obj->o_flags |= ISKNOW;
+                obj->flags |= ISKNOW;
                 op->oi_know = TRUE;
             when AMULET:
                 worth = 1000;
         }
         if (worth < 0)
             worth = 0;
-        displayStringListItem("%c) %5d  %s", obj->o_packch, worth, inv_name(obj, FALSE));
+        displayStringListItem("%c) %5d  %s", obj->packch, worth, inv_name(obj, FALSE));
         purse += worth;
     }
     displayStringListItem("   %5d  Gold Pieces          ", oldpurse);

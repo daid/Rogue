@@ -69,7 +69,6 @@ extern FILE        *scoreboard;
  * Function types
  */
 
-void    auto_save(int);
 int         come_down(int arg);
 int         doctor(int arg);
 int         land(int arg);
@@ -94,7 +93,6 @@ const char  *killname(char monst, bool doart);
 const char  *nothing(char type);
 const char  *type_name(int type);
 
-int        md_chmod(const char *filename, int mode);
 void       md_init();
 int        md_readchar();
 void       md_flush_input();

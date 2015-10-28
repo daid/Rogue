@@ -20,7 +20,7 @@ void displayLargeMap();
 void setMapViewTarget(int x, int y);
 void setStatusLine(const char* buffer);
 int displayMessage(const char* buffer);
-int askForInput(const char* message, char* input_buffer, int input_buffer_size);
+int askForInput(const char* message, char* input_buffer, unsigned int input_buffer_size);
 
 const char* getKeyName(int key);
 

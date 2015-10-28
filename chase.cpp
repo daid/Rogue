@@ -68,7 +68,7 @@ move_monst(THING *tp)
     if (on(*tp, ISHASTE))
         if (do_chase(tp) == -1)
             return(-1);
-    tp->t_turn ^= TRUE;
+    tp->t_turn = !tp->t_turn;
     return(0);
 }
 

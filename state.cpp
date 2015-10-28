@@ -1923,7 +1923,6 @@ rs_save_file(FILE *savef)
     rs_write_sticks(savef);
     rs_write_int(savef,orig_dsusp);
     rs_write_chars(savef, fruit, MAXSTR);
-    rs_write_chars(savef, home, MAXSTR);
     rs_write_int(savef,l_last_comm);
     rs_write_int(savef,l_last_dir);
     rs_write_int(savef,last_comm);
@@ -2044,7 +2043,6 @@ rs_restore_file(FILE *inf)
     rs_read_sticks(inf);
     rs_read_int(inf,&orig_dsusp);
     rs_read_chars(inf, fruit, MAXSTR);
-    rs_read_chars(inf, home, MAXSTR);
     rs_read_int(inf, &l_last_comm);
     rs_read_int(inf, &l_last_dir);
     rs_read_int(inf, &last_comm);

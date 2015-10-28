@@ -130,11 +130,6 @@
 #define RIGHT                1
 #define BOLT_LENGTH        6
 #define LAMPDIST        3
-#ifdef MASTER
-#ifndef PASSWD
-#define        PASSWD                "wizard"
-#endif
-#endif
 
 /*
  * Save against things
@@ -476,7 +471,7 @@ extern bool     after, again, allscore, amulet, door_stop, fight_flush,
                 passgo, playing, q_comm, running, save_msg, see_floor,
                 seenstairs, stat_msg, terse, to_death, tombstone;
 
-extern char     file_name[], home[], huh[], *Numname, outbuf[], take;
+extern char     file_name[], huh[], *Numname, outbuf[], take;
 
 extern const char* version;
 extern const char* release;
@@ -687,7 +682,6 @@ bool        dropcheck(THING *obj);
 bool        fallpos(coord *pos, coord *newpos);
 bool        find_floor(struct room *rp, coord *cp, int limit, bool monst);
 bool        is_magic(THING *obj);
-bool    is_symlink(char *sp); 
 bool        levit_check();
 bool        pack_room(bool from_floor, THING *obj);
 bool        roll_em(THING *thatt, THING *thdef, THING *weap, bool hurl);
@@ -696,7 +690,6 @@ bool        seen_stairs();
 bool        turn_ok(int y, int x);
 int         turn_see(int turn_off);
 bool        is_current(THING *obj);
-int        passwd();
 
 char        be_trapped(coord *tc);
 char        floor_ch();

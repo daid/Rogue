@@ -313,9 +313,11 @@ int displayMessage(const char* msg_buffer)
     return ch;
 }
 
-int askForInput(const char* message, char* input_buffer, int input_buffer_size)
+int askForInput(const char* message, char* input_buffer, unsigned int input_buffer_size)
 {
     memset(input_buffer, 0, input_buffer_size);
+    if (input_buffer_size > strlen(message) - 1)
+        input_buffer_size = strlen(message) - 1;
     
     int w = strlen(message) * 4;
     int x = (DISPLAY_WIDTH - w) / 2;
@@ -336,7 +338,8 @@ int askForInput(const char* message, char* input_buffer, int input_buffer_size)
             drawChar(x, y, *c);
             x += 4;
         }
-        drawChar(x, y, '_');
+        if (strlen(input_buffer) < input_buffer_size)
+            drawChar(x, y, '_');
         refreshDisplay();
 
         int ch = md_readchar();
@@ -350,7 +353,10 @@ int askForInput(const char* message, char* input_buffer, int input_buffer_size)
             drawChar(x, y, ' ');
         }
         if (ch >= ' ' && ch <= '~')
-            input_buffer[strlen(input_buffer)] = ch;
+        {
+            if (strlen(input_buffer) < input_buffer_size)
+                input_buffer[strlen(input_buffer)] = ch;
+        }
     }
 }
 
@@ -358,6 +364,13 @@ const char* getKeyName(int key)
 {
     static char buffer[16];
     strcpy(buffer, "[?]");
+    if (key & CTRL(0))
+    {
+        getKeyName(key &~CTRL(0));
+        strcpy(&buffer[6], buffer);
+        memcpy(buffer, "<ctrl>", 6);
+        return buffer;
+    }
     if ((key >= ' ' && key <= '~'))
         sprintf(buffer, "%c", key);
     if (key == 0)

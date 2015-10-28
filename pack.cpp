@@ -420,7 +420,6 @@ get_item(const char *purpose, int type)
             {
                 reset_last();
                 after = FALSE;
-                msg("");
                 return NULL;
             }
             if (ch == '*')

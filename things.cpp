@@ -433,7 +433,7 @@ const char * nothing(char type)
             case POTION: tystr = "potion";
             when SCROLL: tystr = "scroll";
             when RING: tystr = "ring";
-            when STICK: tystr = "wands";
+            when STICK: tystr = "wand";
         }
         sprintf(sp, " about any %ss", tystr);
     }

@@ -56,7 +56,6 @@ save_game()
 void save_file(FILE *savef)
 {
     char buf[80];
-    md_chmod(file_name, 0400);
     encwrite(version, strlen(version)+1, savef);
     sprintf(buf,"%d x %d\n", NUMLINES, NUMCOLS);
     encwrite(buf,80,savef);

@@ -95,7 +95,6 @@ open_score()
     if ((scoreboard == NULL) && (errno == ENOENT))
     {
         scoreboard = fopen(scorefile, "wb+");
-        md_chmod(scorefile,0664);
     }
 
     if (scoreboard == NULL) { 
@@ -125,15 +124,6 @@ void
 start_score()
 {
 }
-
-/*                   
- * is_symlink:                   
- *      See if the file has a symbolic link                   
-  */                   
-bool is_symlink(char *sp)                   
-{                   
-    return FALSE;                   
-} 
 
 /*
  * flush_type:

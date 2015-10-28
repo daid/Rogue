@@ -151,8 +151,8 @@ int stomach(int arg)
         no_command += rnd(8) + 4;
         hungry_state = 3;
         if (!terse)
-            addmsg(choose_str("the munchies overpower your motor capabilities.  ",
-                              "you feel too weak from lack of food.  "));
+            addmsg(choose_str("the munchies overpower your motor capabilities.",
+                              "you feel too weak from lack of food."));
         msg(choose_str("You freak out", "You faint"));
     }
     else

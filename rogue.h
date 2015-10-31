@@ -10,9 +10,8 @@
  * See the file LICENSE.TXT for full copyright and licensing information.
  */
 
+#include <list>
 #include "extern.h"
-
-#undef lines 
 
 /*
  * Maximum number of different things
@@ -52,9 +51,6 @@
 #define winat(y,x)        (moat(y,x) != NULL ? moat(y,x)->disguise : chat(y,x))
 #define ce(a,b)                ((a).x == (b).x && (a).y == (b).y)
 #define hero                player.pos
-#define attach(a,b)        _attach(&a,b)
-#define detach(a,b)        _detach(&a,b)
-#define free_list(a)        _free_list(&a)
 #undef max
 #define max(a,b)        ((a) > (b) ? (a) : (b))
 #define on(thing,flag)        ((bool)(((thing).flags & (flag)) != 0))
@@ -367,8 +363,9 @@ struct stats {
  * Structure for monsters and player
  */
 /* structure for items/objects */
-struct item_thing {
-    struct item_thing *next, *prev;        /* Next pointer in link */
+class ItemThing
+{
+public:
     int type;                        /* What kind of object it is */
     coord pos;                        /* Where it lives on the screen */
     char *text;                        /* What it says if you read it */
@@ -385,23 +382,29 @@ struct item_thing {
     int group;                        /* group number for this object */
     char *label;                        /* Label for object */
 };
-struct monster_thing {
-    struct monster_thing *next, *prev;        /* Next pointer in link */
-    coord pos;                        /* Position */
-    bool turn;                        /* If slowed, is it a turn to move */
-    char type;                        /* What it is */
-    char disguise;                /* What mimic looks like */
-    char oldch;                        /* Character that was where it was */
+class MonsterThing
+{
+public:    
+    coord pos;                          /* Position */
+    bool turn;                          /* If slowed, is it a turn to move */
+    char type;                          /* What it is */
+    char disguise;                      /* What mimic looks like */
+    char oldch;                         /* Character that was where it was */
     coord *dest;                        /* Where it is running to */
     short flags;                        /* State word */
-    struct stats stats;                /* Physical description */
-    struct room *room;                /* Current room for thing */
-    struct item_thing *pack;                /* What the thing is carrying */
-    int reserved;
-};
+    struct stats stats;                 /* Physical description */
+    struct room *room;                  /* Current room for thing */
+    std::list<ItemThing*> pack;         /* What the thing is carrying */
+    int reserved;                       /* Used during saving/loading */
 
-typedef struct item_thing ITEM_THING;
-typedef struct monster_thing MONSTER_THING;
+public:
+    MonsterThing();
+    MonsterThing(char type, const coord& cp);
+
+    void polymorph(char new_type);
+    
+    int experienceAdd();
+};
 
 typedef int(*daemon_function_t)(int);
 
@@ -411,7 +414,7 @@ typedef int(*daemon_function_t)(int);
 typedef struct {
     char p_ch;
     char p_flags;
-    MONSTER_THING *p_monst;
+    MonsterThing *p_monst;
 } PLACE;
 
 /*
@@ -460,9 +463,11 @@ extern coord        delta, oldpos, stairs;
 
 extern PLACE        places[];
 
-extern ITEM_THING *cur_armor, *cur_ring[], *cur_weapon, *l_last_pick,
-                  *last_pick, *lvl_obj;
-extern MONSTER_THING *mlist, player;
+extern ItemThing *cur_armor, *cur_ring[], *cur_weapon, *l_last_pick,
+                  *last_pick;
+extern std::list<ItemThing*> lvl_obj;
+extern std::list<MonsterThing*> mlist;
+extern MonsterThing player;
 
 extern struct h_list        helpstr[];
 
@@ -478,57 +483,16 @@ extern struct obj_info        arm_info[], pot_info[], ring_info[],
 /*
  * Function types
  */
-template<class T> void _attach(T** list, T* item)
-{
-    if (*list != NULL)
-    {
-        item->next = *list;
-        (*list)->prev = item;
-        item->prev = NULL;
-    }
-    else
-    {
-        item->next = NULL;
-        item->prev = NULL;
-    }
-    *list = item;
-}
-template<class T> void _detach(T** list, T* item)
-{
-    if (*list == item)
-        *list = item->next;
-    if (item->prev != NULL)
-        item->prev->next = item->next;
-    if (item->next != NULL)
-        item->next->prev = item->prev;
-    item->next = NULL;
-    item->prev = NULL;
-}
-template<class T> void _free_list(T** ptr)
-{
-    T *item;
-
-    while (*ptr != NULL)
-    {
-        item = *ptr;
-        *ptr = item->next;
-        discard(item);
-    }
-}
-template<class T> void discard(T* item)
-{
-    free(item);
-}
 void        addmsg(const char *fmt, ...);
 bool        add_haste(bool potion);
-void        add_pack(ITEM_THING *obj, bool silent);
+void        add_pack(ItemThing *obj, bool silent);
 void        add_pass();
 void        add_str(str_t *sp, int amt);
 void        accnt_maze(int y, int x, int ny, int nx);
 void        aggravate();
-int        attack(MONSTER_THING *mp);
+int        attack(MonsterThing *mp);
 void        badcheck(const char *name, struct obj_info *info, int bound);
-void        bounce(ITEM_THING *weap, const char *mname, bool noend);
+void        bounce(ItemThing *weap, const char *mname, bool noend);
 void        call();
 void        call_it(struct obj_info *info);
 bool        cansee(int y, int x);
@@ -538,7 +502,7 @@ void        conn(int r1, int r2);
 void        command();
 void        create_obj();
 
-void        current(ITEM_THING *cur, const char *how, const char *where);
+void        current(ItemThing *cur, const char *how, const char *where);
 void        d_level();
 void        death(char monst);
 char        death_monst();
@@ -546,11 +510,11 @@ void        dig(int y, int x);
 void        discovered();
 int        dist(int y1, int x1, int y2, int x2);
 int        dist_cp(coord *c1, coord *c2);
-int        do_chase(MONSTER_THING *th);
+int        do_chase(MonsterThing *th);
 void        do_daemons(int flag);
 void        do_fuses(int flag);
 void        do_maze(struct room *rp);
-void        do_motion(ITEM_THING *obj, int ydelta, int xdelta);
+void        do_motion(ItemThing *obj, int ydelta, int xdelta);
 void        do_move(int dy, int dx);
 void        do_passages();
 void        do_pot(int type, bool knowit);
@@ -567,27 +531,26 @@ void        eat();
 size_t  encread(void *start, size_t size, FILE *inf);
 size_t  encwrite(const void *start, size_t size, FILE *outf);
 int        endmsg();
-void        enter_room(coord *cp);
+void enter_room(const coord& cp);
 void        erase_lamp(coord *pos, struct room *rp);
-int        exp_add(MONSTER_THING *tp);
 void        extinguish(daemon_function_t func);
-void        fall(ITEM_THING *obj, bool pr);
+void        fall(ItemThing *obj, bool pr);
 void        fire_bolt(coord *start, coord *dir, const char *name);
 char        floor_at();
 void        flush_type();
-int        fight(coord *mp, ITEM_THING *weap, bool thrown);
-void        fix_stick(ITEM_THING *cur);
+int        fight(coord *mp, ItemThing *weap, bool thrown);
+void        fix_stick(ItemThing *cur);
 void        fuse(daemon_function_t func, int arg, int time, int type);
 bool        get_dir();
 int        gethand();
-void        give_pack(MONSTER_THING *tp);
+void        give_pack(MonsterThing *tp);
 void        help();
 void        hit(const char *er, const char *ee, bool noend);
 void        horiz(struct room *rp, int starty);
-void        leave_room(coord *cp);
+void        leave_room(const coord& cp);
 void        lengthen(daemon_function_t func, int xtime);
 void        look(bool wakeup);
-int        hit_monster(int y, int x, ITEM_THING *obj);
+int        hit_monster(int y, int x, ItemThing *obj);
 void        identify();
 void        illcom(int ch);
 void        init_check();
@@ -597,21 +560,20 @@ void        init_names();
 void        init_player();
 void        init_probs();
 void        init_stones();
-void        init_weapon(ITEM_THING *weap, int which);
-int         inventory(ITEM_THING *list, int type);
+void        init_weapon(ItemThing *weap, int which);
+int         inventory(int type);
 void        invis_on();
-void        killed(MONSTER_THING *tp, bool pr);
+void        killed(MonsterThing *tp, bool pr);
 void        kill_daemon(daemon_function_t func);
 bool        lock_sc();
 void        miss(const char *er, const char *ee, bool noend);
 void        missile(int ydelta, int xdelta);
 void        money(int value);
-int        move_monst(MONSTER_THING *tp);
-void        move_msg(ITEM_THING *obj);
+int        move_monst(MonsterThing *tp);
+void        move_msg(ItemThing *obj);
 int        msg(const char *fmt, ...);
-void        nameit(ITEM_THING *obj, const char *type, const char *which, struct obj_info *op, const char *(*prfunc)(ITEM_THING *));
+void        nameit(ItemThing *obj, const char *type, const char *which, struct obj_info *op, const char *(*prfunc)(ItemThing *));
 void        new_level();
-void        new_monster(MONSTER_THING *tp, char type, coord *cp);
 void        numpass(int y, int x);
 void        option();
 void        open_score();
@@ -628,8 +590,8 @@ void        quaff();
 void        raise_level();
 char        randmonster(bool wander);
 void        read_scroll();
-void    relocate(MONSTER_THING *th, coord *new_loc);
-void        remove_mon(coord *mp, MONSTER_THING *tp, bool waskill);
+void    relocate(MonsterThing *th, coord *new_loc);
+void        remove_mon(coord *mp, MonsterThing *tp, bool waskill);
 void        reset_last();
 bool        restore(const char *file);
 int        ring_eat(int hand);
@@ -640,16 +602,16 @@ int        rnd_room();
 int        roll(int number, int sides);
 int        rs_save_file(FILE *savef);
 int        rs_restore_file(FILE *inf);
-void        runto(coord *runner);
-void        rust_armor(ITEM_THING *arm);
+void        runto(const coord& runner);
+void        rust_armor(ItemThing *arm);
 int        save(int which);
 void        save_file(FILE *savef);
 void        save_game();
-int        save_throw(int which, MONSTER_THING *tp);
+int        save_throw(int which, MonsterThing *tp);
 void        score(int amount, int flags, char monst);
 void        search();
-void        set_know(ITEM_THING *obj, struct obj_info *info);
-void        set_oldch(MONSTER_THING *tp, coord *cp);
+void        set_know(ItemThing *obj, struct obj_info *info);
+void        set_oldch(MonsterThing *tp, coord *cp);
 void        setup();
 bool        show_floor();
 void        show_map();
@@ -663,62 +625,60 @@ int        swing(int at_lvl, int op_arm, int wplus);
 void        take_off();
 void        teleport();
 void        total_winner();
-void        thunk(ITEM_THING *weap, const char *mname, bool noend);
+void        thunk(ItemThing *weap, const char *mname, bool noend);
 void        treas_room();
 void        turnref();
 void        u_level();
-void        uncurse(ITEM_THING *obj);
+void        uncurse(ItemThing *obj);
 void        unlock_sc();
 void        vert(struct room *rp, int startx);
-MONSTER_THING *wake_monster(int y, int x);
+MonsterThing *wake_monster(int y, int x);
 void        wanderer();
 void        waste_time();
 void        wear();
 void        whatis(bool insist, int type);
 void        wield();
 
-bool        chase(MONSTER_THING *tp, coord *ee);
+bool        chase(MonsterThing *tp, coord *ee);
 bool        diag_ok(coord *sp, coord *ep);
-bool        dropcheck(ITEM_THING *obj);
+bool        dropcheck(ItemThing *obj);
 bool        fallpos(coord *pos, coord *newpos);
 bool        find_floor(struct room *rp, coord *cp, int limit, bool monst);
-bool        is_magic(ITEM_THING *obj);
+bool        is_magic(ItemThing *obj);
 bool        levit_check();
-bool        pack_room(bool from_floor, ITEM_THING *obj);
-bool        roll_em(MONSTER_THING *thatt, MONSTER_THING *thdef, ITEM_THING *weap, bool hurl);
-bool        see_monst(MONSTER_THING *mp);
+bool        pack_room(bool from_floor, ItemThing *obj);
+bool        roll_em(MonsterThing *thatt, MonsterThing *thdef, ItemThing *weap, bool hurl);
+bool        see_monst(MonsterThing *mp);
 bool        seen_stairs();
 bool        turn_ok(int y, int x);
 int         turn_see(int turn_off);
-bool        is_current(ITEM_THING *obj);
+bool        is_current(ItemThing *obj);
 
 char        be_trapped(coord *tc);
 char        floor_ch();
 char        pack_char();
 char        rnd_thing();
 
-const char  *charge_str(ITEM_THING *obj);
+const char  *charge_str(ItemThing *obj);
 const char  *choose_str(const char *ts, const char *ns);
-const char  *inv_name(ITEM_THING *obj, bool drop);
-const char  *nullstr(ITEM_THING *ignored);
+const char  *inv_name(ItemThing *obj, bool drop);
+const char  *nullstr(ItemThing *ignored);
 const char  *num(int n1, int n2, char type);
-const char  *ring_num(ITEM_THING *obj);
-const char  *set_mname(MONSTER_THING *tp);
+const char  *ring_num(ItemThing *obj);
+const char  *set_mname(MonsterThing *tp);
 const char  *vowelstr(const char *str);
 
 int        trip_ch(int y, int x, int ch);
 
-coord        *find_dest(MONSTER_THING *tp);
-coord        *rndmove(MONSTER_THING *who);
+coord        *find_dest(MonsterThing *tp);
+coord        *rndmove(MonsterThing *who);
 
-ITEM_THING   *find_obj(int y, int x);
-ITEM_THING   *get_item(const char *purpose, int type);
-ITEM_THING   *leave_pack(ITEM_THING *obj, bool newobj, bool all);
-ITEM_THING   *new_item();
-MONSTER_THING *new_monster_thing();
-ITEM_THING   *new_thing();
+ItemThing   *find_obj(int y, int x);
+ItemThing   *get_item(const char *purpose, int type);
+ItemThing   *leave_pack(ItemThing *obj, bool newobj, bool all);
+ItemThing   *new_thing();
 
-struct room        *roomin(coord *cp);
+struct room* roomin(const coord& cp);
 
 #define MAXDAEMONS 20
 

@@ -18,7 +18,7 @@
 void
 wear()
 {
-    ITEM_THING *obj;
+    ItemThing *obj;
     const char *sp;
 
     if ((obj = get_item("wear", ARMOR)) == NULL)
@@ -53,7 +53,7 @@ wear()
 void
 take_off()
 {
-    ITEM_THING *obj;
+    ItemThing *obj;
 
     if ((obj = cur_armor) == NULL)
     {

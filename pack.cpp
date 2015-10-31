@@ -21,10 +21,8 @@
  *        it off the ground.
  */
 
-void add_pack(ITEM_THING *obj, bool silent)
+void add_pack(ItemThing *obj, bool silent)
 {
-    ITEM_THING *op, *lp;
-    MONSTER_THING *mp;
     bool from_floor;
 
     from_floor = FALSE;
@@ -39,107 +37,84 @@ void add_pack(ITEM_THING *obj, bool silent)
      * Check for and deal with scare monster scrolls
      */
     if (obj->type == SCROLL && obj->which == S_SCARE)
+    {
         if (obj->flags & ISFOUND)
         {
-            detach(lvl_obj, obj);
+            lvl_obj.remove(obj);
             setMapDisplay(hero.x, hero.y, floor_ch());
             chat(hero.y, hero.x) = (player.room->r_flags & ISGONE) ? PASSAGE : FLOOR;
-            discard(obj);
+            delete obj;
             msg("the scroll turns to dust as you pick it up");
             return;
         }
-
-    if (player.pack == NULL)
-    {
-        player.pack = obj;
-        obj->packch = pack_char();
-        inpack++;
     }
-    else
+
+    // Deal with the complexity of adding this item to the players inventory.
+    bool placed = false;
+    // First, check if this is a grouped item, and place it in the proper group. This does not take inventory space.
+    for (ItemThing* op : player.pack)
     {
-        lp = NULL;
-        for (op = player.pack; op != NULL; op = op->next)
+        if (op->type == obj->type && op->which == obj->which && op->group && op->group == obj->group)
         {
-            if (op->type != obj->type)
-                lp = op;
-            else
+            //Call tke pack_room function, which removes the object from the floor (odd side behaviour)
+            inpack--;
+            pack_room(from_floor, obj);
+            
+            op->count += obj->count;
+            delete obj;
+            obj = op;
+            placed = true;
+            break;
+        }
+    }
+    
+    if (!placed)
+    {
+        // First, check if there is room in your inventory.
+        if (!pack_room(from_floor, obj))
+            return;
+        
+        // Next, check if we need to stack this item on an stack you already have
+        for (ItemThing* op : player.pack)
+        {
+            if (op->type == obj->type && op->which == obj->which && ISMULT(op->type))
             {
-                while (op->type == obj->type && op->which != obj->which)
-                {
-                    lp = op;
-                    if (op->next == NULL)
-                        break;
-                    else
-                        op = op->next;
-                }
-                if (op->type == obj->type && op->which == obj->which)
-                {
-                    if (ISMULT(op->type))
-                    {
-                        if (!pack_room(from_floor, obj))
-                            return;
-                        op->count++;
-dump_it:
-                        discard(obj);
-                        obj = op;
-                        lp = NULL;
-                        goto out;
-                    }
-                    else if (obj->group)
-                    {
-                        lp = op;
-                        while (op->type == obj->type
-                            && op->which == obj->which
-                            && op->group != obj->group)
-                        {
-                            lp = op;
-                            if (op->next == NULL)
-                                break;
-                            else
-                                op = op->next;
-                        }
-                        if (op->type == obj->type
-                            && op->which == obj->which
-                            && op->group == obj->group)
-                        {
-                                op->count += obj->count;
-                                inpack--;
-                                if (!pack_room(from_floor, obj))
-                                    return;
-                                goto dump_it;
-                        }
-                    }
-                    else
-                        lp = op;
-                }
-out:
+                op->count += obj->count;
+                delete obj;
+                obj = op;
+                placed = true;
+                inpack++;
                 break;
             }
         }
-
-        if (lp != NULL)
+        if (!placed)
         {
-            if (!pack_room(from_floor, obj))
-                return;
-            else
+            // If it's not a stacked item, find a proper position to place this item.
+            // We want to place it with the same "type" of objects. So the list is sorted on types.
+            auto place_before = player.pack.end();
+            for(auto it = player.pack.begin(); it != player.pack.end(); it++)
             {
-                obj->packch = pack_char();
-                obj->next = lp->next;
-                obj->prev = lp;
-                if (lp->next != NULL)
-                    lp->next->prev = obj;
-                lp->next = obj;
+                ItemThing* op = *it;
+                if (op->type == obj->type)
+                {
+                    place_before = it;
+                    if (op->which == obj->which)
+                        place_before++;
+                }
             }
+            player.pack.insert(place_before, obj);
+            obj->packch = pack_char();
+            inpack++;
         }
     }
-
+    
     obj->flags |= ISFOUND;
 
     /*
      * If this was the object of something's desire, that monster will
      * get mad and run at the hero.
      */
-    for (mp = mlist; mp != NULL; mp = mp->next)
+    for(MonsterThing* mp : mlist)
         if (mp->dest == &obj->pos)
             mp->dest = &hero;
 
@@ -161,7 +136,7 @@ out:
  *        See if there's room in the pack.  If not, print out an
  *        appropriate message
  */
-bool pack_room(bool from_floor, ITEM_THING *obj)
+bool pack_room(bool from_floor, ItemThing *obj)
 {
     if (++inpack > MAXPACK)
     {
@@ -179,7 +154,7 @@ bool pack_room(bool from_floor, ITEM_THING *obj)
 
     if (from_floor)
     {
-        detach(lvl_obj, obj);
+        lvl_obj.remove(obj);
         setMapDisplay(hero.x, hero.y, floor_ch());
         chat(hero.y, hero.x) = (player.room->r_flags & ISGONE) ? PASSAGE : FLOOR;
     }
@@ -191,9 +166,9 @@ bool pack_room(bool from_floor, ITEM_THING *obj)
  * leave_pack:
  *        take an item out of the pack
  */
-ITEM_THING * leave_pack(ITEM_THING *obj, bool newobj, bool all)
+ItemThing * leave_pack(ItemThing *obj, bool newobj, bool all)
 {
-    ITEM_THING *nobj;
+    ItemThing *nobj;
 
     inpack--;
     nobj = obj;
@@ -205,10 +180,8 @@ ITEM_THING * leave_pack(ITEM_THING *obj, bool newobj, bool all)
             inpack++;
         if (newobj)
         {
-            nobj = new_item();
+            nobj = new ItemThing();
             *nobj = *obj;
-            nobj->next = NULL;
-            nobj->prev = NULL;
             nobj->count = 1;
         }
     }
@@ -216,7 +189,7 @@ ITEM_THING * leave_pack(ITEM_THING *obj, bool newobj, bool all)
     {
         last_pick = NULL;
         pack_used[obj->packch - 'a'] = FALSE;
-        detach(player.pack, obj);
+        player.pack.remove(obj);
     }
     return nobj;
 }
@@ -241,15 +214,13 @@ pack_char()
  *        List what is in the pack.  Return TRUE if there is something of
  *        the given type.
  */
-int inventory(ITEM_THING *list_start, int type)
+int inventory(int type)
 {
     int ch;
-    ITEM_THING *list;
-    ITEM_THING *list2;
     
     startDisplayOfStringList();
     n_objs = 0;
-    for (list=list_start; list != NULL; list = list->next)
+    for (ItemThing* list : player.pack)
     {
         if (type && type != list->type && !(type == CALLABLE &&
             list->type != FOOD && list->type != AMULET) &&
@@ -259,7 +230,7 @@ int inventory(ITEM_THING *list_start, int type)
         ch = displayStringListItem("%c) %s", list->packch, inv_name(list, FALSE));
         if (ch == ESCAPE)
             return ch;
-        for (list2=list_start; list2 != NULL && list2 != list->next; list2 = list2->next)
+        for (ItemThing* list2 : player.pack)
         {
             if (type && type != list2->type && !(type == CALLABLE &&
                 list2->type != FOOD && list2->type != AMULET) &&
@@ -267,12 +238,14 @@ int inventory(ITEM_THING *list_start, int type)
                     continue;
             if (list2->packch == ch)
                 return ch;
+            if (list2 == list)
+                break;
         }
     }
     ch = finishDisplayOfStringList();
     if (ch == ESCAPE)
         return ch;
-    for (list=list_start; list != NULL; list = list->next)
+    for (ItemThing* list : player.pack)
     {
         if (type && type != list->type && !(type == CALLABLE &&
             list->type != FOOD && list->type != AMULET) &&
@@ -303,7 +276,7 @@ int inventory(ITEM_THING *list_start, int type)
 
 void pick_up(int ch)
 {
-    ITEM_THING *obj;
+    ItemThing *obj;
 
     if (on(player, ISLEVIT))
         return;
@@ -318,8 +291,8 @@ void pick_up(int ch)
                 if (obj == NULL)
                     return;
                 money(obj->arm);//gold value is stored in "arm" field (used to be handled with an ugly define)
-                detach(lvl_obj, obj);
-                discard(obj);
+                lvl_obj.remove(obj);
+                delete obj;
                 player.room->r_goldval = 0;
                 break;
             default:
@@ -345,7 +318,7 @@ void pick_up(int ch)
  */
 
 void
-move_msg(ITEM_THING *obj)
+move_msg(ItemThing *obj)
 {
     if (!terse)
         addmsg("you ");
@@ -360,13 +333,12 @@ move_msg(ITEM_THING *obj)
 void
 picky_inven()
 {
-    ITEM_THING *obj;
     char mch;
 
-    if (player.pack == NULL)
+    if (player.pack.size() == 0)
         msg("you aren't carrying anything");
-    else if (player.pack->next == NULL)
-        msg("a) %s", inv_name(player.pack, FALSE));
+    else if (player.pack.size() == 1)
+        msg("a) %s", inv_name(player.pack.front(), FALSE));
     else
     {
         mch = displayMessage(terse ? "item:" : "which item do you wish to inventory:");
@@ -374,7 +346,7 @@ picky_inven()
         {
             return;
         }
-        for (obj = player.pack; obj != NULL; obj = obj->next)
+        for (ItemThing* obj : player.pack)
             if (mch == obj->packch)
             {
                 msg("%c) %s", mch, inv_name(obj, FALSE));
@@ -388,13 +360,12 @@ picky_inven()
  * get_item:
  *        Pick something out of a pack for a purpose
  */
-ITEM_THING *
+ItemThing *
 get_item(const char *purpose, int type)
 {
-    ITEM_THING *obj;
     int ch;
 
-    if (player.pack == NULL)
+    if (player.pack.size() == 0)
         msg("you aren't carrying anything");
     else if (again)
         if (last_pick)
@@ -422,7 +393,7 @@ get_item(const char *purpose, int type)
             }
             if (ch == '*')
             {
-                ch = inventory(player.pack, type);
+                ch = inventory(type);
                 if (ch == ESCAPE)
                 {
                     after = FALSE;
@@ -434,9 +405,15 @@ get_item(const char *purpose, int type)
                     continue;
                 }
             }
-            for (obj = player.pack; obj != NULL; obj = obj->next)
-                if (obj->packch == ch)
+            ItemThing* obj = NULL;
+            for (ItemThing* o : player.pack)
+            {
+                if (o->packch == ch)
+                {
+                    obj = o;
                     break;
+                }
+            }
             if (obj == NULL)
             {
                 msg("'%s' is not a valid item", getKeyName(ch));

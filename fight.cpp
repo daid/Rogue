@@ -59,10 +59,9 @@ static int add_dam[] = {
  * fight:
  *        The player attacks the monster.
  */
-int
-fight(coord *mp, ITEM_THING *weap, bool thrown)
+int fight(coord *mp, ItemThing *weap, bool thrown)
 {
-    MONSTER_THING *tp;
+    MonsterThing *tp;
     bool did_hit = TRUE;
     const char *mname;
     int ch;
@@ -70,19 +69,14 @@ fight(coord *mp, ITEM_THING *weap, bool thrown)
     /*
      * Find the monster we want to fight
      */
-#ifdef MASTER
-    if ((tp = moat(mp->y, mp->x)) == NULL)
-        debug("Fight what @ %d,%d", mp->y, mp->x);
-#else
     tp = moat(mp->y, mp->x);
-#endif
     /*
      * Since we are fighting, things are not quiet so no healing takes
      * place.
      */
     count = 0;
     quiet = 0;
-    runto(mp);
+    runto(*mp);
     /*
      * Let him know it was really a xeroc (if it was one).
      */
@@ -136,7 +130,7 @@ fight(coord *mp, ITEM_THING *weap, bool thrown)
  * attack:
  *        The monster attacks the player
  */
-int attack(MONSTER_THING *mp)
+int attack(MonsterThing *mp)
 {
     const char *mname;
     int oldhp;
@@ -289,7 +283,7 @@ int attack(MONSTER_THING *mp)
                 }
                 when 'N':
                 {
-                    ITEM_THING *obj, *steal;
+                    ItemThing *steal;
                     int nobj;
 
                     /*
@@ -297,18 +291,17 @@ int attack(MONSTER_THING *mp)
                      * and pick out one we like.
                      */
                     steal = NULL;
-                    for (nobj = 0, obj = player.pack; obj != NULL; obj = obj->next)
-                        if (obj != cur_armor && obj != cur_weapon
-                            && obj != cur_ring[LEFT] && obj != cur_ring[RIGHT]
-                            && is_magic(obj) && rnd(++nobj) == 0)
-                                steal = obj;
+                    nobj = 0;
+                    for (ItemThing* obj : player.pack)
+                        if (obj != cur_armor && obj != cur_weapon && obj != cur_ring[LEFT] && obj != cur_ring[RIGHT] && is_magic(obj) && rnd(++nobj) == 0)
+                            steal = obj;
                     if (steal != NULL)
                     {
                         remove_mon(&mp->pos, moat(mp->pos.y, mp->pos.x), FALSE);
                         mp=NULL;
                         leave_pack(steal, FALSE, FALSE);
                         msg("she stole %s!", inv_name(steal, TRUE));
-                        discard(steal);
+                        delete steal;
                     }
                 }
                 otherwise:
@@ -344,7 +337,7 @@ int attack(MONSTER_THING *mp)
  * set_mname:
  *        return the monster name for the given monster
  */
-const char* set_mname(MONSTER_THING *tp)
+const char* set_mname(MonsterThing *tp)
 {
     int ch;
     const char *mname;
@@ -391,7 +384,7 @@ swing(int at_lvl, int op_arm, int wplus)
  * roll_em:
  *        Roll several attacks
  */
-bool roll_em(MONSTER_THING *thatt, MONSTER_THING *thdef, ITEM_THING *weap, bool hurl)
+bool roll_em(MonsterThing *thatt, MonsterThing *thdef, ItemThing *weap, bool hurl)
 {
     register struct stats *att, *def;
     register char *cp;
@@ -501,7 +494,7 @@ const char * prname(const char *mname, bool upper)
  * thunk:
  *        A missile hits a monster
  */
-void thunk(ITEM_THING *weap, const char *mname, bool noend)
+void thunk(ItemThing *weap, const char *mname, bool noend)
 {
     if (to_death)
         return;
@@ -572,7 +565,7 @@ void miss(const char *er, const char *ee, bool noend)
  * bounce:
  *        A missile misses a monster
  */
-void bounce(ITEM_THING *weap, const char *mname, bool noend)
+void bounce(ItemThing *weap, const char *mname, bool noend)
 {
     if (to_death)
         return;
@@ -589,24 +582,21 @@ void bounce(ITEM_THING *weap, const char *mname, bool noend)
  * remove_mon:
  *        Remove a monster from the screen
  */
-void
-remove_mon(coord *mp, MONSTER_THING *tp, bool waskill)
+void remove_mon(coord *mp, MonsterThing *tp, bool waskill)
 {
-    ITEM_THING *obj, *nexti;
-
-    for (obj = tp->pack; obj != NULL; obj = nexti)
+    for(auto it = tp->pack.begin(); it != tp->pack.end(); )
     {
-        nexti = obj->next;
+        ItemThing* obj = *it++;
         obj->pos = tp->pos;
-        detach(tp->pack, obj);
+        tp->pack.remove(obj);
         if (waskill)
             fall(obj, FALSE);
         else
-            discard(obj);
+            delete obj;
     }
     moat(mp->y, mp->x) = NULL;
     setMapDisplay(mp->x, mp->y, tp->oldch);
-    detach(mlist, tp);
+    mlist.remove(tp);
     if (on(*tp, ISTARGET))
     {
         kamikaze = FALSE;
@@ -614,7 +604,7 @@ remove_mon(coord *mp, MONSTER_THING *tp, bool waskill)
         if (fight_flush)
             flush_type();
     }
-    discard(tp);
+    delete tp;
 }
 
 /*
@@ -622,7 +612,7 @@ remove_mon(coord *mp, MONSTER_THING *tp, bool waskill)
  *        Called to put a monster to death
  */
 void
-killed(MONSTER_THING *tp, bool pr)
+killed(MonsterThing *tp, bool pr)
 {
     const char *mname;
 
@@ -639,17 +629,17 @@ killed(MONSTER_THING *tp, bool pr)
             strcpy(monsters['F'-'A'].m_stats.s_dmg, "000x0");
         when 'L':
         {
-            ITEM_THING *gold;
+            ItemThing *gold;
 
             if (fallpos(&tp->pos, &tp->room->r_gold) && level >= max_level)
             {
-                gold = new_item();
+                gold = new ItemThing();
                 gold->type = GOLD;
                 gold->arm = GOLDCALC;
                 if (save(VS_MAGIC))
                     gold->arm += GOLDCALC + GOLDCALC
                                      + GOLDCALC + GOLDCALC;
-                attach(tp->pack, gold);
+                tp->pack.push_front(gold);
             }
         }
     }

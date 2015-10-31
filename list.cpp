@@ -12,28 +12,3 @@
 
 #include <stdlib.h>
 #include "rogue.h"
-
-
-/*
- * new_item
- *        Get a new item with a specified size
- */
-ITEM_THING* new_item()
-{
-    ITEM_THING *item;
-
-    item = (ITEM_THING*)calloc(1, sizeof *item);
-    item->next = NULL;
-    item->prev = NULL;
-    return item;
-}
-
-MONSTER_THING *new_monster_thing()
-{
-    MONSTER_THING *item;
-
-    item = (MONSTER_THING*)calloc(1, sizeof *item);
-    item->next = NULL;
-    item->prev = NULL;
-    return item;
-}

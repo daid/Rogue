@@ -767,36 +767,29 @@ rs_read_window(FILE *inf)
 
 /******************************************************************************/
 
-template<class T> T* get_list_item(T *l, int i)
+ItemThing* get_list_item(std::list<ItemThing*>& l, int i)
 {
-    int count;
-
-    for(count = 0; l != NULL; count++, l = l->next)
+    int count = 0;
+    for(ItemThing* obj : l)
+    {
         if (count == i)
-            return(l);
-    
+            return obj;
+        count++;
+    }
     return(NULL);
 }
 
-template<class T> int find_list_ptr(T *l, T *ptr)
+int find_list_ptr(std::list<ItemThing*>& l, ItemThing *ptr)
 {
-    int count;
-
-    for(count = 0; l != NULL; count++, l = l->next)
-        if (l == ptr)
+    int count = 0;
+    for(ItemThing* obj : l)
+    {
+        if (obj == ptr)
             return(count);
+        count++;
+    }
     
     return(-1);
-}
-
-template<class T> int list_size(T *l)
-{
-    int count;
-    
-    for(count = 0; l != NULL; count++, l = l->next)
-        ;
-    
-    return(count);
 }
 
 /******************************************************************************/
@@ -1331,7 +1324,7 @@ rs_read_monsters(FILE *inf, struct monster *m, int count)
 }
 
 int
-rs_write_object(FILE *savef, ITEM_THING *o)
+rs_write_object(FILE *savef, ItemThing *o)
 {
     if (write_error)
         return(WRITESTAT);
@@ -1355,7 +1348,7 @@ rs_write_object(FILE *savef, ITEM_THING *o)
 }
 
 int
-rs_read_object(FILE *inf, ITEM_THING *o)
+rs_read_object(FILE *inf, ItemThing *o)
 {
     if (read_error || format_error)
         return(READSTAT);
@@ -1380,25 +1373,24 @@ rs_read_object(FILE *inf, ITEM_THING *o)
 }
 
 int
-rs_write_object_list(FILE *savef, ITEM_THING *l)
+rs_write_object_list(FILE *savef, std::list<ItemThing*>& list)
 {
     if (write_error)
         return(WRITESTAT);
 
     rs_write_marker(savef, RSID_OBJECTLIST);
-    rs_write_int(savef, list_size(l));
+    rs_write_int(savef, list.size());
 
-    for( ;l != NULL; l = l->next)
+    for(ItemThing* l : list)
         rs_write_object(savef, l);
     
     return(WRITESTAT);
 }
 
-int
-rs_read_object_list(FILE *inf, ITEM_THING **list)
+int rs_read_object_list(FILE *inf, std::list<ItemThing*>& list)
 {
     int i, cnt;
-    ITEM_THING *l = NULL, *previous = NULL, *head = NULL;
+    ItemThing *l = NULL;
 
     if (read_error || format_error)
         return(READSTAT);
@@ -1408,33 +1400,17 @@ rs_read_object_list(FILE *inf, ITEM_THING **list)
 
     for (i = 0; i < cnt; i++) 
     {
-        l = new_item();
-
-        memset(l,0,sizeof(ITEM_THING));
-
-        l->prev = previous;
-
-        if (previous != NULL)
-            previous->next = l;
+        l = new ItemThing();
+        list.push_back(l);
 
         rs_read_object(inf,l);
-
-        if (previous == NULL)
-            head = l;
-
-        previous = l;
     }
-            
-    if (l != NULL)
-        l->next = NULL;
-    
-    *list = head;
 
     return(READSTAT);
 }
 
 int
-rs_write_object_reference(FILE *savef, ITEM_THING *list, ITEM_THING *item)
+rs_write_object_reference(FILE *savef, std::list<ItemThing*>& list, ItemThing *item)
 {
     int i;
     
@@ -1449,7 +1425,7 @@ rs_write_object_reference(FILE *savef, ITEM_THING *list, ITEM_THING *item)
 }
 
 int
-rs_read_object_reference(FILE *inf, ITEM_THING *list, ITEM_THING **item)
+rs_read_object_reference(FILE *inf, std::list<ItemThing*>& list, ItemThing **item)
 {
     int i;
     
@@ -1458,7 +1434,7 @@ rs_read_object_reference(FILE *inf, ITEM_THING *list, ITEM_THING **item)
 
     rs_read_int(inf, &i);
 
-    *item = get_list_item(list,i);
+    *item = get_list_item(list, i);
             
     return(READSTAT);
 }
@@ -1475,17 +1451,12 @@ find_room_coord(struct room *rmlist, coord *c, int n)
     return(-1);
 }
 
-int
-find_thing_coord(MONSTER_THING *monlist, coord *c)
+int find_monster_index_for_coord(coord *c)
 {
-    MONSTER_THING *mitem;
-    MONSTER_THING *tp;
     int i = 0;
 
-    for(mitem = monlist; mitem != NULL; mitem = mitem->next)
+    for(MonsterThing* tp : mlist)
     {
-        tp = mitem;
-
         if (c == &tp->pos)
             return(i);
 
@@ -1495,17 +1466,12 @@ find_thing_coord(MONSTER_THING *monlist, coord *c)
     return(-1);
 }
 
-int
-find_object_coord(ITEM_THING *objlist, coord *c)
+int find_object_coord(coord *c)
 {
-    ITEM_THING *oitem;
-    ITEM_THING *obj;
     int i = 0;
 
-    for(oitem = objlist; oitem != NULL; oitem = oitem->next)
+    for(ItemThing* obj : lvl_obj)
     {
-        obj = oitem;
-
         if (c == &obj->pos)
             return(i);
 
@@ -1516,7 +1482,7 @@ find_object_coord(ITEM_THING *objlist, coord *c)
 }
 
 int
-rs_write_thing(FILE *savef, MONSTER_THING *t)
+rs_write_thing(FILE *savef, MonsterThing *t)
 {
     int i = -1;
     
@@ -1557,7 +1523,7 @@ rs_write_thing(FILE *savef, MONSTER_THING *t)
     }
     else if (t->dest != NULL)
     {
-        i = find_thing_coord(mlist, t->dest);
+        i = find_monster_index_for_coord(t->dest);
             
         if (i >=0 )
         {
@@ -1566,7 +1532,7 @@ rs_write_thing(FILE *savef, MONSTER_THING *t)
         }
         else
         {
-            i = find_object_coord(lvl_obj, t->dest);
+            i = find_object_coord(t->dest);
             
             if (i >= 0)
             {
@@ -1605,7 +1571,7 @@ rs_write_thing(FILE *savef, MONSTER_THING *t)
 }
 
 int
-rs_read_thing(FILE *inf, MONSTER_THING *t)
+rs_read_thing(FILE *inf, MonsterThing *t)
 {
     int listid = 0, index = -1;
 
@@ -1655,7 +1621,7 @@ rs_read_thing(FILE *inf, MONSTER_THING *t)
     }
     else if (listid == 2) /* object */
     {
-        ITEM_THING *obj;
+        ItemThing *obj;
 
         obj = get_list_item(lvl_obj, index);
 
@@ -1674,20 +1640,23 @@ rs_read_thing(FILE *inf, MONSTER_THING *t)
     rs_read_short(inf,&t->flags);
     rs_read_stats(inf,&t->stats);
     rs_read_room_reference(inf, &t->room);
-    rs_read_object_list(inf,&t->pack);
+    rs_read_object_list(inf, t->pack);
     
     return(READSTAT);
 }
 
 void
-rs_fix_thing(MONSTER_THING *t)
+rs_fix_monster(MonsterThing *t)
 {
-    MONSTER_THING *item;
+    MonsterThing *item;
 
     if (t->reserved < 0)
         return;
 
-    item = get_list_item(mlist, t->reserved);
+    auto it = mlist.begin();
+    for(int n=0; n<t->reserved; n++)
+        it++;
+    item = *it;
 
     if (item != NULL)
     {
@@ -1696,7 +1665,7 @@ rs_fix_thing(MONSTER_THING *t)
 }
 
 int
-rs_write_thing_list(FILE *savef, MONSTER_THING *l)
+rs_write_monster_list(FILE *savef)
 {
     int cnt = 0;
     
@@ -1705,26 +1674,23 @@ rs_write_thing_list(FILE *savef, MONSTER_THING *l)
 
     rs_write_marker(savef, RSID_MONSTERLIST);
 
-    cnt = list_size(l);
+    cnt = mlist.size();
 
     rs_write_int(savef, cnt);
 
     if (cnt < 1)
         return(WRITESTAT);
 
-    while (l != NULL) {
+    for(MonsterThing* l : mlist)
         rs_write_thing(savef, l);
-        l = l->next;
-    }
     
     return(WRITESTAT);
 }
 
-int
-rs_read_thing_list(FILE *inf, MONSTER_THING **list)
+int rs_read_monster_list(FILE *inf)
 {
     int i, cnt;
-    MONSTER_THING *l = NULL, *previous = NULL, *head = NULL;
+    MonsterThing *l = NULL;
 
     if (read_error || format_error)
         return(READSTAT);
@@ -1735,60 +1701,46 @@ rs_read_thing_list(FILE *inf, MONSTER_THING **list)
 
     for (i = 0; i < cnt; i++) 
     {
-        l = new_monster_thing();
-
-        l->prev = previous;
-            
-        if (previous != NULL)
-            previous->next = l;
-
+        l = new MonsterThing();
+        mlist.push_back(l);
         rs_read_thing(inf,l);
-
-        if (previous == NULL)
-            head = l;
-
-        previous = l;
     }
         
-    if (l != NULL)
-        l->next = NULL;
-
-    *list = head;
-    
     return(READSTAT);
 }
 
 void
-rs_fix_thing_list(MONSTER_THING *list)
+rs_fix_monster_list()
 {
-    MONSTER_THING *item;
-
-    for(item = list; item != NULL; item = item->next)
-        rs_fix_thing(item);
+    for(MonsterThing *item : mlist)
+        rs_fix_monster(item);
 }
 
 int
-rs_write_thing_reference(FILE *savef, MONSTER_THING *list, MONSTER_THING *item)
+rs_write_monster_reference(FILE *savef, MonsterThing *item)
 {
     int i;
 
     if (write_error)
         return(WRITESTAT);
 
-    if (item == NULL)
-        rs_write_int(savef,-1);
-    else
+    i = 0;
+    for(MonsterThing* mt : mlist)
     {
-        i = find_list_ptr(list, item);
-
-        rs_write_int(savef, i);
+        if (item == mt)
+        {
+            rs_write_int(savef, i);
+            return(WRITESTAT);
+        }
+        i++;
     }
+    rs_write_int(savef,-1);
 
     return(WRITESTAT);
 }
 
 int
-rs_read_thing_reference(FILE *inf, MONSTER_THING *list, MONSTER_THING **item)
+rs_read_monster_reference(FILE *inf, MonsterThing **item)
 {
     int i;
     
@@ -1798,39 +1750,19 @@ rs_read_thing_reference(FILE *inf, MONSTER_THING *list, MONSTER_THING **item)
     rs_read_int(inf, &i);
 
     if (i == -1)
+    {
         *item = NULL;
-    else
-        *item = get_list_item(list,i);
+    }else{
+        auto it = mlist.begin();
+        while(i > 0)
+        {
+            it++;
+            i--;
+        }
+        *item = *it;
+    }
 
     return(READSTAT);
-}
-
-int
-rs_write_thing_references(FILE *savef, MONSTER_THING *list, MONSTER_THING *items[], int count)
-{
-    int i;
-
-    if (write_error)
-        return(WRITESTAT);
-
-    for(i = 0; i < count; i++)
-        rs_write_thing_reference(savef,list,items[i]);
-
-    return(WRITESTAT);
-}
-
-int
-rs_read_thing_references(FILE *inf, MONSTER_THING *list, MONSTER_THING *items[], int count)
-{
-    int i;
-
-    if (read_error || format_error)
-        return(READSTAT);
-
-    for(i = 0; i < count; i++)
-        rs_read_thing_reference(inf,list,&items[i]);
-
-    return(WRITESTAT);
 }
 
 int 
@@ -1845,7 +1777,7 @@ rs_write_places(FILE *savef, PLACE *places, int count)
     {
         rs_write_char(savef, places[i].p_ch);
         rs_write_char(savef, places[i].p_flags);
-        rs_write_thing_reference(savef, mlist, places[i].p_monst);
+        rs_write_monster_reference(savef, places[i].p_monst);
     }
 
     return(WRITESTAT);
@@ -1863,7 +1795,7 @@ rs_read_places(FILE *inf, PLACE *places, int count)
     {
         rs_read_char(inf,&places[i].p_ch);
         rs_read_char(inf,&places[i].p_flags);
-        rs_read_thing_reference(inf, mlist, &places[i].p_monst);
+        rs_read_monster_reference(inf, &places[i].p_monst);
     }
 
     return(READSTAT);
@@ -1953,7 +1885,7 @@ rs_save_file(FILE *savef)
     rs_write_object_reference(savef, player.pack, last_pick); 
     
     rs_write_object_list(savef, lvl_obj);               
-    rs_write_thing_list(savef, mlist);                
+    rs_write_monster_list(savef);
 
     rs_write_places(savef,places,MAXLINES*MAXCOLS);
 
@@ -2072,10 +2004,10 @@ rs_restore_file(FILE *inf)
     rs_read_object_reference(inf, player.pack, &l_last_pick);
     rs_read_object_reference(inf, player.pack, &last_pick);
 
-    rs_read_object_list(inf, &lvl_obj);                 
-    rs_read_thing_list(inf, &mlist);                  
-    rs_fix_thing(&player);
-    rs_fix_thing_list(mlist);
+    rs_read_object_list(inf, lvl_obj);
+    rs_read_monster_list(inf);                  
+    rs_fix_monster(&player);
+    rs_fix_monster_list();
 
     rs_read_places(inf,places,MAXLINES*MAXCOLS);
 

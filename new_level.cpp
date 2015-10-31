@@ -21,7 +21,6 @@
 void
 new_level()
 {
-    MONSTER_THING *tp;
     PLACE *pp;
     char *sp;
     int i;
@@ -42,13 +41,19 @@ new_level()
     /*
      * Free up the monsters on the last level
      */
-    for (tp = mlist; tp != NULL; tp = tp->next)
-        free_list(tp->pack);
-    free_list(mlist);
+    for(MonsterThing* tp : mlist)
+    {
+        for(ItemThing* obj : tp->pack)
+            delete obj;
+        delete tp;
+    }
+    mlist.clear();
     /*
      * Throw away stuff left on the previous level (if anything)
      */
-    free_list(lvl_obj);
+    for(ItemThing* obj : lvl_obj)
+        delete obj;
+    lvl_obj.clear();
     do_rooms();                                /* Draw rooms */
     do_passages();                        /* Draw passages */
     no_food++;
@@ -86,11 +91,11 @@ new_level()
     chat(stairs.y, stairs.x) = STAIRS;
     seenstairs = FALSE;
 
-    for (tp = mlist; tp != NULL; tp = tp->next)
-        tp->room = roomin(&tp->pos);
+    for(MonsterThing *tp : mlist)
+        tp->room = roomin(tp->pos);
 
     find_floor((struct room *) NULL, &hero, FALSE, TRUE);
-    enter_room(&hero);
+    enter_room(hero);
     setMapDisplay(hero.x, hero.y, PLAYER);
     if (on(player, SEEMONST))
         turn_see(FALSE);
@@ -123,7 +128,7 @@ void
 put_things()
 {
     int i;
-    ITEM_THING *obj;
+    ItemThing *obj;
 
     /*
      * Once you have found the amulet, the only way to get new stuff is
@@ -146,7 +151,7 @@ put_things()
              * Pick a new object and link it in the list
              */
             obj = new_thing();
-            attach(lvl_obj, obj);
+            lvl_obj.push_front(obj);
             /*
              * Put it somewhere
              */
@@ -159,8 +164,8 @@ put_things()
      */
     if (level >= AMULETLEVEL && !amulet)
     {
-        obj = new_item();
-        attach(lvl_obj, obj);
+        obj = new ItemThing();
+        lvl_obj.push_front(obj);
         obj->hplus = 0;
         obj->dplus = 0;
         strncpy(obj->damage,"0x0",sizeof(obj->damage));
@@ -186,8 +191,8 @@ void
 treas_room()
 {
     int nm;
-    ITEM_THING *tp;
-    MONSTER_THING *monster_p;
+    ItemThing *tp;
+    MonsterThing *monster_p;
     struct room *rp;
     int spots, num_monst;
     static coord mp;
@@ -202,7 +207,7 @@ treas_room()
         find_floor(rp, &mp, 2 * MAXTRIES, FALSE);
         tp = new_thing();
         tp->pos = mp;
-        attach(lvl_obj, tp);
+        lvl_obj.push_front(tp);
         chat(mp.y, mp.x) = (char) tp->type;
     }
 
@@ -221,8 +226,7 @@ treas_room()
         spots = 0;
         if (find_floor(rp, &mp, MAXTRIES, TRUE))
         {
-            monster_p = new_monster_thing();
-            new_monster(monster_p, randmonster(FALSE), &mp);
+            monster_p = new MonsterThing(randmonster(FALSE), mp);
             monster_p->flags |= ISMEAN;        /* no sloughers in THIS room */
             give_pack(monster_p);
         }

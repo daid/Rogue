@@ -51,59 +51,104 @@ randmonster(bool wander)
     return mons[d];
 }
 
+MonsterThing::MonsterThing()
+{
+    pos.x = pos.y = 0;                        /* Position */
+    turn = FALSE;                        /* If slowed, is it a turn to move */
+    type = 0;                        /* What it is */
+    disguise = 0;                /* What mimic looks like */
+    oldch = 0;                        /* Character that was where it was */
+    dest = NULL;                        /* Where it is running to */
+    flags = 0;                        /* State word */
+    stats.s_str = 0;                        /* Strength */
+    stats.s_exp = 0;                                /* Experience */
+    stats.s_lvl = 0;                                /* level of mastery */
+    stats.s_arm = 0;                                /* Armor class */
+    stats.s_hpt = 0;                        /* Hit points */
+    stats.s_dmg[0] = 0;                        /* String describing damage done */
+    stats.s_maxhp = 0;                        /* Max hit points */
+    room = NULL;                /* Current room for thing */
+    reserved = 0;
+}
+
 /*
  * new_monster:
  *        Pick a new monster and add it to the list
  */
-
-void new_monster(MONSTER_THING *tp, char type, coord *cp)
+MonsterThing::MonsterThing(char type, const coord& cp)
 {
-    struct monster *mp;
     int lev_add;
+    struct monster* mp;
 
     if ((lev_add = level - AMULETLEVEL) < 0)
         lev_add = 0;
-    attach(mlist, tp);
-    tp->type = type;
-    tp->disguise = type;
-    tp->pos = *cp;
-    tp->oldch = getMapDisplay(cp->x, cp->y);
-    tp->room = roomin(cp);
-    moat(cp->y, cp->x) = tp;
-    mp = &monsters[tp->type-'A'];
-    tp->stats.s_lvl = mp->m_stats.s_lvl + lev_add;
-    tp->stats.s_maxhp = tp->stats.s_hpt = roll(tp->stats.s_lvl, 8);
-    tp->stats.s_arm = mp->m_stats.s_arm - lev_add;
-    strcpy(tp->stats.s_dmg,mp->m_stats.s_dmg);
-    tp->stats.s_str = mp->m_stats.s_str;
-    tp->stats.s_exp = mp->m_stats.s_exp + lev_add * 10 + exp_add(tp);
-    tp->flags = mp->m_flags;
+    mlist.push_back(this);
+    this->type = type;
+    this->disguise = type;
+    this->pos = cp;
+    this->oldch = getMapDisplay(cp.x, cp.y);
+    this->room = roomin(cp);
+    moat(cp.y, cp.x) = this;
+    mp = &monsters[this->type-'A'];
+    this->stats.s_lvl = mp->m_stats.s_lvl + lev_add;
+    this->stats.s_maxhp = this->stats.s_hpt = roll(this->stats.s_lvl, 8);
+    this->stats.s_arm = mp->m_stats.s_arm - lev_add;
+    strcpy(this->stats.s_dmg,mp->m_stats.s_dmg);
+    this->stats.s_str = mp->m_stats.s_str;
+    this->stats.s_exp = mp->m_stats.s_exp + lev_add * 10 + experienceAdd();
+    this->flags = mp->m_flags;
     if (level > 29)
-        tp->flags |= ISHASTE;
-    tp->turn = TRUE;
-    tp->pack = NULL;
+        this->flags |= ISHASTE;
+    this->turn = TRUE;
+    this->dest = NULL;
     if (ISWEARING(R_AGGR))
         runto(cp);
     if (type == 'X')
-        tp->disguise = rnd_thing();
+        this->disguise = rnd_thing();
+    this->reserved = 0;
+}
+
+void MonsterThing::polymorph(char new_type)
+{
+    struct monster* old_mp = &monsters[type-'A'];
+    struct monster* new_mp = &monsters[new_type-'A'];
+    
+    //Change this monster into a different kind of monster.
+    type = new_type;
+    disguise = type;
+    //Change all the stats to reflect the new monster. Use the previous monster template to find how to adjust the stats.
+    stats.s_lvl = new_mp->m_stats.s_lvl + (stats.s_lvl - old_mp->m_stats.s_lvl);
+    stats.s_arm = new_mp->m_stats.s_arm + (stats.s_arm - old_mp->m_stats.s_arm);
+    strcpy(this->stats.s_dmg, new_mp->m_stats.s_dmg);
+    stats.s_str = new_mp->m_stats.s_str;
+    stats.s_exp = new_mp->m_stats.s_exp + (stats.s_lvl - new_mp->m_stats.s_lvl) * 10 + experienceAdd();
+    //Keep all the flags that where not set by the monster template.
+    flags &=~old_mp->m_flags;
+    flags |= new_mp->m_flags;
+    //Adjust the hitpoints to a new value, keep the hitpoints amount at about the same faction, rounded up.
+    int new_maxhp = roll(stats.s_lvl, 8);
+    stats.s_hpt = ((stats.s_hpt * new_maxhp) + stats.s_maxhp - 1) / stats.s_maxhp;
+    stats.s_maxhp = new_maxhp;
+    
+    if (type == 'X')
+        disguise = rnd_thing();
 }
 
 /*
  * expadd:
  *        Experience to add for this monster's level/hit points
  */
-int
-exp_add(MONSTER_THING *tp)
+int MonsterThing::experienceAdd()
 {
     int mod;
 
-    if (tp->stats.s_lvl == 1)
-        mod = tp->stats.s_maxhp / 8;
+    if (stats.s_lvl == 1)
+        mod = stats.s_maxhp / 8;
     else
-        mod = tp->stats.s_maxhp / 6;
-    if (tp->stats.s_lvl > 9)
+        mod = stats.s_maxhp / 6;
+    if (stats.s_lvl > 9)
         mod *= 20;
-    else if (tp->stats.s_lvl > 6)
+    else if (stats.s_lvl > 6)
         mod *= 4;
     return mod;
 }
@@ -116,15 +161,14 @@ exp_add(MONSTER_THING *tp)
 void
 wanderer()
 {
-    MONSTER_THING *tp;
+    MonsterThing *tp;
     static coord cp;
 
-    tp = new_monster_thing();
     do
     {
         find_floor((struct room *) NULL, &cp, FALSE, TRUE);
-    } while (roomin(&cp) == player.room);
-    new_monster(tp, randmonster(TRUE), &cp);
+    } while (roomin(cp) == player.room);
+    tp = new MonsterThing(randmonster(TRUE), cp);
     if (on(player, SEEMONST))
     {
         if (!on(player, ISHALU))
@@ -132,7 +176,7 @@ wanderer()
         else
             setMapDisplay(cp.x, cp.y, (rnd(26) + 'A') | DISPLAY_INVERT);
     }
-    runto(&tp->pos);
+    runto(tp->pos);
 #ifdef MASTER
     if (wizard)
         msg("started a wandering %s", monsters[tp->type-'A'].m_name);
@@ -143,9 +187,9 @@ wanderer()
  * wake_monster:
  *        What to do when the hero steps next to a monster
  */
-MONSTER_THING* wake_monster(int y, int x)
+MonsterThing* wake_monster(int y, int x)
 {
-    MONSTER_THING *tp;
+    MonsterThing *tp;
     struct room *rp;
     int ch;
     const char *mname;
@@ -210,10 +254,10 @@ MONSTER_THING* wake_monster(int y, int x)
  */
 
 void
-give_pack(MONSTER_THING *tp)
+give_pack(MonsterThing *tp)
 {
     if (level >= max_level && rnd(100) < monsters[tp->type-'A'].m_carry)
-        attach(tp->pack, new_thing());
+        tp->pack.push_front(new_thing());
 }
 
 /*
@@ -221,7 +265,7 @@ give_pack(MONSTER_THING *tp)
  *        See if a creature save against something
  */
 int
-save_throw(int which, MONSTER_THING *tp)
+save_throw(int which, MonsterThing *tp)
 {
     int need;
 

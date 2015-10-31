@@ -43,7 +43,7 @@ static struct init_weaps {
 void
 missile(int ydelta, int xdelta)
 {
-    ITEM_THING *obj;
+    ItemThing *obj;
 
     /*
      * Get which thing we are hurling
@@ -70,7 +70,7 @@ missile(int ydelta, int xdelta)
  */
 
 void
-do_motion(ITEM_THING *obj, int ydelta, int xdelta)
+do_motion(ItemThing *obj, int ydelta, int xdelta)
 {
     int ch;
 
@@ -119,7 +119,7 @@ do_motion(ITEM_THING *obj, int ydelta, int xdelta)
  */
 
 void
-fall(ITEM_THING *obj, bool pr)
+fall(ItemThing *obj, bool pr)
 {
     PLACE *pp;
     static coord fpos;
@@ -136,7 +136,7 @@ fall(ITEM_THING *obj, bool pr)
             else
                 setMapDisplay(fpos.x, fpos.y, obj->type);
         }
-        attach(lvl_obj, obj);
+        lvl_obj.push_front(obj);
         return;
     }
     if (pr)
@@ -149,7 +149,7 @@ fall(ITEM_THING *obj, bool pr)
         msg("the %s vanishes as it hits the ground",
             weap_info[obj->which].oi_name);
     }
-    discard(obj);
+    delete obj;
 }
 
 /*
@@ -158,7 +158,7 @@ fall(ITEM_THING *obj, bool pr)
  */
 
 void
-init_weapon(ITEM_THING *weap, int which)
+init_weapon(ItemThing *weap, int which)
 {
     struct init_weaps *iwp;
 
@@ -193,7 +193,7 @@ init_weapon(ITEM_THING *weap, int which)
  *        Does the missile hit the monster?
  */
 int
-hit_monster(int y, int x, ITEM_THING *obj)
+hit_monster(int y, int x, ItemThing *obj)
 {
     static coord mp;
 
@@ -224,7 +224,7 @@ const char* num(int n1, int n2, char type)
 void
 wield()
 {
-    ITEM_THING *obj, *oweapon;
+    ItemThing *obj, *oweapon;
     const char *sp;
 
     oweapon = cur_weapon;

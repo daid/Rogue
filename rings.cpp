@@ -20,7 +20,7 @@
 void
 ring_on()
 {
-    ITEM_THING *obj;
+    ItemThing *obj;
     int ring;
 
     obj = get_item("put on", RING);
@@ -93,7 +93,7 @@ void
 ring_off()
 {
     int ring;
-    ITEM_THING *obj;
+    ItemThing *obj;
 
     if (cur_ring[LEFT] == NULL && cur_ring[RIGHT] == NULL)
     {
@@ -152,7 +152,7 @@ gethand()
 int
 ring_eat(int hand)
 {
-    ITEM_THING *ring;
+    ItemThing *ring;
     int eat;
     static int uses[] = {
          1,        /* R_PROTECT */                 1,        /* R_ADDSTR */
@@ -177,7 +177,7 @@ ring_eat(int hand)
  * ring_num:
  *        Print ring bonuses
  */
-const char * ring_num(ITEM_THING *obj)
+const char * ring_num(ItemThing *obj)
 {
     static char buf[10];
 

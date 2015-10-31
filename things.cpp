@@ -20,7 +20,7 @@
  *        Return the name of something as it would appear in an
  *        inventory.
  */
-const char * inv_name(ITEM_THING *obj, bool drop)
+const char * inv_name(ItemThing *obj, bool drop)
 {
     char *pb;
     struct obj_info *op;
@@ -140,7 +140,7 @@ void
 drop()
 {
     int ch;
-    ITEM_THING *obj;
+    ItemThing *obj;
 
     ch = chat(hero.y, hero.x);
     if (ch != FLOOR && ch != PASSAGE)
@@ -157,7 +157,7 @@ drop()
     /*
      * Link it into the level object list
      */
-    attach(lvl_obj, obj);
+    lvl_obj.push_front(obj);
     chat(hero.y, hero.x) = (char) obj->type;
     flat(hero.y, hero.x) |= F_DROPPED;
     obj->pos = hero;
@@ -171,7 +171,7 @@ drop()
  *        Do special checks for dropping or unweilding|unwearing|unringing
  */
 bool
-dropcheck(ITEM_THING *obj)
+dropcheck(ItemThing *obj)
 {
     if (obj == NULL)
         return TRUE;
@@ -211,12 +211,12 @@ dropcheck(ITEM_THING *obj)
  * new_thing:
  *        Return a new thing
  */
-ITEM_THING* new_thing()
+ItemThing* new_thing()
 {
-    ITEM_THING *cur;
+    ItemThing *cur;
     int r;
 
-    cur = new_item();
+    cur = new ItemThing();
     cur->hplus = 0;
     cur->dplus = 0;
     strncpy(cur->damage, "0x0", sizeof(cur->damage));
@@ -349,7 +349,7 @@ void print_disc(char type)
 {
     struct obj_info *info = NULL;
     int i, maxnum = 0, num_found;
-    static ITEM_THING obj;
+    static ItemThing obj;
     static int order[MAX4(MAXSCROLLS, MAXPOTIONS, MAXRINGS, MAXSTICKS)];
 
     switch (type)
@@ -444,7 +444,7 @@ const char * nothing(char type)
  *        Give the proper name to a potion, stick, or ring
  */
 
-void nameit(ITEM_THING *obj, const char *type, const char *which, struct obj_info *op, const char *(*prfunc)(ITEM_THING *))
+void nameit(ItemThing *obj, const char *type, const char *which, struct obj_info *op, const char *(*prfunc)(ItemThing *))
 {
     char *pb;
 
@@ -470,7 +470,7 @@ void nameit(ITEM_THING *obj, const char *type, const char *which, struct obj_inf
  * nullstr:
  *        Return a pointer to a null-length string
  */
-const char * nullstr(ITEM_THING *ignored)
+const char * nullstr(ItemThing *ignored)
 {
     return "";
 }

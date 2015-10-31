@@ -135,14 +135,14 @@ coord stairs;                                /* Location of staircase */
 
 PLACE places[MAXLINES*MAXCOLS];                /* level map */
 
-ITEM_THING *cur_armor;                        /* What he is wearing */
-ITEM_THING *cur_ring[2];                        /* Which rings are being worn */
-ITEM_THING *cur_weapon;                        /* Which weapon he is weilding */
-ITEM_THING *l_last_pick = NULL;                /* Last last_pick */
-ITEM_THING *last_pick = NULL;                /* Last object picked in get_item() */
-ITEM_THING *lvl_obj = NULL;                        /* List of objects on this level */
-MONSTER_THING *mlist = NULL;                        /* List of monsters on the level */
-MONSTER_THING player;                                /* His stats */
+ItemThing *cur_armor;                       /* What he is wearing */
+ItemThing *cur_ring[2];                     /* Which rings are being worn */
+ItemThing *cur_weapon;                      /* Which weapon he is weilding */
+ItemThing *l_last_pick = NULL;              /* Last last_pick */
+ItemThing *last_pick = NULL;                /* Last object picked in get_item() */
+std::list<ItemThing*> lvl_obj;               /* List of objects on this level */
+std::list<MonsterThing*> mlist;
+MonsterThing player;                                /* His stats */
                                         /* restart of game */
 
 #define INIT_STATS { 16, 0, 1, 10, 16, "1x4", 16 }

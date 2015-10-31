@@ -165,7 +165,7 @@ hit_bound:
         case DOOR:
             running = FALSE;
             if (flat(hero.y, hero.x) & F_PASS)
-                enter_room(&nh);
+                enter_room(nh);
             goto move_stuff;
         case TRAP:
             ch = be_trapped(&nh);
@@ -179,7 +179,7 @@ hit_bound:
              * if you're leaving a maze room, so it is necessary to
              * always recalculate player.room.
              */
-            player.room = roomin(&hero);
+            player.room = roomin(hero);
             goto move_stuff;
         case FLOOR:
             if (!(fl & F_REAL))
@@ -199,7 +199,7 @@ hit_bound:
 move_stuff:
                 setMapDisplay(hero.x, hero.y, floor_at());
                 if ((fl & F_PASS) && chat(oldpos.y, oldpos.x) == DOOR)
-                    leave_room(&nh);
+                    leave_room(nh);
                 hero = nh;
             }
     }
@@ -266,7 +266,7 @@ char
 be_trapped(coord *tc)
 {
     PLACE *pp;
-    ITEM_THING *arrow;
+    ItemThing *arrow;
     char tr;
 
     if (on(player, ISLEVIT))
@@ -319,7 +319,7 @@ be_trapped(coord *tc)
             }
             else
             {
-                arrow = new_item();
+                arrow = new ItemThing();
                 init_weapon(arrow, ARROW);
                 arrow->count = 1;
                 arrow->pos = hero;
@@ -360,9 +360,8 @@ be_trapped(coord *tc)
  * rndmove:
  *        Move in a random direction if the monster/person is confused
  */
-coord* rndmove(MONSTER_THING *who)
+coord* rndmove(MonsterThing *who)
 {
-    ITEM_THING *obj;
     int x, y;
     int ch;
     static coord ret;  /* what we will be returning */
@@ -384,9 +383,7 @@ coord* rndmove(MONSTER_THING *who)
             goto bad;
         if (ch == SCROLL)
         {
-            for (obj = lvl_obj; obj != NULL; obj = obj->next)
-                if (y == obj->pos.y && x == obj->pos.x)
-                    break;
+            ItemThing* obj = find_obj(y, x);
             if (obj != NULL && obj->which == S_SCARE)
                 goto bad;
         }
@@ -404,7 +401,7 @@ bad:
  *        aren't wearing a magic ring.
  */
 
-void rust_armor(ITEM_THING *arm)
+void rust_armor(ItemThing *arm)
 {
     if (arm == NULL || arm->type != ARMOR || arm->which == LEATHER ||
         arm->arm >= 9)

@@ -31,7 +31,7 @@ do_rooms()
 {
     int i;
     struct room *rp;
-    MONSTER_THING *tp;
+    MonsterThing *tp;
     int left_out;
     static coord top;
     coord bsze;                                /* maximum room size */
@@ -117,9 +117,9 @@ do_rooms()
          */
         if (rnd(2) == 0 && (!amulet || level >= max_level))
         {
-            ITEM_THING *gold;
+            ItemThing *gold;
 
-            gold = new_item();
+            gold = new ItemThing();
             gold->arm = rp->r_goldval = GOLDCALC;//gold value is stored in arm field (used to be handled with ugly define)
             find_floor(rp, &rp->r_gold, FALSE, FALSE);
             gold->pos = rp->r_gold;
@@ -127,16 +127,15 @@ do_rooms()
             gold->flags = ISMANY;
             gold->group = GOLDGRP;
             gold->type = GOLD;
-            attach(lvl_obj, gold);
+            lvl_obj.push_front(gold);
         }
         /*
          * Put the monster in
          */
         if (rnd(100) < (rp->r_goldval > 0 ? 80 : 25))
         {
-            tp = new_monster_thing();
             find_floor(rp, &mp, FALSE, TRUE);
-            new_monster(tp, randmonster(FALSE), &mp);
+            tp = new MonsterThing(randmonster(FALSE), mp);
             give_pack(tp);
         }
     }
@@ -373,11 +372,10 @@ find_floor(struct room *rp, coord *cp, int limit, bool monst)
  *        Code that is executed whenver you appear in a room
  */
 
-void
-enter_room(coord *cp)
+void enter_room(const coord& cp)
 {
     struct room *rp;
-    MONSTER_THING *tp;
+    MonsterThing *tp;
     int y, x;
     int ch;
 
@@ -412,8 +410,7 @@ enter_room(coord *cp)
  *        Code for when we exit a room
  */
 
-void
-leave_room(coord *cp)
+void leave_room(const coord& cp)
 {
     PLACE *pp;
     struct room *rp;
@@ -433,7 +430,7 @@ leave_room(coord *cp)
     else
         floor = ' ';
 
-    player.room = &passages[flat(cp->y, cp->x) & F_PNUM];
+    player.room = &passages[flat(cp.y, cp.x) & F_PNUM];
     for (y = rp->r_pos.y; y < rp->r_max.y + rp->r_pos.y; y++)
         for (x = rp->r_pos.x; x < rp->r_max.x + rp->r_pos.x; x++)
         {

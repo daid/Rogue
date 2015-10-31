@@ -24,9 +24,9 @@
 void
 whatis(bool insist, int type)
 {
-    ITEM_THING *obj;
+    ItemThing *obj;
 
-    if (player.pack == NULL)
+    if (player.pack.size() == 0)
     {
         msg("you don't have anything in your pack to identify");
         return;
@@ -77,7 +77,7 @@ whatis(bool insist, int type)
  */
 
 void
-set_know(ITEM_THING *obj, struct obj_info *info)
+set_know(ItemThing *obj, struct obj_info *info)
 {
     char **guess;
 
@@ -201,11 +201,11 @@ teleport()
 
     setMapDisplay(hero.x, hero.y, floor_at());
     find_floor((struct room *) NULL, &c, FALSE, TRUE);
-    if (roomin(&c) != player.room)
+    if (roomin(c) != player.room)
     {
-        leave_room(&hero);
+        leave_room(hero);
         hero = c;
-        enter_room(&hero);
+        enter_room(hero);
     }
     else
     {

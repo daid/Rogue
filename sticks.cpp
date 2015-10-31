@@ -21,7 +21,7 @@
  */
 
 void
-fix_stick(ITEM_THING *cur)
+fix_stick(ItemThing *cur)
 {
     if (strcmp(ws_type[cur->which], "staff") == 0)
         strncpy(cur->damage,"2x3",sizeof(cur->damage));
@@ -46,12 +46,12 @@ fix_stick(ITEM_THING *cur)
 void
 do_zap()
 {
-    ITEM_THING *obj;
-    MONSTER_THING *tp;
+    ItemThing *obj;
+    MonsterThing *tp;
     int y, x;
     const char *name;
-    char monster, oldch;
-    static ITEM_THING bolt;
+    char monster;
+    static ItemThing bolt;
 
     if ((obj = get_item("zap with", STICK)) == NULL)
         return;
@@ -86,7 +86,7 @@ do_zap()
                 /*
                  * Light the room and put the player back up
                  */
-                enter_room(&hero);
+                enter_room(hero);
                 addmsg("the room is lit");
                 if (!terse)
                     addmsg(" by a shimmering %s light", pick_color("blue"));
@@ -130,20 +130,9 @@ do_zap()
                         break;
                     case WS_POLYMORPH:
                     {
-                        ITEM_THING *pp;
-
-                        pp = tp->pack;
-                        detach(mlist, tp);
+                        tp->polymorph(rnd(26) + 'A');
                         if (see_monst(tp))
-                            setMapDisplay(x, y, chat(y, x));
-                        oldch = tp->oldch;
-                        delta.y = y;
-                        delta.x = x;
-                        new_monster(tp, monster = (char)(rnd(26) + 'A'), &delta);
-                        if (see_monst(tp))
-                            setMapDisplay(x, y, monster);
-                        tp->oldch = oldch;
-                        tp->pack = pp;
+                            setMapDisplay(x, y, tp->type);
                         ws_info[WS_POLYMORPH].oi_know |= see_monst(tp);
                         break;
                     }
@@ -222,7 +211,7 @@ do_zap()
                 }
                 delta.y = y;
                 delta.x = x;
-                runto(&delta);
+                runto(delta);
             }
         when WS_ELECT:
         case WS_FIRE:
@@ -253,12 +242,11 @@ do_zap()
 void
 drain()
 {
-    MONSTER_THING *mp;
     struct room *corp;
-    MONSTER_THING **dp;
+    MonsterThing **dp;
     int cnt;
     bool inpass;
-    static MONSTER_THING* drainee[40];
+    static MonsterThing* drainee[40];
 
     /*
      * First cnt how many things we need to spread the hit points among
@@ -270,7 +258,7 @@ drain()
         corp = NULL;
     inpass = (bool)(player.room->r_flags & ISGONE);
     dp = drainee;
-    for (mp = mlist; mp != NULL; mp = mp->next)
+    for (MonsterThing* mp : mlist)
         if (mp->room == player.room || mp->room == corp ||
             (inpass && chat(mp->pos.y, mp->pos.x) == DOOR &&
             &passages[flat(mp->pos.y, mp->pos.x) & F_PNUM] == player.room))
@@ -288,11 +276,11 @@ drain()
      */
     for (dp = drainee; *dp; dp++)
     {
-        mp = *dp;
+        MonsterThing* mp = *dp;
         if ((mp->stats.s_hpt -= cnt) <= 0)
             killed(mp, see_monst(mp));
         else
-            runto(&mp->pos);
+            runto(mp->pos);
     }
 }
 
@@ -305,12 +293,12 @@ void
 fire_bolt(coord *start, coord *dir, const char *name)
 {
     coord *c1, *c2;
-    MONSTER_THING *tp;
+    MonsterThing *tp;
     char dirch = 0, ch;
     bool hit_hero, used, changed;
     static coord pos;
     static coord spotpos[BOLT_LENGTH];
-    ITEM_THING bolt;
+    ItemThing bolt;
 
     bolt.type = WEAPON;
     bolt.which = FLAME;
@@ -386,7 +374,7 @@ def:
                     else if (ch != 'M' || tp->disguise == 'M')
                     {
                         if (start == &hero)
-                            runto(&pos);
+                            runto(pos);
                         if (terse)
                             msg("%s misses", name);
                         else
@@ -427,7 +415,7 @@ def:
  * charge_str:
  *        Return an appropriate string for a wand charge
  */
-const char * charge_str(ITEM_THING *obj)
+const char * charge_str(ItemThing *obj)
 {
     static char buf[20];
 

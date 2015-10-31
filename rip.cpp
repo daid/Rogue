@@ -218,7 +218,6 @@ void death(char monst)
 
 void total_winner()
 {
-    ITEM_THING *obj;
     struct obj_info *op;
     int worth = 0;
     int oldpurse;
@@ -235,7 +234,7 @@ void total_winner()
     startDisplayOfStringList();
     displayStringListItem("   Worth  Item");
     oldpurse = purse;
-    for (obj = player.pack; obj != NULL; obj = obj->next)
+    for (ItemThing* obj : player.pack)
     {
         switch (obj->type)
         {

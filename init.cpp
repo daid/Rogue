@@ -22,21 +22,21 @@
 void
 init_player()
 {
-    ITEM_THING *obj;
+    ItemThing *obj;
 
     player.stats = max_stats;
     food_left = HUNGERTIME;
     /*
      * Give him some food
      */
-    obj = new_item();
+    obj = new ItemThing();
     obj->type = FOOD;
     obj->count = 1;
     add_pack(obj, TRUE);
     /*
      * And his suit of armor
      */
-    obj = new_item();
+    obj = new ItemThing();
     obj->type = ARMOR;
     obj->which = RING_MAIL;
     obj->arm = a_class[RING_MAIL] - 1;
@@ -47,7 +47,7 @@ init_player()
     /*
      * Give him his weaponry.  First a mace.
      */
-    obj = new_item();
+    obj = new ItemThing();
     init_weapon(obj, MACE);
     obj->hplus = 1;
     obj->dplus = 1;
@@ -57,7 +57,7 @@ init_player()
     /*
      * Now a +1 bow
      */
-    obj = new_item();
+    obj = new ItemThing();
     init_weapon(obj, BOW);
     obj->hplus = 1;
     obj->flags |= ISKNOW;
@@ -65,7 +65,7 @@ init_player()
     /*
      * Now some arrows
      */
-    obj = new_item();
+    obj = new ItemThing();
     init_weapon(obj, ARROW);
     obj->count = rnd(15) + 25;
     obj->flags |= ISKNOW;

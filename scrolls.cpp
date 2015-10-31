@@ -21,15 +21,15 @@
 void
 read_scroll()
 {
-    ITEM_THING *obj;
-    MONSTER_THING* m_obj;
+    ItemThing *obj;
+    MonsterThing* m_obj;
     PLACE *pp;
     int y, x;
     int ch;
     int i;
     bool discardit = FALSE;
     struct room *cur_room;
-    ITEM_THING *orig_obj;
+    ItemThing *orig_obj;
     static coord mp;
 
     obj = get_item("read", SCROLL);
@@ -140,8 +140,7 @@ read_scroll()
                 msg("you hear a faint cry of anguish in the distance");
             else
             {
-                m_obj = new_monster_thing();
-                new_monster(m_obj, randmonster(FALSE), &mp);
+                m_obj = new MonsterThing(randmonster(FALSE), mp);
             }
         when S_ID_POTION:
         case S_ID_SCROLL:
@@ -238,11 +237,11 @@ def:
              * Potion of gold detection
              */
             ch = FALSE;
-            for (obj = lvl_obj; obj != NULL; obj = obj->next)
-                if (obj->type == FOOD)
+            for (ItemThing* op : lvl_obj)
+                if (op->type == FOOD)
                 {
                     ch = TRUE;
-                    setMapDisplay(obj->pos.x, obj->pos.y, FOOD);
+                    setMapDisplay(op->pos.x, op->pos.y, FOOD);
                 }
             if (ch)
             {
@@ -317,7 +316,7 @@ def:
     call_it(&scr_info[obj->which]);
 
     if (discardit)
-        discard(obj);
+        delete obj;
 }
 
 /*
@@ -326,7 +325,7 @@ def:
  */
 
 void
-uncurse(ITEM_THING *obj)
+uncurse(ItemThing *obj)
 {
     if (obj != NULL)
         obj->flags &= ~ISCURSED;

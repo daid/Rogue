@@ -25,7 +25,7 @@ command()
     register int ch;
     register int ntimes = 1;                        /* Number of player moves */
     char *fp;
-    MONSTER_THING *mp;
+    MonsterThing *mp;
     static char countch, direction, newcount = FALSE;
 
     if (on(player, ISHASTE))
@@ -150,24 +150,22 @@ over:
             switch (ch)
             {
                 case ',': {
-                    ITEM_THING *obj = NULL;
-                    int found = 0;
-                    for (obj = lvl_obj; obj != NULL; obj = obj->next)
+                    ItemThing *found = NULL;
+                    for (ItemThing* obj : lvl_obj)
+                    {
+                        if (obj->pos.y == hero.y && obj->pos.x == hero.x)
                         {
-                            if (obj->pos.y == hero.y && obj->pos.x == hero.x)
-                            {
-                                found=1;
-                                break;
-                            }
+                            found = obj;
+                            break;
                         }
+                    }
 
                     if (found) {
                         if (levit_check())
                             ;
                         else
-                            pick_up(obj->type);
-                    }
-                    else {
+                            pick_up(found->type);
+                    } else {
                         if (!terse)
                             addmsg("there is ");
                         addmsg("nothing here");
@@ -261,7 +259,7 @@ over:
                     q_comm = TRUE;
                     quit(0);
                     q_comm = FALSE;
-                when 'i': after = FALSE; inventory(player.pack, 0);
+                when 'i': after = FALSE; inventory(0);
                 when 'I': after = FALSE; picky_inven();
                 when 'd': drop();
                 when 'r': read_scroll();
@@ -342,65 +340,7 @@ over:
                     after = FALSE;
                 otherwise:
                     after = FALSE;
-#ifdef MASTER
-                    if (wizard) switch (ch)
-                    {
-                        case '|': msg("@ %d,%d", hero.y, hero.x);
-                        when 'C': create_obj();
-                        when '$': msg("inpack = %d", inpack);
-                        when CTRL('G'): inventory(lvl_obj, 0);
-                        when CTRL('W'): whatis(FALSE, 0);
-                        when CTRL('D'): level++; new_level();
-                        when CTRL('A'): level--; new_level();
-                        when CTRL('F'): show_map();
-                        when CTRL('T'): teleport();
-                        when CTRL('E'): msg("food left: %d", food_left);
-                        when CTRL('C'): add_pass();
-                        when CTRL('X'): turn_see(on(player, SEEMONST));
-                        when CTRL('~'):
-                        {
-                            THING *item;
-
-                            if ((item = get_item("charge", STICK)) != NULL)
-                                item->o_charges = 10000;
-                        }
-                        when CTRL('I'):
-                        {
-                            int i;
-                            THING *obj;
-
-                            for (i = 0; i < 9; i++)
-                                raise_level();
-                            /*
-                             * Give him a sword (+1,+1)
-                             */
-                            obj = new_item();
-                            init_weapon(obj, TWOSWORD);
-                            obj->hplus = 1;
-                            obj->dplus = 1;
-                            add_pack(obj, TRUE);
-                            cur_weapon = obj;
-                            /*
-                             * And his suit of armor
-                             */
-                            obj = new_item();
-                            obj->type = ARMOR;
-                            obj->which = PLATE_MAIL;
-                            obj->arm = -5;
-                            obj->flags |= ISKNOW;
-                            obj->count = 1;
-                            obj->group = 0;
-                            cur_armor = obj;
-                            add_pack(obj, TRUE);
-                        }
-                        when '*' :
-                            pr_list();
-                        otherwise:
-                            illcom(ch);
-                    }
-                    else
-#endif
-                        illcom(ch);
+                    illcom(ch);
             }
             /*
              * turn off flags if no longer needed
@@ -669,7 +609,7 @@ levit_check()
 void
 call()
 {
-    ITEM_THING *obj;
+    ItemThing *obj;
     struct obj_info *op = NULL;
     char **guess;
     const char* elsewise = NULL;
@@ -741,7 +681,7 @@ norm:
  * current:
  *        Print the current weapon/armor
  */
-void current(ITEM_THING *cur, const char *how, const char *where)
+void current(ItemThing *cur, const char *how, const char *where)
 {
     after = FALSE;
     if (cur != NULL)

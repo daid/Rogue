@@ -92,9 +92,7 @@ int unconfuse(int arg)
  */
 int unsee(int arg)
 {
-    MONSTER_THING *th;
-
-    for (th = mlist; th != NULL; th = th->next)
+    for(MonsterThing *th : mlist)
         if (on(*th, ISINVIS) && see_monst(th))
             setMapDisplay(th->pos.x, th->pos.y, th->oldch);
     player.flags &= ~CANSEE;
@@ -112,7 +110,7 @@ int sight(int arg)
         extinguish(sight);
         player.flags &= ~ISBLIND;
         if (!(player.room->r_flags & ISGONE))
-            enter_room(&hero);
+            enter_room(hero);
         msg(choose_str("far out!  Everything is all cosmic again",
                        "the veil of darkness lifts"));
     }
@@ -191,8 +189,6 @@ int stomach(int arg)
  */
 int come_down(int arg)
 {
-    ITEM_THING *tp;
-    MONSTER_THING *mp;
     bool seemonst;
 
     if (!on(player, ISHALU))
@@ -207,7 +203,7 @@ int come_down(int arg)
     /*
      * undo the things
      */
-    for (tp = lvl_obj; tp != NULL; tp = tp->next)
+    for (ItemThing* tp : lvl_obj)
         if (cansee(tp->pos.y, tp->pos.x))
             setMapDisplay(tp->pos.x, tp->pos.y, tp->type);
 
@@ -215,7 +211,7 @@ int come_down(int arg)
      * undo the monsters
      */
     seemonst = on(player, SEEMONST);
-    for (mp = mlist; mp != NULL; mp = mp->next)
+    for(MonsterThing* mp : mlist)
     {
         if (cansee(mp->pos.y, mp->pos.x))
         {
@@ -239,8 +235,6 @@ int come_down(int arg)
  */
 int visuals(int arg)
 {
-    ITEM_THING *tp;
-    MONSTER_THING *mp;
     register bool seemonst;
 
     if (!after || (running && jump))
@@ -248,7 +242,7 @@ int visuals(int arg)
     /*
      * change the things
      */
-    for (tp = lvl_obj; tp != NULL; tp = tp->next)
+    for (ItemThing* tp : lvl_obj)
         if (cansee(tp->pos.y, tp->pos.x))
             setMapDisplay(tp->pos.x, tp->pos.y, rnd_thing());
 
@@ -262,7 +256,7 @@ int visuals(int arg)
      * change the monsters
      */
     seemonst = on(player, SEEMONST);
-    for (mp = mlist; mp != NULL; mp = mp->next)
+    for (MonsterThing *mp : mlist)
     {
         if (see_monst(mp))
         {

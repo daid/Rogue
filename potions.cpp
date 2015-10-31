@@ -57,8 +57,7 @@ static PACT p_actions[] =
 void
 quaff()
 {
-    ITEM_THING *obj, *tp;
-    MONSTER_THING *mp;
+    ItemThing *obj;
     bool discardit = FALSE;
     bool show, trip;
 
@@ -120,26 +119,23 @@ quaff()
              * Potion of magic detection.  Show the potions and scrolls
              */
             show = FALSE;
-            if (lvl_obj != NULL)
+            for(ItemThing* tp : lvl_obj)
             {
-                for (tp = lvl_obj; tp != NULL; tp = tp->next)
+                if (is_magic(tp))
+                {
+                    show = TRUE;
+                    setMapDisplay(tp->pos.x, tp->pos.y, MAGIC);
+                    pot_info[P_TFIND].oi_know = TRUE;
+                }
+            }
+            for (MonsterThing* mp : mlist)
+            {
+                for(ItemThing* tp : mp->pack)
                 {
                     if (is_magic(tp))
                     {
                         show = TRUE;
-                        setMapDisplay(tp->pos.x, tp->pos.y, MAGIC);
-                        pot_info[P_TFIND].oi_know = TRUE;
-                    }
-                }
-                for (mp = mlist; mp != NULL; mp = mp->next)
-                {
-                    for (tp = mp->pack; tp != NULL; tp = tp->next)
-                    {
-                        if (is_magic(tp))
-                        {
-                            show = TRUE;
-                            setMapDisplay(mp->pos.x, mp->pos.y, MAGIC);
-                        }
+                        setMapDisplay(mp->pos.x, mp->pos.y, MAGIC);
                     }
                 }
             }
@@ -217,7 +213,7 @@ quaff()
     call_it(&pot_info[obj->which]);
 
     if (discardit)
-        discard(obj);
+        delete obj;
     return;
 }
 
@@ -226,7 +222,7 @@ quaff()
  *        Returns true if an object radiates magic
  */
 bool
-is_magic(ITEM_THING *obj)
+is_magic(ItemThing *obj)
 {
     switch (obj->type)
     {
@@ -252,10 +248,8 @@ is_magic(ITEM_THING *obj)
 void
 invis_on()
 {
-    MONSTER_THING *mp;
-
     player.flags |= CANSEE;
-    for (mp = mlist; mp != NULL; mp = mp->next)
+    for(MonsterThing *mp : mlist)
         if (on(*mp, ISINVIS) && see_monst(mp) && !on(player, ISHALU))
             setMapDisplay(mp->pos.x, mp->pos.y, mp->disguise);
 }
@@ -266,11 +260,10 @@ invis_on()
  */
 int turn_see(int turn_off)
 {
-    MONSTER_THING *mp;
     bool can_see, add_new;
 
     add_new = FALSE;
-    for (mp = mlist; mp != NULL; mp = mp->next)
+    for (MonsterThing* mp : mlist)
     {
         can_see = see_monst(mp);
         if (turn_off)
@@ -309,7 +302,7 @@ int turn_see(int turn_off)
 bool
 seen_stairs()
 {
-    MONSTER_THING        *tp;
+    MonsterThing        *tp;
 
     if (getMapDisplay(stairs.x, stairs.y) == STAIRS)                        /* it's on the map */
         return TRUE;

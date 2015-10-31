@@ -27,7 +27,7 @@ look(bool wakeup)
 {
     int x, y;
     int ch;
-    MONSTER_THING *tp;
+    MonsterThing *tp;
     PLACE *pp;
     struct room *rp;
     int ey, ex;
@@ -261,23 +261,14 @@ show_floor()
  * find_obj:
  *        Find the unclaimed object at y, x
  */
-ITEM_THING* find_obj(int y, int x)
+ItemThing* find_obj(int y, int x)
 {
-    ITEM_THING* obj;
-
-    for (obj = lvl_obj; obj != NULL; obj = obj->next)
+    for(ItemThing* obj : lvl_obj)
     {
         if (obj->pos.y == y && obj->pos.x == x)
                 return obj;
     }
-#ifdef MASTER
-    sprintf(prbuf, "Non-object %d,%d", y, x);
-    msg(prbuf);
     return NULL;
-#else
-    /* NOTREACHED */
-    return NULL;
-#endif
 }
 
 /*
@@ -288,7 +279,7 @@ ITEM_THING* find_obj(int y, int x)
 void
 eat()
 {
-    ITEM_THING *obj;
+    ItemThing *obj;
 
     if ((obj = get_item("eat", FOOD)) == NULL)
         return;
@@ -414,10 +405,10 @@ add_haste(bool potion)
 void
 aggravate()
 {
-    MONSTER_THING *mp;
+    
 
-    for (mp = mlist; mp != NULL; mp = mp->next)
-        runto(&mp->pos);
+    for(MonsterThing *mp : mlist)
+        runto(mp->pos);
 }
 
 /*
@@ -445,7 +436,7 @@ const char * vowelstr(const char *str)
  *        See if the object is one of the currently used items
  */
 bool
-is_current(ITEM_THING *obj)
+is_current(ItemThing *obj)
 {
     if (obj == NULL)
         return FALSE;

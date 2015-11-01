@@ -177,10 +177,6 @@ wanderer()
             setMapDisplay(cp.x, cp.y, (rnd(26) + 'A') | DISPLAY_INVERT);
     }
     runto(tp->pos);
-#ifdef MASTER
-    if (wizard)
-        msg("started a wandering %s", monsters[tp->type-'A'].m_name);
-#endif
 }
 
 /*
@@ -194,13 +190,8 @@ MonsterThing* wake_monster(int y, int x)
     int ch;
     const char *mname;
 
-#ifdef MASTER
-    if ((tp = moat(y, x)) == NULL)
-        msg("can't find monster in wake_monster");
-#else
     tp = moat(y, x);
     assert(tp != NULL);
-#endif
     ch = tp->type;
     /*
      * Every time he sees mean monster, it might start chasing him

@@ -311,14 +311,6 @@ pick_one(struct obj_info *info, int nitems)
             break;
     if (info == end)
     {
-#ifdef MASTER
-        if (wizard)
-        {
-            msg("bad pick_one: %d from %d items", i, nitems);
-            for (info = start; info < end; info++)
-                msg("%s: %d%%", info->oi_name, info->oi_prob);
-        }
-#endif
         info = start;
     }
     return (int)(info - start);
@@ -474,66 +466,3 @@ const char * nullstr(ItemThing *ignored)
 {
     return "";
 }
-
-# ifdef        MASTER
-/*
- * pr_list:
- *        List possible potions, scrolls, etc. for wizard.
- */
-
-void
-pr_list()
-{
-    int ch;
-
-    if (!terse)
-        addmsg("for ");
-    addmsg("what type");
-    if (!terse)
-        addmsg(" of object do you want a list");
-    msg("? ");
-    ch = md_readchar();
-    switch (ch)
-    {
-        case POTION:
-            pr_spec(pot_info, MAXPOTIONS);
-        when SCROLL:
-            pr_spec(scr_info, MAXSCROLLS);
-        when RING:
-            pr_spec(ring_info, MAXRINGS);
-        when STICK:
-            pr_spec(ws_info, MAXSTICKS);
-        when ARMOR:
-            pr_spec(arm_info, MAXARMORS);
-        when WEAPON:
-            pr_spec(weap_info, MAXWEAPONS);
-        otherwise:
-            return;
-    }
-}
-
-/*
- * pr_spec:
- *        Print specific list of possible items to choose from
- */
-
-void
-pr_spec(struct obj_info *info, int nitems)
-{
-    struct obj_info *endp;
-    int i, lastprob;
-
-    startDisplayOfStringList();
-    endp = &info[nitems];
-    lastprob = 0;
-    for (i = '0'; info < endp; i++)
-    {
-        if (i == '9' + 1)
-            i = 'a';
-        displayStringListItem("%c: %s (%d%%)", i, info->oi_name, info->oi_prob - lastprob);
-        lastprob = info->oi_prob;
-        info++;
-    }
-    finishDisplayOfStringList();
-}
-# endif        /* MASTER */

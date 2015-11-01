@@ -95,7 +95,7 @@ void score(int amount, int flags, char monst)
      * Insert her in list if need be
      */
     sc2 = NULL;
-    if (!noscore)
+    if (amount > 0)
     {
         uid = 0;
         for (scp = top_ten; scp < endp; scp++)

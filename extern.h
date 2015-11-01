@@ -60,7 +60,6 @@
  * Now all the global variables
  */
 
-extern int        wizard;
 extern char        fruit[], prbuf[];
 extern int orig_dsusp;
 extern FILE        *scoreboard;

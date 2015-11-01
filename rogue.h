@@ -63,9 +63,6 @@
 #define flat(y,x)        (places[((x) << 5) + (y)].p_flags)
 #define moat(y,x)        (places[((x) << 5) + (y)].p_monst)
 #define unc(cp)                (cp).y, (cp).x
-#ifdef MASTER
-#define debug                if (wizard) msg
-#endif
 
 /*
  * things that appear on the screens
@@ -103,23 +100,23 @@
  * Various constants
  */
 #define BEARTIME        spread(3)
-#define SLEEPTIME        spread(5)
+#define SLEEPTIME       spread(5)
 #define HOLDTIME        spread(2)
-#define WANDERTIME        spread(70)
-#define BEFORE                spread(1)
-#define AFTER                spread(2)
+#define WANDERTIME      spread(70)
+#define BEFORE          spread(1)
+#define AFTER           spread(2)
 #define HEALTIME        30
-#define HUHDURATION        20
-#define SEEDURATION        850
-#define HUNGERTIME        1300
+#define HUHDURATION     20
+#define SEEDURATION     850
+#define HUNGERTIME      1300
 #define MORETIME        150
-#define STOMACHSIZE        2000
-#define STARVETIME        850
-#define ESCAPE                27
-#define LEFT                0
-#define RIGHT                1
-#define BOLT_LENGTH        6
-#define LAMPDIST        3
+#define STOMACHSIZE     2000
+#define STARVETIME      850
+#define ESCAPE          27
+#define LEFT            0
+#define RIGHT           1
+#define BOLT_LENGTH     6
+#define LAMPDIST        3   /* Distance squared! */
 
 /*
  * Save against things
@@ -451,7 +448,7 @@ extern const char *ws_type[];
 
 extern int      a_class[], count, food_left, hungry_state, inpack,
                 inv_type, lastscore, level, max_hit, max_level, runch,
-                n_objs, no_command, no_food, no_move, noscore, ntraps, purse,
+                n_objs, no_command, no_food, no_move, ntraps, purse,
                 l_last_comm, l_last_dir, last_comm, last_dir, dir_ch,
                 quiet, vf_hit;
 
@@ -694,7 +691,6 @@ typedef struct {
     int         st_value;
 } STONE;
 
-extern int        total;
 extern int        between;
 extern int        group;
 extern coord      nh;

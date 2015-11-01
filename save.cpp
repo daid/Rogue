@@ -116,11 +116,7 @@ bool restore(const char *file)
      * inode for as long as possible
      */
 
-    if (
-#ifdef MASTER
-        !wizard &&
-#endif
-        md_unlink_open_file(file, inf) < 0)
+    if (md_unlink_open_file(file, inf) < 0)
     {
         printf("Cannot unlink file\n");
         return FALSE;

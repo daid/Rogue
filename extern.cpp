@@ -14,7 +14,6 @@
 
 bool after;                                /* True if we want after daemons */
 bool again;                                /* Repeating the last command */
-int  noscore;                                /* Was a wizard sometime */
 bool seenstairs;                        /* Have seen the stairs (for lsd) */
 bool amulet = FALSE;                        /* He found the amulet */
 bool door_stop = FALSE;                        /* Stop running when we pass a door */
@@ -36,9 +35,6 @@ bool stat_msg = FALSE;                        /* Should status() print as a msg(
 bool terse = FALSE;                        /* True if we should be short */
 bool to_death = FALSE;                        /* Fighting is to the death! */
 bool tombstone = TRUE;                        /* Print out tombstone at end */
-#ifdef MASTER
-int wizard = FALSE;                        /* True if allows wizard commands */
-#endif
 bool pack_used[26] = {                        /* Is the character used in the pack? */
     FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
     FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,

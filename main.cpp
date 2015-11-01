@@ -39,7 +39,6 @@ int main(int argc, char **argv)
     {
         if (strcmp(argv[1], "-s") == 0)
         {
-            noscore = TRUE;
             score(0, -1, 0);
             exit(0);
         }

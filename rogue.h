@@ -198,8 +198,8 @@
 #define P_SEEINVIS        4
 #define P_HEALING        5
 #define P_MFIND                6
-#define        P_TFIND         7
-#define        P_RAISE                8
+#define P_TFIND         7
+#define P_RAISE          8
 #define P_XHEAL                9
 #define P_HASTE                10
 #define P_RESTORE        11

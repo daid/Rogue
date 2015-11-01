@@ -70,7 +70,7 @@ void add_pack(ItemThing *obj, bool silent)
     
     if (!placed)
     {
-        // First, check if there is room in your inventory.
+        // First, check if there is room in your inventory. This adds the item to the "inpack" counter as side effect.
         if (!pack_room(from_floor, obj))
             return;
         
@@ -83,7 +83,6 @@ void add_pack(ItemThing *obj, bool silent)
                 delete obj;
                 obj = op;
                 placed = true;
-                inpack++;
                 break;
             }
         }
@@ -109,7 +108,6 @@ void add_pack(ItemThing *obj, bool silent)
             }
             player.pack.insert(place_before, obj);
             obj->packch = pack_char();
-            inpack++;
         }
     }
     

@@ -70,6 +70,14 @@ init_player()
     obj->count = rnd(15) + 25;
     obj->flags |= ISKNOW;
     add_pack(obj, TRUE);
+
+#ifdef DEBUG
+    obj = new ItemThing();
+    obj->type = SCROLL;
+    obj->which = S_MAP;
+    obj->count = 1;
+    add_pack(obj, TRUE);
+#endif
 }
 
 /*

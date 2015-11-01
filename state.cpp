@@ -1218,8 +1218,7 @@ rs_read_room(FILE *inf, struct room *r)
     return(READSTAT);
 }
 
-int
-rs_write_rooms(FILE *savef, struct room r[], int count)
+static int rs_write_rooms(FILE *savef, struct room r[], int count)
 {
     int n = 0;
 
@@ -1234,8 +1233,7 @@ rs_write_rooms(FILE *savef, struct room r[], int count)
     return(WRITESTAT);
 }
 
-int
-rs_read_rooms(FILE *inf, struct room *r, int count)
+static int rs_read_rooms(FILE *inf, struct room *r, int count)
 {
     int value = 0, n = 0;
 
@@ -1253,8 +1251,7 @@ rs_read_rooms(FILE *inf, struct room *r, int count)
     return(READSTAT);
 }
 
-int
-rs_write_room_reference(FILE *savef, struct room *rp)
+static int rs_write_room_reference(FILE *savef, struct room *rp)
 {
     int i, room = -1;
     
@@ -1270,8 +1267,7 @@ rs_write_room_reference(FILE *savef, struct room *rp)
     return(WRITESTAT);
 }
 
-int
-rs_read_room_reference(FILE *inf, struct room **rp)
+static int rs_read_room_reference(FILE *inf, struct room **rp)
 {
     int i;
     
@@ -1285,8 +1281,7 @@ rs_read_room_reference(FILE *inf, struct room **rp)
     return(READSTAT);
 }
 
-int
-rs_write_monsters(FILE *savef, struct monster *m, int count)
+static int rs_write_monsters(FILE *savef, struct monster *m, int count)
 {
     int n;
     
@@ -1302,8 +1297,7 @@ rs_write_monsters(FILE *savef, struct monster *m, int count)
     return(WRITESTAT);
 }
 
-int
-rs_read_monsters(FILE *inf, struct monster *m, int count)
+static int rs_read_monsters(FILE *inf, struct monster *m, int count)
 {
     int value = 0, n = 0;
 
@@ -1323,8 +1317,7 @@ rs_read_monsters(FILE *inf, struct monster *m, int count)
     return(READSTAT);
 }
 
-int
-rs_write_object(FILE *savef, ItemThing *o)
+static int rs_write_object(FILE *savef, ItemThing *o)
 {
     if (write_error)
         return(WRITESTAT);
@@ -1347,8 +1340,7 @@ rs_write_object(FILE *savef, ItemThing *o)
     return(WRITESTAT);
 }
 
-int
-rs_read_object(FILE *inf, ItemThing *o)
+static int rs_read_object(FILE *inf, ItemThing *o)
 {
     if (read_error || format_error)
         return(READSTAT);
@@ -1372,8 +1364,7 @@ rs_read_object(FILE *inf, ItemThing *o)
     return(READSTAT);
 }
 
-int
-rs_write_object_list(FILE *savef, std::list<ItemThing*>& list)
+static int rs_write_object_list(FILE *savef, std::list<ItemThing*>& list)
 {
     if (write_error)
         return(WRITESTAT);
@@ -1387,7 +1378,7 @@ rs_write_object_list(FILE *savef, std::list<ItemThing*>& list)
     return(WRITESTAT);
 }
 
-int rs_read_object_list(FILE *inf, std::list<ItemThing*>& list)
+static int rs_read_object_list(FILE *inf, std::list<ItemThing*>& list)
 {
     int i, cnt;
     ItemThing *l = NULL;
@@ -1409,8 +1400,7 @@ int rs_read_object_list(FILE *inf, std::list<ItemThing*>& list)
     return(READSTAT);
 }
 
-int
-rs_write_object_reference(FILE *savef, std::list<ItemThing*>& list, ItemThing *item)
+static int rs_write_object_reference(FILE *savef, std::list<ItemThing*>& list, ItemThing *item)
 {
     int i;
     
@@ -1424,8 +1414,7 @@ rs_write_object_reference(FILE *savef, std::list<ItemThing*>& list, ItemThing *i
     return(WRITESTAT);
 }
 
-int
-rs_read_object_reference(FILE *inf, std::list<ItemThing*>& list, ItemThing **item)
+static int rs_read_object_reference(FILE *inf, std::list<ItemThing*>& list, ItemThing **item)
 {
     int i;
     
@@ -1439,8 +1428,7 @@ rs_read_object_reference(FILE *inf, std::list<ItemThing*>& list, ItemThing **ite
     return(READSTAT);
 }
 
-int
-find_room_coord(struct room *rmlist, coord *c, int n)
+static int find_room_coord(struct room *rmlist, coord *c, int n)
 {
     int i = 0;
     
@@ -1451,7 +1439,7 @@ find_room_coord(struct room *rmlist, coord *c, int n)
     return(-1);
 }
 
-int find_monster_index_for_coord(coord *c)
+static int find_monster_index_for_coord(coord *c)
 {
     int i = 0;
 
@@ -1466,7 +1454,7 @@ int find_monster_index_for_coord(coord *c)
     return(-1);
 }
 
-int find_object_coord(coord *c)
+static int find_object_coord(coord *c)
 {
     int i = 0;
 
@@ -1481,8 +1469,7 @@ int find_object_coord(coord *c)
     return(-1);
 }
 
-int
-rs_write_thing(FILE *savef, MonsterThing *t)
+static int rs_write_thing(FILE *savef, MonsterThing *t)
 {
     int i = -1;
     

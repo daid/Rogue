@@ -276,8 +276,7 @@ ItemThing* find_obj(int y, int x)
  *        She wants to eat something, so let her try
  */
 
-void
-eat()
+void eat()
 {
     ItemThing *obj;
 

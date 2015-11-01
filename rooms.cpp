@@ -147,8 +147,7 @@ do_rooms()
  *        rooms; for maze rooms, draw maze.
  */
 
-void
-draw_room(struct room *rp)
+void draw_room(struct room *rp)
 {
     int y, x;
 
@@ -381,6 +380,7 @@ void enter_room(const coord& cp)
 
     rp = player.room = roomin(cp);
     door_open(rp);
+    /*
     if (!(rp->r_flags & ISDARK) && !on(player, ISBLIND))
         for (y = rp->r_pos.y; y < rp->r_max.y + rp->r_pos.y; y++)
         {
@@ -403,6 +403,7 @@ void enter_room(const coord& cp)
                 }
             }
         }
+    */
 }
 
 /*

@@ -98,8 +98,13 @@ void add_pack(ItemThing *obj, bool silent)
                 if (op->type == obj->type)
                 {
                     place_before = it;
-                    if (op->which == obj->which)
-                        place_before++;
+                    place_before++;
+                    if (op->which == obj->which && place_before != player.pack.end())
+                    {
+                        ItemThing* before = *place_before;
+                        if (before->type != obj->type && before->which == obj->which)
+                            break;
+                    }
                 }
             }
             player.pack.insert(place_before, obj);

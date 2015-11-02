@@ -264,7 +264,7 @@ int turn_see(int turn_off)
         if (turn_off)
         {
             if (!can_see)
-                setMapDisplay(mp->pos.x, mp->pos.y, mp->oldch);
+                setMapDisplay(mp->pos.x, mp->pos.y, char_at(mp->pos.x, mp->pos.y));
         }
         else
         {
@@ -294,8 +294,7 @@ int turn_see(int turn_off)
  * seen_stairs:
  *        Return TRUE if the player has seen the stairs
  */
-bool
-seen_stairs()
+bool seen_stairs()
 {
     MonsterThing        *tp;
 
@@ -312,9 +311,8 @@ seen_stairs()
         if (see_monst(tp) && on(*tp, ISRUN))        /* if it's visible and awake */
             return TRUE;                        /* it must have moved there */
 
-        if (on(player, SEEMONST)                /* if she can detect monster */
-            && tp->oldch == STAIRS)                /* and there once were stairs */
-                return TRUE;                        /* it must have moved there */
+        if (on(player, SEEMONST))                /* if she can detect monster */
+            return TRUE;                        /* it must have moved there */
     }
     return FALSE;
 }

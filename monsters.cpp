@@ -57,7 +57,6 @@ MonsterThing::MonsterThing()
     turn = FALSE;                        /* If slowed, is it a turn to move */
     type = 0;                        /* What it is */
     disguise = 0;                /* What mimic looks like */
-    oldch = 0;                        /* Character that was where it was */
     dest = NULL;                        /* Where it is running to */
     flags = 0;                        /* State word */
     stats.s_str = 0;                        /* Strength */
@@ -86,7 +85,6 @@ MonsterThing::MonsterThing(char type, const coord& cp)
     this->type = type;
     this->disguise = type;
     this->pos = cp;
-    this->oldch = getMapDisplay(cp.x, cp.y);
     this->room = roomin(cp);
     moat(cp.y, cp.x) = this;
     mp = &monsters[this->type-'A'];

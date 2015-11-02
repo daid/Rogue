@@ -590,9 +590,10 @@ void remove_mon(coord *mp, MonsterThing *tp, bool waskill)
         else
             delete obj;
     }
-    moat(mp->y, mp->x) = NULL;
-    setMapDisplay(mp->x, mp->y, tp->oldch);
+    moat(mp->y, mp->x) = nullptr;
     mlist.remove(tp);
+    if (see_monst(tp))
+        setMapDisplay(mp->x, mp->y, char_at_place(mp->x, mp->y));
     if (on(*tp, ISTARGET))
     {
         kamikaze = FALSE;

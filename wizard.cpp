@@ -127,7 +127,7 @@ teleport()
 {
     static coord c;
 
-    setMapDisplay(hero.x, hero.y, floor_at());
+    setMapDisplay(hero.x, hero.y, char_at_place(hero.x, hero.y));
     find_floor((struct room *) NULL, &c, FALSE, TRUE);
     if (roomin(c) != player.room)
     {

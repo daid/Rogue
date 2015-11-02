@@ -126,7 +126,7 @@ do_zap()
                     case WS_INVIS:
                         tp->flags |= ISINVIS;
                         if (cansee(y, x))
-                            setMapDisplay(x, y, tp->oldch);
+                            setMapDisplay(x, y, char_at_place(x, y));
                         break;
                     case WS_POLYMORPH:
                     {
@@ -248,7 +248,7 @@ drain()
      * First cnt how many things we need to spread the hit points among
      */
     cnt = 0;
-    if (chat(hero.y, hero.x) == DOOR)
+    if (char_at(hero.x, hero.y) == DOOR)
         corp = &passages[flat(hero.y, hero.x) & F_PNUM];
     else
         corp = NULL;
@@ -256,7 +256,7 @@ drain()
     dp = drainee;
     for (MonsterThing* mp : mlist)
         if (mp->room == player.room || mp->room == corp ||
-            (inpass && chat(mp->pos.y, mp->pos.x) == DOOR &&
+            (inpass && char_at(mp->pos.x, mp->pos.y) == DOOR &&
             &passages[flat(mp->pos.y, mp->pos.x) & F_PNUM] == player.room))
                 *dp++ = mp;
     if ((cnt = (int)(dp - drainee)) == 0)
@@ -352,7 +352,6 @@ def:
                 {
                     hit_hero = TRUE;
                     changed = !changed;
-                    tp->oldch = chat(pos.y, pos.x);
                     if (!save_throw(VS_MAGIC, tp))
                     {
                         bolt.pos = pos;
@@ -404,7 +403,7 @@ def:
         }
     }
     for (c2 = spotpos; c2 < c1; c2++)
-        setMapDisplay(c2->x, c2->y, chat(c2->y, c2->x));
+        setMapDisplay(c2->x, c2->y, char_at_place(c2->x, c2->y));
 }
 
 /*

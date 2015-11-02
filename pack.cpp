@@ -41,8 +41,7 @@ void add_pack(ItemThing *obj, bool silent)
         if (obj->flags & ISFOUND)
         {
             lvl_obj.remove(obj);
-            setMapDisplay(hero.x, hero.y, floor_ch());
-            chat(hero.y, hero.x) = (player.room->r_flags & ISGONE) ? PASSAGE : FLOOR;
+            item_at(hero.x, hero.y) = nullptr;
             delete obj;
             msg("the scroll turns to dust as you pick it up");
             return;
@@ -158,8 +157,7 @@ bool pack_room(bool from_floor, ItemThing *obj)
     if (from_floor)
     {
         lvl_obj.remove(obj);
-        setMapDisplay(hero.x, hero.y, floor_ch());
-        chat(hero.y, hero.x) = (player.room->r_flags & ISGONE) ? PASSAGE : FLOOR;
+        item_at(hero.x, hero.y) = nullptr;
     }
 
     return TRUE;
@@ -295,6 +293,7 @@ void pick_up(int ch)
                     return;
                 money(obj->arm);//gold value is stored in "arm" field (used to be handled with an ugly define)
                 lvl_obj.remove(obj);
+                item_at(obj->pos.x, obj->pos.y) = nullptr;
                 delete obj;
                 player.room->r_goldval = 0;
                 break;
@@ -431,46 +430,15 @@ get_item(const char *purpose, int type)
  *        Add or subtract gold from the pack
  */
 
-void
-money(int value)
+void money(int value)
 {
     purse += value;
-    setMapDisplay(hero.x, hero.y, floor_ch());
-    chat(hero.y, hero.x) = (player.room->r_flags & ISGONE) ? PASSAGE : FLOOR;
     if (value > 0)
     {
         if (!terse)
             addmsg("you found ");
         msg("%d gold pieces", value);
     }
-}
-
-/*
- * floor_ch:
- *        Return the appropriate floor character for her room
- */
-char
-floor_ch()
-{
-    if (player.room->r_flags & ISGONE)
-        return PASSAGE;
-    return (show_floor() ? FLOOR : ' ');
-}
-
-/*
- * floor_at:
- *        Return the character at hero's position, taking see_floor
- *        into account
- */
-char
-floor_at()
-{
-    int ch;
-
-    ch = chat(hero.y, hero.x);
-    if (ch == FLOOR)
-        ch = floor_ch();
-    return ch;
 }
 
 /*

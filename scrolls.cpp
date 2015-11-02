@@ -226,9 +226,7 @@ def:
                     }
                     if (ch != ' ')
                     {
-                        if ((m_obj = pp->p_monst) != NULL)
-                            m_obj->oldch = ch;
-                        if (m_obj == NULL || !on(player, SEEMONST))
+                        if (pp->p_monst == NULL || !on(player, SEEMONST))
                             setMapDisplay(x, y, ch);
                     }
                 }

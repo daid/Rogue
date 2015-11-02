@@ -56,7 +56,9 @@ void look(bool wakeup)
     {
         visit_field_of_view(hero.x, hero.y, 20, [](int x, int y)
         {
-            int ch = chat(y, x);
+            int ch = char_at(x, y);
+            if (item_at(x, y))
+                ch = item_at(x, y)->type;
             ch = trip_ch(y, x, ch);
             MonsterThing* mp = moat(y, x);
             if (mp)
@@ -95,7 +97,7 @@ void look(bool wakeup)
                  ((pfl & F_PASS) || pch == DOOR))
             {
                 if (hero.x != x && hero.y != y &&
-                    !step_ok(chat(y, hero.x)) && !step_ok(chat(hero.y, x)))
+                    !step_ok(char_at(hero.x, y)) && !step_ok(char_at(x, hero.y)))
                         continue;
             }
 
@@ -122,9 +124,6 @@ void look(bool wakeup)
                 }
             if (on(player, ISBLIND) && (y != hero.y || x != hero.x))
                 continue;
-
-            if ((player.room->r_flags & ISDARK) && !see_floor && ch == FLOOR)
-                ch = ' ';
 
             //if (tp != NULL || ch != getMapDisplay(x, y))
             //    setMapDisplay(x, y, ch);
@@ -245,19 +244,6 @@ void erase_lamp(coord& pos, struct room *rp)
         if (getMapDisplay(x, y) == PASSAGE)
             setMapDisplay(x, y, PASSAGE2);
     });
-}
-
-/*
- * show_floor:
- *        Should we show the floor in her room at this time?
- */
-bool
-show_floor()
-{
-    if ((player.room->r_flags & (ISGONE|ISDARK)) == ISDARK && !on(player, ISBLIND))
-        return see_floor;
-    else
-        return TRUE;
 }
 
 /*
@@ -589,5 +575,26 @@ rnd_thing()
  */
 const char* choose_str(const char *ts, const char *ns)
 {
-        return (on(player, ISHALU) ? ts : ns);
+    return (on(player, ISHALU) ? ts : ns);
+}
+
+/* Return the character that needs to be displayed at position x/y */
+int char_at_place(int x, int y)
+{
+    MonsterThing* mp = monster_at(x, y);
+    if (mp)
+    {
+        if (cansee(mp->pos.y, mp->pos.x))
+        {
+            if (!on(*mp, ISINVIS) || on(player, CANSEE))
+                return mp->disguise;
+        }
+        else if (on(player, SEEMONST))
+        {
+            return mp->disguise | DISPLAY_INVERT;
+        }
+    }
+    if (item_at(x, y))
+        return item_at(x, y)->type;
+    return char_at(x, y);
 }

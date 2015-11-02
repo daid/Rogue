@@ -359,7 +359,7 @@ numpass(int y, int x)
      * check to see if it is a door or secret door, i.e., a new exit,
      * or a numerable type of place
      */
-    if ((ch = chat(y, x)) == DOOR ||
+    if ((ch = char_at(x, y)) == DOOR ||
         (!(*fp & F_REAL) && IS_WALL(ch)))
     {
         rp = &passages[pnum];

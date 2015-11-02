@@ -93,8 +93,14 @@ int unconfuse(int arg)
 int unsee(int arg)
 {
     for(MonsterThing *th : mlist)
+    {
         if (on(*th, ISINVIS) && see_monst(th))
-            setMapDisplay(th->pos.x, th->pos.y, th->oldch);
+        {
+            player.flags &=~CANSEE; //Swap this flag to cheat the char_at_place function into giving us what we want, without causing problems for the see_monst function.
+            setMapDisplay(th->pos.x, th->pos.y, char_at_place(th->pos.x, th->pos.y));
+            player.flags |= CANSEE;
+        }
+    }
     player.flags &= ~CANSEE;
     return 0;
 }
@@ -205,7 +211,7 @@ int come_down(int arg)
      */
     for (ItemThing* tp : lvl_obj)
         if (cansee(tp->pos.y, tp->pos.x))
-            setMapDisplay(tp->pos.x, tp->pos.y, tp->type);
+            setMapDisplay(tp->pos.x, tp->pos.y, char_at_place(tp->pos.x, tp->pos.y));
 
     /*
      * undo the monsters
@@ -213,16 +219,9 @@ int come_down(int arg)
     seemonst = on(player, SEEMONST);
     for(MonsterThing* mp : mlist)
     {
-        if (cansee(mp->pos.y, mp->pos.x))
+        if (cansee(mp->pos.y, mp->pos.x) || seemonst)
         {
-            if (!on(*mp, ISINVIS) || on(player, CANSEE))
-                setMapDisplay(mp->pos.x, mp->pos.y, mp->disguise);
-            else
-                setMapDisplay(mp->pos.x, mp->pos.y, chat(mp->pos.y, mp->pos.x));
-        }
-        else if (seemonst)
-        {
-            setMapDisplay(mp->pos.x, mp->pos.y, mp->type | DISPLAY_INVERT);
+            setMapDisplay(mp->pos.x, mp->pos.y, char_at_place(mp->pos.x, mp->pos.y));
         }
     }
     msg("Everything looks SO boring now.");

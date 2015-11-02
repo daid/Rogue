@@ -30,7 +30,6 @@ bool playing = TRUE;                        /* True until he quits */
 bool q_comm = FALSE;                        /* Are we executing a 'Q' command? */
 bool running = FALSE;                        /* True if player is running */
 bool save_msg = TRUE;                        /* Remember last msg */
-bool see_floor = TRUE;                        /* Show the lamp illuminated floor */
 bool stat_msg = FALSE;                        /* Should status() print as a msg() */
 bool terse = FALSE;                        /* True if we should be short */
 bool to_death = FALSE;                        /* Fighting is to the death! */

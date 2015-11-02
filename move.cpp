@@ -91,7 +91,7 @@ over:
     {
         if (!on(player, ISLEVIT))
         {
-            chat(nh.y, nh.x) = ch = TRAP;
+            char_at(nh.x, nh.y) = ch = TRAP;
             flat(nh.y, nh.x) |= F_REAL;
         }
     }
@@ -195,11 +195,11 @@ hit_bound:
                 fight(&nh, cur_weapon, FALSE);
             else
             {
-                if (ch != STAIRS)
-                    take = ch;
 move_stuff:
-                setMapDisplay(hero.x, hero.y, floor_at());
-                if ((fl & F_PASS) && chat(oldpos.y, oldpos.x) == DOOR)
+                if (item_at(nh.x, nh.y))
+                    take = item_at(nh.x, nh.y)->type;
+                setMapDisplay(hero.x, hero.y, char_at_place(hero.x, hero.y));
+                if ((fl & F_PASS) && char_at(oldpos.x, oldpos.y) == DOOR)
                     leave_room(nh);
                 hero = nh;
             }

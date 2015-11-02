@@ -49,10 +49,9 @@
 #define when                break;case
 #define otherwise        break;default
 #define until(expr)        while(!(expr))
-#define winat(y,x)        (moat(y,x) != NULL ? moat(y,x)->disguise : chat(y,x))
+#define winat(y,x)        (moat(y,x) != NULL ? moat(y,x)->disguise : char_at(x, y))
 #define ce(a,b)                ((a).x == (b).x && (a).y == (b).y)
 #define hero                player.pos
-#undef max
 #define max(a,b)        ((a) > (b) ? (a) : (b))
 #define on(thing,flag)        ((bool)(((thing).flags & (flag)) != 0))
 #define GOLDCALC        (rnd(50 + 10 * level) + 2)
@@ -60,8 +59,10 @@
 #define ISWEARING(r)        (ISRING(LEFT, r) || ISRING(RIGHT, r))
 #define ISMULT(type)         (type == POTION || type == SCROLL || type == FOOD)
 #define INDEX(y,x)        (&places[((x) << 5) + (y)])
-#define chat(y,x)        (places[((x) << 5) + (y)].p_ch)
+#define char_at(x,y)     (places[((x) << 5) + (y)].p_ch)
 #define flat(y,x)        (places[((x) << 5) + (y)].p_flags)
+#define item_at(x,y)     (places[((x) << 5) + (y)].p_item)
+#define monster_at(x,y)  (places[((x) << 5) + (y)].p_monst)
 #define moat(y,x)        (places[((x) << 5) + (y)].p_monst)
 #define unc(cp)                (cp).y, (cp).x
 
@@ -388,7 +389,6 @@ public:
     bool turn;                          /* If slowed, is it a turn to move */
     char type;                          /* What it is */
     char disguise;                      /* What mimic looks like */
-    char oldch;                         /* Character that was where it was */
     coord *dest;                        /* Where it is running to */
     short flags;                        /* State word */
     struct stats stats;                 /* Physical description */
@@ -413,7 +413,8 @@ typedef int(*daemon_function_t)(int);
 typedef struct {
     char p_ch;
     char p_flags;
-    MonsterThing *p_monst;
+    ItemThing* p_item;
+    MonsterThing* p_monst;
 } PLACE;
 
 /*
@@ -433,7 +434,7 @@ struct monster {
 extern bool     after, again, allscore, amulet, door_stop, fight_flush,
                 firstmove, has_hit, inv_describe, jump, kamikaze,
                 lower_msg, move_on, pack_used[],
-                passgo, playing, q_comm, running, save_msg, see_floor,
+                passgo, playing, q_comm, running, save_msg,
                 seenstairs, stat_msg, terse, to_death, tombstone;
 
 extern char     file_name[], huh[], *Numname, outbuf[], take;
@@ -535,7 +536,6 @@ void        erase_lamp(coord& pos, struct room *rp);
 void        extinguish(daemon_function_t func);
 void        fall(ItemThing *obj, bool pr);
 void        fire_bolt(coord *start, coord *dir, const char *name);
-char        floor_at();
 void        flush_type();
 int        fight(coord *mp, ItemThing *weap, bool thrown);
 void        fix_stick(ItemThing *cur);
@@ -610,9 +610,7 @@ int        save_throw(int which, MonsterThing *tp);
 void        score(int amount, int flags, char monst);
 void        search();
 void        set_know(ItemThing *obj, struct obj_info *info);
-void        set_oldch(MonsterThing *tp, coord *cp);
 void        setup();
-bool        show_floor();
 void        show_map();
 int        sign(int nm);
 int        spread(int nm);
@@ -654,7 +652,6 @@ int         turn_see(int turn_off);
 bool        is_current(ItemThing *obj);
 
 char        be_trapped(coord *tc);
-char        floor_ch();
 char        pack_char();
 char        rnd_thing();
 
@@ -668,6 +665,7 @@ const char  *set_mname(MonsterThing *tp);
 const char  *vowelstr(const char *str);
 
 int        trip_ch(int y, int x, int ch);
+int        char_at_place(int x, int y);
 
 coord        *find_dest(MonsterThing *tp);
 coord        *rndmove(MonsterThing *who);

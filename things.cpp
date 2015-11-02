@@ -137,8 +137,8 @@ drop()
     int ch;
     ItemThing *obj;
 
-    ch = chat(hero.y, hero.x);
-    if (ch != FLOOR && ch != PASSAGE && ch != PASSAGE2)
+    ch = char_at(hero.x, hero.y);
+    if ((ch != FLOOR && ch != PASSAGE && ch != PASSAGE2) || item_at(hero.x, hero.y))
     {
         after = FALSE;
         msg("there is something there already");
@@ -153,7 +153,7 @@ drop()
      * Link it into the level object list
      */
     lvl_obj.push_front(obj);
-    chat(hero.y, hero.x) = (char) obj->type;
+    item_at(hero.x, hero.y) = obj;
     flat(hero.y, hero.x) |= F_DROPPED;
     obj->pos = hero;
     if (obj->type == AMULET)

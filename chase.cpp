@@ -81,9 +81,9 @@ void relocate(MonsterThing *th, coord *new_loc)
 
     if (!ce(*new_loc, th->pos))
     {
-        setMapDisplay(th->pos.x, th->pos.y, th->oldch);
+        if (see_monst(th))
+            setMapDisplay(th->pos.x, th->pos.y, winat(th->pos.y, th->pos.x));
         th->room = roomin(*new_loc);
-        set_oldch(th, new_loc);
         oroom = th->room;
         moat(th->pos.y, th->pos.x) = NULL;
 
@@ -123,7 +123,7 @@ int do_chase(MonsterThing *th)
     /*
      * We don't count doors as inside rooms for this routine
      */
-    door = (chat(th->pos.y, th->pos.x) == DOOR);
+    door = (char_at(th->pos.x, th->pos.y) == DOOR);
     /*
      * If the object of our desire is in a different room,
      * and we are not in a corridor, run to the door nearest to
@@ -195,9 +195,8 @@ over:
                 if (th->dest == &obj->pos)
                 {
                     lvl_obj.remove(obj);
+                    item_at(obj->pos.x, obj->pos.y) = nullptr;
                     th->pack.push_front(obj);
-                    chat(obj->pos.y, obj->pos.x) =
-                        (th->room->r_flags & ISGONE) ? PASSAGE : FLOOR;
                     th->dest = find_dest(th);
                     break;
                 }
@@ -221,51 +220,16 @@ over:
 }
 
 /*
- * set_oldch:
- *        Set the oldch character for the monster
- */
-void
-set_oldch(MonsterThing *tp, coord *cp)
-{
-    char sch;
-
-    if (ce(tp->pos, *cp))
-        return;
-
-    sch = tp->oldch;
-    tp->oldch = getMapDisplay(cp->x, cp->y);
-    if (!on(player, ISBLIND))
-    {
-        if (sch == FLOOR || tp->oldch == FLOOR)
-            tp->oldch = ' ';
-        else if (dist_cp(cp, &hero) <= LAMPDIST && see_floor)
-            tp->oldch = chat(cp->y, cp->x);
-    }
-}
-
-/*
  * see_monst:
  *        Return TRUE if the hero can see the monster
  */
 bool see_monst(MonsterThing *mp)
 {
-    int y, x;
-
     if (on(player, ISBLIND))
         return FALSE;
     if (on(*mp, ISINVIS) && !on(player, CANSEE))
         return FALSE;
-    y = mp->pos.y;
-    x = mp->pos.x;
-    if (dist(y, x, hero.y, hero.x) < LAMPDIST)
-    {
-        if (!has_line_of_sight(hero.x, hero.y, x, y))
-            return FALSE;
-        return TRUE;
-    }
-    if (mp->room != player.room)
-        return FALSE;
-    return ((bool)!(mp->room->r_flags & ISDARK));
+    return cansee(mp->pos.y, mp->pos.x);
 }
 
 /*
@@ -422,43 +386,34 @@ struct room * roomin(const coord& cp)
  * diag_ok:
  *        Check to see if the move is legal if it is diagonal
  */
-bool
-diag_ok(coord *sp, coord *ep)
+bool diag_ok(coord *sp, coord *ep)
 {
     if (ep->x < 0 || ep->x >= NUMCOLS || ep->y <= 0 || ep->y >= NUMLINES - 1)
         return FALSE;
     if (ep->x == sp->x || ep->y == sp->y)
         return TRUE;
-    return (bool)(step_ok(chat(ep->y, sp->x)) && step_ok(chat(sp->y, ep->x)));
+    return (bool)(step_ok(char_at(ep->x, sp->y)) && step_ok(char_at(sp->x, ep->y)));
 }
 
 /*
  * cansee:
  *        Returns true if the hero can see a certain coordinate.
  */
-bool
-cansee(int y, int x)
+bool cansee(int y, int x)
 {
     register struct room *rer;
     static coord tp;
 
     if (on(player, ISBLIND))
         return FALSE;
+    if (!has_line_of_sight(hero.x, hero.y, x, y))
+        return FALSE;
     if (dist(y, x, hero.y, hero.x) < LAMPDIST)
-    {
-        if (flat(y, x) & F_PASS)
-            if (y != hero.y && x != hero.x &&
-                !step_ok(chat(y, hero.x)) && !step_ok(chat(hero.y, x)))
-                    return FALSE;
         return TRUE;
-    }
-    /*
-     * We can only see if the hero in the same room as
-     * the coordinate and the room is lit or if it is close.
-     */
     tp.y = y;
     tp.x = x;
-    return (bool)((rer = roomin(tp)) == player.room && !(rer->r_flags & ISDARK));
+    rer = roomin(tp);
+    return (bool)(!(rer->r_flags & ISDARK));
 }
 
 /*

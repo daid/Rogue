@@ -35,7 +35,8 @@ new_level()
     {
         pp->p_ch = ' ';
         pp->p_flags = F_REAL;
-        pp->p_monst = NULL;
+        pp->p_monst = nullptr;
+        pp->p_item = nullptr;
     }
     clearMapDisplay();
     /*
@@ -78,7 +79,7 @@ new_level()
             do
             {
                 find_floor((struct room *) NULL, &stairs, FALSE, FALSE);
-            } while (chat(stairs.y, stairs.x) != FLOOR);
+            } while (char_at(stairs.x, stairs.y) != FLOOR);
             sp = &flat(stairs.y, stairs.x);
             *sp &= ~F_REAL;
             *sp |= rnd(NTRAPS);
@@ -88,7 +89,7 @@ new_level()
      * Place the staircase down.
      */
     find_floor((struct room *) NULL, &stairs, FALSE, FALSE);
-    chat(stairs.y, stairs.x) = STAIRS;
+    char_at(stairs.x, stairs.y) = STAIRS;
     seenstairs = FALSE;
 
     for(MonsterThing *tp : mlist)
@@ -156,7 +157,7 @@ put_things()
              * Put it somewhere
              */
             find_floor((struct room *) NULL, &obj->pos, FALSE, FALSE);
-            chat(obj->pos.y, obj->pos.x) = (char) obj->type;
+            item_at(obj->pos.x, obj->pos.y) = obj;
         }
     /*
      * If he is really deep in the dungeon and he hasn't found the
@@ -176,7 +177,7 @@ put_things()
          * Put it somewhere
          */
         find_floor((struct room *) NULL, &obj->pos, FALSE, FALSE);
-        chat(obj->pos.y, obj->pos.x) = AMULET;
+        item_at(obj->pos.x, obj->pos.y) = obj;
     }
 }
 
@@ -208,7 +209,7 @@ treas_room()
         tp = new_thing();
         tp->pos = mp;
         lvl_obj.push_front(tp);
-        chat(mp.y, mp.x) = (char) tp->type;
+        item_at(tp->pos.x, tp->pos.y) = tp;
     }
 
     /*

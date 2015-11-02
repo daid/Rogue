@@ -123,11 +123,11 @@ do_rooms()
             gold->arm = rp->r_goldval = GOLDCALC;//gold value is stored in arm field (used to be handled with ugly define)
             find_floor(rp, &rp->r_gold, FALSE, FALSE);
             gold->pos = rp->r_gold;
-            chat(rp->r_gold.y, rp->r_gold.x) = GOLD;
             gold->flags = ISMANY;
             gold->group = GOLDGRP;
             gold->type = GOLD;
             lvl_obj.push_front(gold);
+            item_at(rp->r_gold.x, rp->r_gold.y) = gold;
         }
         /*
          * Put the monster in
@@ -159,17 +159,17 @@ void draw_room(struct room *rp)
         vert(rp, rp->r_pos.x + rp->r_max.x - 1);        /* Draw right side */
         horiz(rp, rp->r_pos.y);                                /* Draw top */
         horiz(rp, rp->r_pos.y + rp->r_max.y - 1);        /* Draw bottom */
-        chat(rp->r_pos.y, rp->r_pos.x) = WALL_TL;
-        chat(rp->r_pos.y + rp->r_max.y - 1, rp->r_pos.x) = WALL_BL;
-        chat(rp->r_pos.y, rp->r_pos.x + rp->r_max.x - 1) = WALL_TR;
-        chat(rp->r_pos.y + rp->r_max.y - 1, rp->r_pos.x + rp->r_max.x - 1) = WALL_BR;
+        char_at(rp->r_pos.x, rp->r_pos.y) = WALL_TL;
+        char_at(rp->r_pos.x, rp->r_pos.y + rp->r_max.y - 1) = WALL_BL;
+        char_at(rp->r_pos.x + rp->r_max.x - 1, rp->r_pos.y) = WALL_TR;
+        char_at(rp->r_pos.x + rp->r_max.x - 1, rp->r_pos.y + rp->r_max.y - 1) = WALL_BR;
 
         /*
          * Put the floor down
          */
         for (y = rp->r_pos.y + 1; y < rp->r_pos.y + rp->r_max.y - 1; y++)
             for (x = rp->r_pos.x + 1; x < rp->r_pos.x + rp->r_max.x - 1; x++)
-                chat(y, x) = FLOOR;
+                char_at(x, y) = FLOOR;
     }
 }
 
@@ -184,7 +184,7 @@ vert(struct room *rp, int startx)
     int y;
 
     for (y = rp->r_pos.y + 1; y <= rp->r_max.y + rp->r_pos.y - 1; y++)
-        chat(y, startx) = WALL_V;
+        char_at(startx, y) = WALL_V;
 }
 
 /*
@@ -198,7 +198,7 @@ horiz(struct room *rp, int starty)
     int x;
 
     for (x = rp->r_pos.x; x <= rp->r_pos.x + rp->r_max.x - 1; x++)
-        chat(starty, x) = WALL_H;
+        char_at(x, starty) = WALL_H;
 }
 
 /*
@@ -374,9 +374,6 @@ find_floor(struct room *rp, coord *cp, int limit, bool monst)
 void enter_room(const coord& cp)
 {
     struct room *rp;
-    MonsterThing *tp;
-    int y, x;
-    int ch;
 
     rp = player.room = roomin(cp);
     door_open(rp);
@@ -389,23 +386,12 @@ void enter_room(const coord& cp)
 
 void leave_room(const coord& cp)
 {
-    PLACE *pp;
     struct room *rp;
-    int y, x;
-    char floor;
-    int ch;
 
     rp = player.room;
 
     if (rp->r_flags & ISMAZE)
         return;
-
-    if (rp->r_flags & ISGONE)
-        floor = PASSAGE;
-    else if (!(rp->r_flags & ISDARK) || on(player, ISBLIND))
-        floor = FLOOR;
-    else
-        floor = ' ';
 
     player.room = &passages[flat(cp.y, cp.x) & F_PNUM];
 

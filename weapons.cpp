@@ -85,10 +85,7 @@ do_motion(ItemThing *obj, int ydelta, int xdelta)
          */
         if (!ce(obj->pos, hero) && cansee(unc(obj->pos)) && !terse)
         {
-            ch = chat(obj->pos.y, obj->pos.x);
-            if (ch == FLOOR && !show_floor())
-                ch = ' ';
-            setMapDisplay(obj->pos.x, obj->pos.y, ch);
+            setMapDisplay(obj->pos.x, obj->pos.y, char_at_place(obj->pos.x, obj->pos.y));
         }
         /*
          * Get the new position
@@ -121,20 +118,15 @@ do_motion(ItemThing *obj, int ydelta, int xdelta)
 void
 fall(ItemThing *obj, bool pr)
 {
-    PLACE *pp;
     static coord fpos;
 
     if (fallpos(&obj->pos, &fpos))
     {
-        pp = INDEX(fpos.y, fpos.x);
-        pp->p_ch = (char) obj->type;
+        item_at(fpos.x, fpos.y) = obj;
         obj->pos = fpos;
         if (cansee(fpos.y, fpos.x))
         {
-            if (pp->p_monst != NULL)
-                pp->p_monst->oldch = (char) obj->type;
-            else
-                setMapDisplay(fpos.x, fpos.y, obj->type);
+            setMapDisplay(fpos.x, fpos.y, char_at_place(fpos.x, fpos.y));
         }
         lvl_obj.push_front(obj);
         return;
@@ -263,7 +255,7 @@ bad:
 bool
 fallpos(coord *pos, coord *newpos)
 {
-    int y, x, cnt, ch;
+    int y, x, cnt;
 
     cnt = 0;
     for (y = pos->y - 1; y <= pos->y + 1; y++)
@@ -276,7 +268,7 @@ fallpos(coord *pos, coord *newpos)
              */
             if (y == hero.y && x == hero.x)
                 continue;
-            if (((ch = chat(y, x)) == FLOOR || ch == PASSAGE || ch == PASSAGE2) && rnd(++cnt) == 0)
+            if (!item_at(y, x) && rnd(++cnt) == 0)
             {
                 newpos->y = y;
                 newpos->x = x;

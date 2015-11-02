@@ -1489,7 +1489,6 @@ static int rs_write_thing(FILE *savef, MonsterThing *t)
     rs_write_boolean(savef, t->turn);
     rs_write_char(savef, t->type);
     rs_write_char(savef, t->disguise);
-    rs_write_char(savef, t->oldch);
 
     /* 
         t_dest can be:
@@ -1576,7 +1575,6 @@ rs_read_thing(FILE *inf, MonsterThing *t)
     rs_read_boolean(inf,&t->turn);
     rs_read_char(inf,&t->type);
     rs_read_char(inf,&t->disguise);
-    rs_read_char(inf,&t->oldch);
             
     /* 
         t_dest can be (listid,index):
@@ -1696,15 +1694,13 @@ int rs_read_monster_list(FILE *inf)
     return(READSTAT);
 }
 
-void
-rs_fix_monster_list()
+void rs_fix_monster_list()
 {
     for(MonsterThing *item : mlist)
         rs_fix_monster(item);
 }
 
-int
-rs_write_monster_reference(FILE *savef, MonsterThing *item)
+static int rs_write_monster_reference(FILE *savef, MonsterThing *item)
 {
     int i;
 
@@ -1726,8 +1722,7 @@ rs_write_monster_reference(FILE *savef, MonsterThing *item)
     return(WRITESTAT);
 }
 
-int
-rs_read_monster_reference(FILE *inf, MonsterThing **item)
+static int rs_read_monster_reference(FILE *inf, MonsterThing **item)
 {
     int i;
     
@@ -1752,8 +1747,54 @@ rs_read_monster_reference(FILE *inf, MonsterThing **item)
     return(READSTAT);
 }
 
-int 
-rs_write_places(FILE *savef, PLACE *places, int count)
+static int rs_write_item_reference(FILE *savef, ItemThing* item)
+{
+    int i;
+
+    if (write_error)
+        return(WRITESTAT);
+
+    i = 0;
+    for(ItemThing* it : lvl_obj)
+    {
+        if (item == it)
+        {
+            rs_write_int(savef, i);
+            return(WRITESTAT);
+        }
+        i++;
+    }
+    rs_write_int(savef,-1);
+
+    return(WRITESTAT);
+}
+
+static int rs_read_item_reference(FILE *inf, ItemThing** item)
+{
+    int i;
+    
+    if (read_error || format_error)
+        return(READSTAT);
+
+    rs_read_int(inf, &i);
+
+    if (i == -1)
+    {
+        *item = NULL;
+    }else{
+        auto it = lvl_obj.begin();
+        while(i > 0)
+        {
+            it++;
+            i--;
+        }
+        *item = *it;
+    }
+
+    return(READSTAT);
+}
+
+static int rs_write_places(FILE *savef, PLACE *places, int count)
 {
     int i = 0;
     
@@ -1765,13 +1806,13 @@ rs_write_places(FILE *savef, PLACE *places, int count)
         rs_write_char(savef, places[i].p_ch);
         rs_write_char(savef, places[i].p_flags);
         rs_write_monster_reference(savef, places[i].p_monst);
+        rs_write_item_reference(savef, places[i].p_item);
     }
 
     return(WRITESTAT);
 }
 
-int 
-rs_read_places(FILE *inf, PLACE *places, int count)
+static int rs_read_places(FILE *inf, PLACE *places, int count)
 {
     int i = 0;
     
@@ -1783,6 +1824,7 @@ rs_read_places(FILE *inf, PLACE *places, int count)
         rs_read_char(inf,&places[i].p_ch);
         rs_read_char(inf,&places[i].p_flags);
         rs_read_monster_reference(inf, &places[i].p_monst);
+        rs_read_item_reference(inf, &places[i].p_item);
     }
 
     return(READSTAT);
@@ -1812,7 +1854,6 @@ rs_save_file(FILE *savef)
     rs_write_boolean(savef, q_comm);                /* 20 */
     rs_write_boolean(savef, running);               /* 21 */
     rs_write_boolean(savef, save_msg);              /* 22 */
-    rs_write_boolean(savef, see_floor);             /* 23 */
     rs_write_boolean(savef, stat_msg);              /* 24 */
     rs_write_boolean(savef, terse);                 /* 25 */
     rs_write_boolean(savef, to_death);              /* 26 */
@@ -1919,7 +1960,6 @@ rs_restore_file(FILE *inf)
     rs_read_boolean(inf, &q_comm);              /* 20 */
     rs_read_boolean(inf, &running);             /* 21 */
     rs_read_boolean(inf, &save_msg);            /* 22 */
-    rs_read_boolean(inf, &see_floor);           /* 23 */
     rs_read_boolean(inf, &stat_msg);            /* 24 */
     rs_read_boolean(inf, &terse);               /* 25 */
     rs_read_boolean(inf, &to_death);            /* 26 */

@@ -299,7 +299,7 @@ over:
                         fp = &flat(delta.y, delta.x);
                         if (!terse)
                             addmsg("You have found ");
-                        if (chat(delta.y, delta.x) != TRAP)
+                        if (char_at(delta.x, delta.y) != TRAP)
                             msg("no trap there");
                         else if (on(player, ISHALU))
                             msg(tr_name[rnd(NTRAPS)]);
@@ -404,7 +404,8 @@ void search()
                 continue;
             fp = &flat(y, x);
             if (!(*fp & F_REAL))
-                switch (chat(y, x))
+            {
+                switch (char_at(x, y))
                 {
                     case WALL_V:
                     case WALL_H:
@@ -412,7 +413,7 @@ void search()
                     case '-':
                         if (rnd(5 + probinc) != 0)
                             break;
-                        chat(y, x) = DOOR;
+                        char_at(x, y) = DOOR;
                         msg("a secret door");
 foundone:
                         found = TRUE;
@@ -423,7 +424,7 @@ foundone:
                     case FLOOR:
                         if (rnd(2 + probinc) != 0)
                             break;
-                        chat(y, x) = TRAP;
+                        char_at(x, y) = TRAP;
                         if (!terse)
                             addmsg("you found ");
                         if (on(player, ISHALU))
@@ -437,9 +438,10 @@ foundone:
                     case ' ':
                         if (rnd(3 + probinc) != 0)
                             break;
-                        chat(y, x) = PASSAGE;
+                        char_at(x, y) = PASSAGE;
                         goto foundone;
                 }
+            }
         }
     if (found)
         look(FALSE);
@@ -550,7 +552,7 @@ d_level()
 {
     if (levit_check())
         return;
-    if (chat(hero.y, hero.x) != STAIRS)
+    if (char_at(hero.x, hero.y) != STAIRS)
         msg("I see no way down");
     else
     {
@@ -570,7 +572,8 @@ u_level()
 {
     if (levit_check())
         return;
-    if (chat(hero.y, hero.x) == STAIRS)
+    if (char_at(hero.x, hero.y) == STAIRS)
+    {
         if (amulet)
         {
             level--;
@@ -580,9 +583,14 @@ u_level()
             msg("you feel a wrenching sensation in your gut");
         }
         else
+        {
             msg("your way is magically blocked");
+        }
+    }
     else
+    {
         msg("I see no way up");
+    }
 }
 
 /*

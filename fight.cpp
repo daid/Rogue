@@ -457,10 +457,6 @@ bool roll_em(MonsterThing *thatt, MonsterThing *thdef, ItemThing *weap, bool hur
             int proll;
 
             proll = roll(ndice, nsides);
-#ifdef MASTER
-            if (ndice + nsides > 0 && proll <= 0)
-                debug("Damage for %dx%d came out %d, dplus = %d, add_dam = %d, def_arm = %d", ndice, nsides, proll, dplus, add_dam[att->s_str], def_arm);
-#endif
             damage = dplus + proll + add_dam[att->s_str];
             def->s_hpt -= max(0, damage);
             did_hit = TRUE;

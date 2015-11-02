@@ -36,9 +36,6 @@ d_slot()
     for (dev = d_list; dev <= &d_list[MAXDAEMONS-1]; dev++)
         if (dev->d_type == EMPTY)
             return dev;
-#ifdef MASTER
-    debug("Ran out of fuse slots");
-#endif
     return NULL;
 }
 

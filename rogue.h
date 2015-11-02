@@ -12,6 +12,7 @@
 
 #include <list>
 #include "extern.h"
+#include "line_of_sight.h"
 
 /*
  * Maximum number of different things
@@ -68,6 +69,7 @@
  * things that appear on the screens
  */
 #define PASSAGE             '\x02'
+#define PASSAGE2            '\x01'
 #define DOOR                '\x16'
 #define FLOOR               '.'
 #define PLAYER              '@'
@@ -116,7 +118,7 @@
 #define LEFT            0
 #define RIGHT           1
 #define BOLT_LENGTH     6
-#define LAMPDIST        3   /* Distance squared! */
+#define LAMPDIST        11   /* Distance squared! */
 
 /*
  * Save against things
@@ -529,7 +531,7 @@ size_t  encread(void *start, size_t size, FILE *inf);
 size_t  encwrite(const void *start, size_t size, FILE *outf);
 int        endmsg();
 void enter_room(const coord& cp);
-void        erase_lamp(coord *pos, struct room *rp);
+void        erase_lamp(coord& pos, struct room *rp);
 void        extinguish(daemon_function_t func);
 void        fall(ItemThing *obj, bool pr);
 void        fire_bolt(coord *start, coord *dir, const char *name);

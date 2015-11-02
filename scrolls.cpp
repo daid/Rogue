@@ -203,7 +203,7 @@ pass:
                             if (!(pp->p_flags & F_REAL))
                                 pp->p_ch = PASSAGE;
                             pp->p_flags |= (F_SEEN|F_REAL);
-                            ch = PASSAGE;
+                            ch = PASSAGE2;
                             break;
 
                         case FLOOR:
@@ -303,11 +303,6 @@ def:
             }
             else
                 msg("you feel a strange sense of loss");
-#ifdef MASTER
-        otherwise:
-            msg("what a puzzling scroll!");
-            return;
-#endif
     }
     obj = orig_obj;
     look(TRUE);        /* put the result of the scroll on the screen */

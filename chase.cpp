@@ -236,11 +236,10 @@ set_oldch(MonsterThing *tp, coord *cp)
     tp->oldch = getMapDisplay(cp->x, cp->y);
     if (!on(player, ISBLIND))
     {
-            if ((sch == FLOOR || tp->oldch == FLOOR) &&
-                (tp->room->r_flags & ISDARK))
-                    tp->oldch = ' ';
-            else if (dist_cp(cp, &hero) <= LAMPDIST && see_floor)
-                tp->oldch = chat(cp->y, cp->x);
+        if (sch == FLOOR || tp->oldch == FLOOR)
+            tp->oldch = ' ';
+        else if (dist_cp(cp, &hero) <= LAMPDIST && see_floor)
+            tp->oldch = chat(cp->y, cp->x);
     }
 }
 
@@ -260,9 +259,8 @@ bool see_monst(MonsterThing *mp)
     x = mp->pos.x;
     if (dist(y, x, hero.y, hero.x) < LAMPDIST)
     {
-        if (y != hero.y && x != hero.x &&
-            !step_ok(chat(y, hero.x)) && !step_ok(chat(hero.y, x)))
-                return FALSE;
+        if (!has_line_of_sight(hero.x, hero.y, x, y))
+            return FALSE;
         return TRUE;
     }
     if (mp->room != player.room)
@@ -417,7 +415,6 @@ struct room * roomin(const coord& cp)
          && cp.y <= rp->r_pos.y + rp->r_max.y && rp->r_pos.y <= cp.y)
             return rp;
 
-    msg("in some bizarre place (%d, %d)", unc(cp));
     return NULL;
 }
 

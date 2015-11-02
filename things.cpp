@@ -106,11 +106,6 @@ const char * inv_name(ItemThing *obj, bool drop)
             strcpy(pb, "The Amulet of Yendor");
         when GOLD:
             sprintf(prbuf, "%d Gold pieces", obj->arm); //gold value is stored in arm field.
-#ifdef MASTER
-        otherwise:
-            debug("Picked up something funny %s", unctrl(obj->type));
-            sprintf(pb, "Something bizarre %s", unctrl(obj->type));
-#endif
     }
     if (inv_describe)
     {
@@ -143,7 +138,7 @@ drop()
     ItemThing *obj;
 
     ch = chat(hero.y, hero.x);
-    if (ch != FLOOR && ch != PASSAGE)
+    if (ch != FLOOR && ch != PASSAGE && ch != PASSAGE2)
     {
         after = FALSE;
         msg("there is something there already");
@@ -286,10 +281,6 @@ ItemThing* new_thing()
             cur->type = STICK;
             cur->which = pick_one(ws_info, MAXSTICKS);
             fix_stick(cur);
-#ifdef MASTER
-        otherwise:
-            debug("Picked a bad kind of object");
-#endif
     }
     return cur;
 }

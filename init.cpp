@@ -363,7 +363,6 @@ init_materials()
     }
 }
 
-#ifdef MASTER
 # define        NT        NUMTHINGS, "things"
 # define        MP        MAXPOTIONS, "potions"
 # define        MS        MAXSCROLLS, "scrolls"
@@ -371,29 +370,15 @@ init_materials()
 # define        MWS        MAXSTICKS, "sticks"
 # define        MW        MAXWEAPONS, "weapons"
 # define        MA        MAXARMORS, "armor"
-#else
-# define        NT        NUMTHINGS
-# define        MP        MAXPOTIONS
-# define        MS        MAXSCROLLS
-# define        MR        MAXRINGS
-# define        MWS        MAXSTICKS
-# define        MW        MAXWEAPONS
-# define        MA        MAXARMORS
-#endif
 
 /*
  * sumprobs:
  *        Sum up the probabilities for items appearing
  */
-void
-sumprobs(struct obj_info *info, int bound
-#ifdef MASTER
-        , char *name
-#endif
-)
+void sumprobs(struct obj_info *info, int bound, const char *name)
 {
 #ifdef MASTER
-        struct obj_info *start = info;
+    struct obj_info *start = info;
 #endif
     struct obj_info *endp;
 
@@ -409,8 +394,7 @@ sumprobs(struct obj_info *info, int bound
  * init_probs:
  *        Initialize the probabilities for the various items
  */
-void
-init_probs()
+void init_probs()
 {
     sumprobs(things, NT);
     sumprobs(pot_info, MP);
@@ -421,13 +405,11 @@ init_probs()
     sumprobs(arm_info, MA);
 }
 
-#ifdef MASTER
 /*
  * badcheck:
  *        Check to see if a series of probabilities sums to 100
  */
-void
-badcheck(char *name, struct obj_info *info, int bound)
+void badcheck(char *name, struct obj_info *info, int bound)
 {
     register struct obj_info *end;
 
@@ -436,12 +418,7 @@ badcheck(char *name, struct obj_info *info, int bound)
     printf("\nBad percentages for %s (bound = %d):\n", name, bound);
     for (end = &info[bound]; info < end; info++)
         printf("%3d%% %s\n", info->oi_prob, info->oi_name);
-    printf("[hit RETURN to continue]");
-    fflush(stdout);
-    while (getchar() != '\n')
-        continue;
 }
-#endif
 
 /*
  * pick_color:

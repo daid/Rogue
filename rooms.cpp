@@ -380,30 +380,6 @@ void enter_room(const coord& cp)
 
     rp = player.room = roomin(cp);
     door_open(rp);
-    /*
-    if (!(rp->r_flags & ISDARK) && !on(player, ISBLIND))
-        for (y = rp->r_pos.y; y < rp->r_max.y + rp->r_pos.y; y++)
-        {
-            for (x = rp->r_pos.x; x < rp->r_max.x + rp->r_pos.x; x++)
-            {
-                tp = moat(y, x);
-                ch = chat(y, x);
-                if (tp == NULL)
-                    setMapDisplay(x, y, ch);
-                else
-                {
-                    tp->oldch = ch;
-                    if (!see_monst(tp))
-                        if (on(player, SEEMONST))
-                            setMapDisplay(x, y, tp->disguise | DISPLAY_INVERT);
-                        else
-                            setMapDisplay(x, y, ch);
-                    else
-                        setMapDisplay(x, y, tp->disguise);
-                }
-            }
-        }
-    */
 }
 
 /*
@@ -432,31 +408,6 @@ void leave_room(const coord& cp)
         floor = ' ';
 
     player.room = &passages[flat(cp.y, cp.x) & F_PNUM];
-    for (y = rp->r_pos.y; y < rp->r_max.y + rp->r_pos.y; y++)
-        for (x = rp->r_pos.x; x < rp->r_max.x + rp->r_pos.x; x++)
-        {
-            switch ( ch = getMapDisplay(x, y) )
-            {
-                case FLOOR:
-                    if (floor == ' ' && ch != ' ')
-                        setMapDisplay(x, y, ' ');
-                    break;
-                default:
-                    /*
-                     * to check for monster, we have to strip out
-                     * standout bit
-                     */
-                    if (isupper(ch & 0x7F))
-                    {
-                        if (on(player, SEEMONST))
-                        {
-                            setMapDisplay(x, y, ch | DISPLAY_INVERT);
-                            break;
-                        }
-                        pp = INDEX(y,x);
-                        setMapDisplay(x, y, pp->p_ch == DOOR ? DOOR : floor);
-                    }
-            }
-        }
+
     door_open(rp);
 }

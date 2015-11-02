@@ -19,11 +19,7 @@
  * look:
  *        A quick glance all around the player
  */
-#undef DEBUG
-
-
-void
-look(bool wakeup)
+void look(bool wakeup)
 {
     int x, y;
     int ch;
@@ -34,18 +30,12 @@ look(bool wakeup)
     int passcount;
     char pfl, *fp, pch;
     int sy, sx, sumhero = 0, diffhero = 0;
-# ifdef DEBUG
-    static bool done = FALSE;
 
-    if (done)
-        return;
-    done = TRUE;
-# endif /* DEBUG */
     passcount = 0;
     rp = player.room;
     if (!ce(oldpos, hero))
     {
-        erase_lamp(&oldpos, oldrp);
+        erase_lamp(oldpos, oldrp);
         oldpos = hero;
         oldrp = rp;
     }
@@ -61,6 +51,26 @@ look(bool wakeup)
     pp = INDEX(hero.y, hero.x);
     pch = pp->p_ch;
     pfl = pp->p_flags;
+    
+    if (!on(player, ISBLIND))
+    {
+        visit_field_of_view(hero.x, hero.y, 20, [](int x, int y)
+        {
+            int ch = chat(y, x);
+            ch = trip_ch(y, x, ch);
+            MonsterThing* mp = moat(y, x);
+            if (mp)
+            {
+                if (!on(*mp, ISINVIS) || on(player, SEEMONST))
+                {
+                    ch = mp->disguise;
+                    if (on(player, ISHALU))
+                        ch = rnd(26) + 'A';
+                }
+            }
+            setMapDisplay(x, y, ch);
+        });
+    }
 
     for (y = sy; y <= ey; y++)
         if (y > 0 && y < NUMLINES - 1) for (x = sx; x <= ex; x++)
@@ -116,8 +126,8 @@ look(bool wakeup)
             if ((player.room->r_flags & ISDARK) && !see_floor && ch == FLOOR)
                 ch = ' ';
 
-            if (tp != NULL || ch != getMapDisplay(x, y))
-                setMapDisplay(x, y, ch);
+            //if (tp != NULL || ch != getMapDisplay(x, y))
+            //    setMapDisplay(x, y, ch);
 
             if (door_stop && !firstmove && running)
             {
@@ -155,6 +165,7 @@ look(bool wakeup)
                             running = FALSE;
                         break;
                     case PASSAGE:
+                    case PASSAGE2:
                         if (x == hero.x || y == hero.y)
                             passcount++;
                         break;
@@ -198,6 +209,7 @@ trip_ch(int y, int x, int ch)
             case FLOOR:
             case ' ':
             case PASSAGE:
+            case PASSAGE2:
             case '-':
             case '|':
             case WALL_H:
@@ -222,26 +234,17 @@ trip_ch(int y, int x, int ch)
  *        Erase the area shown by a lamp in a dark room.
  */
 
-void
-erase_lamp(coord *pos, struct room *rp)
+void erase_lamp(coord& pos, struct room *rp)
 {
-    int y, x, ey, sy, ex;
-
-    if (!(see_floor && (rp->r_flags & (ISGONE|ISDARK)) == ISDARK
-        && !on(player,ISBLIND)))
+    visit_field_of_view(pos.x, pos.y, 20, [](int x, int y)
+    {
+        if (x == hero.x && y == hero.y)
             return;
-
-    ey = pos->y + 1;
-    ex = pos->x + 1;
-    sy = pos->y - 1;
-    for (x = pos->x - 1; x <= ex; x++)
-        for (y = sy; y <= ey; y++)
-        {
-            if (y == hero.y && x == hero.x)
-                continue;
-            if (getMapDisplay(x, y) == FLOOR)
-                setMapDisplay(x, y, ' ');
-        }
+        if (getMapDisplay(x, y) == FLOOR)
+            setMapDisplay(x, y, ' ');
+        if (getMapDisplay(x, y) == PASSAGE)
+            setMapDisplay(x, y, PASSAGE2);
+    });
 }
 
 /*

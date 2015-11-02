@@ -226,10 +226,6 @@ do_zap()
             ws_info[obj->which].oi_know = TRUE;
         when WS_NOP:
             break;
-#ifdef MASTER
-        otherwise:
-            msg("what a bizarre schtick!");
-#endif
     }
     obj->arm--;//amount of charges left is stored in the arm field
 }

@@ -124,9 +124,6 @@ command()
                     case K_SHIFT_RIGHT: case K_SHIFT_DOWN_LEFT: case K_SHIFT_DOWN: case K_SHIFT_DOWN_RIGHT:
                     case CTRL(K_SHIFT_UP_LEFT): case CTRL(K_SHIFT_UP): case CTRL(K_SHIFT_UP_RIGHT): case CTRL(K_SHIFT_LEFT):
                     case CTRL(K_SHIFT_RIGHT): case CTRL(K_SHIFT_DOWN_LEFT): case CTRL(K_SHIFT_DOWN): case CTRL(K_SHIFT_DOWN_RIGHT):
-#ifdef MASTER
-                    case CTRL('D'): case CTRL('A'):
-#endif
                         break;
                     default:
                         count = 0;
@@ -387,8 +384,7 @@ illcom(int ch)
  * search:
  *        player gropes about him to find hidden things.
  */
-void
-search()
+void search()
 {
     register int y, x;
     register char *fp;
@@ -510,6 +506,7 @@ identify()
         {DOOR,                "door",                                FALSE},
         {FLOOR,                "room floor",                        FALSE},
         {PLAYER,        "you",                                FALSE},
+        {PASSAGE2,        "passage",                        FALSE},
         {PASSAGE,        "passage",                        FALSE},
         {TRAP,                "trap",                                FALSE},
         {POTION,        "potion",                        FALSE},

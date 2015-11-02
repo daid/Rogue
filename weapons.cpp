@@ -276,8 +276,7 @@ fallpos(coord *pos, coord *newpos)
              */
             if (y == hero.y && x == hero.x)
                 continue;
-            if (((ch = chat(y, x)) == FLOOR || ch == PASSAGE)
-                                        && rnd(++cnt) == 0)
+            if (((ch = chat(y, x)) == FLOOR || ch == PASSAGE || ch == PASSAGE2) && rnd(++cnt) == 0)
             {
                 newpos->y = y;
                 newpos->x = x;

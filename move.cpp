@@ -173,6 +173,7 @@ hit_bound:
                 return;
             goto move_stuff;
         case PASSAGE:
+        case PASSAGE2:
             /*
              * when you're in a corridor, you don't know if you're in
              * a maze room or not, and there ain't no way to find out

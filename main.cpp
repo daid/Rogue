@@ -55,9 +55,6 @@ int main(int argc, char **argv)
     init_materials();                        /* Set up materials of wands */
     setup();
 
-#ifdef MASTER
-    noscore = wizard;
-#endif
     displayMessage("WELCOME TO THE DUNGEONS OF DOOM");
     new_level();                        /* Draw current level */
     /*

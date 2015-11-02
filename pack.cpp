@@ -299,9 +299,6 @@ void pick_up(int ch)
                 player.room->r_goldval = 0;
                 break;
             default:
-#ifdef MASTER
-                debug("Where did you pick a '%s' up???", unctrl(ch));
-#endif
             case ARMOR:
             case POTION:
             case FOOD:

@@ -22,7 +22,7 @@ void
 new_level()
 {
     PLACE *pp;
-    char *sp;
+    int *sp;
     int i;
 
     player.flags &= ~ISHELD;        /* unhold when you go down just in case */

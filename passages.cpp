@@ -338,10 +338,9 @@ passnum()
  *        Number a passageway square and its brethren
  */
 
-void
-numpass(int y, int x)
+void numpass(int y, int x)
 {
-    char *fp;
+    int *fp;
     struct room *rp;
     int ch;
 

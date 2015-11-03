@@ -138,7 +138,7 @@ drop()
     ItemThing *obj;
 
     ch = char_at(hero.x, hero.y);
-    if ((ch != FLOOR && ch != PASSAGE && ch != PASSAGE2) || item_at(hero.x, hero.y))
+    if ((ch != FLOOR && ch != PASSAGE) || item_at(hero.x, hero.y))
     {
         after = FALSE;
         msg("there is something there already");
@@ -154,7 +154,6 @@ drop()
      */
     lvl_obj.push_front(obj);
     item_at(hero.x, hero.y) = obj;
-    flat(hero.y, hero.x) |= F_DROPPED;
     obj->pos = hero;
     if (obj->type == AMULET)
         amulet = FALSE;
@@ -165,8 +164,7 @@ drop()
  * dropcheck:
  *        Do special checks for dropping or unweilding|unwearing|unringing
  */
-bool
-dropcheck(ItemThing *obj)
+bool dropcheck(ItemThing *obj)
 {
     if (obj == NULL)
         return TRUE;

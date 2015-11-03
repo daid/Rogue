@@ -86,7 +86,7 @@ MonsterThing::MonsterThing(char type, const coord& cp)
     this->disguise = type;
     this->pos = cp;
     this->room = roomin(cp);
-    moat(cp.y, cp.x) = this;
+    monster_at(cp.x, cp.y) = this;
     mp = &monsters[this->type-'A'];
     this->stats.s_lvl = mp->m_stats.s_lvl + lev_add;
     this->stats.s_maxhp = this->stats.s_hpt = roll(this->stats.s_lvl, 8);
@@ -188,7 +188,7 @@ MonsterThing* wake_monster(int y, int x)
     int ch;
     const char *mname;
 
-    tp = moat(y, x);
+    tp = monster_at(x, y);
     assert(tp != NULL);
     ch = tp->type;
     /*

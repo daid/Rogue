@@ -1804,7 +1804,7 @@ static int rs_write_places(FILE *savef, PLACE *places, int count)
     for(i = 0; i < count; i++) 
     {
         rs_write_char(savef, places[i].p_ch);
-        rs_write_char(savef, places[i].p_flags);
+        rs_write_int(savef, places[i].p_flags);
         rs_write_monster_reference(savef, places[i].p_monst);
         rs_write_item_reference(savef, places[i].p_item);
     }
@@ -1822,7 +1822,7 @@ static int rs_read_places(FILE *inf, PLACE *places, int count)
     for(i = 0; i < count; i++) 
     {
         rs_read_char(inf,&places[i].p_ch);
-        rs_read_char(inf,&places[i].p_flags);
+        rs_read_int(inf,&places[i].p_flags);
         rs_read_monster_reference(inf, &places[i].p_monst);
         rs_read_item_reference(inf, &places[i].p_item);
     }

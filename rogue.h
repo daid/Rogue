@@ -49,7 +49,6 @@
 #define when                break;case
 #define otherwise        break;default
 #define until(expr)        while(!(expr))
-#define winat(y,x)        (moat(y,x) != NULL ? moat(y,x)->disguise : char_at(x, y))
 #define ce(a,b)                ((a).x == (b).x && (a).y == (b).y)
 #define hero                player.pos
 #define max(a,b)        ((a) > (b) ? (a) : (b))
@@ -63,14 +62,13 @@
 #define flat(y,x)        (places[((x) << 5) + (y)].p_flags)
 #define item_at(x,y)     (places[((x) << 5) + (y)].p_item)
 #define monster_at(x,y)  (places[((x) << 5) + (y)].p_monst)
-#define moat(y,x)        (places[((x) << 5) + (y)].p_monst)
 #define unc(cp)                (cp).y, (cp).x
 
 /*
  * things that appear on the screens
  */
 #define PASSAGE             '\x02'
-#define PASSAGE2            '\x01'
+#define PASSAGE_UNLIT       '\x01'
 #define DOOR                '\x16'
 #define FLOOR               '.'
 #define PLAYER              '@'
@@ -172,11 +170,11 @@
  */
 #define F_PASS                0x80                /* is a passageway */
 #define F_SEEN                0x40                /* have seen this spot before */
-#define F_DROPPED        0x20                /* object was dropped here */
-#define F_LOCKED        0x20                /* door is locked */
+#define F_TMASK               0x07                /* trap number mask */
+#define F_LOCKED              0x20                /* door is locked */
 #define F_REAL                0x10                /* what you see is what you get */
 #define F_PNUM                0x0f                /* passage number mask */
-#define F_TMASK                0x07                /* trap number mask */
+#define F_TMASK               0x07                /* trap number mask */
 
 /*
  * Trap types
@@ -412,7 +410,7 @@ typedef int(*daemon_function_t)(int);
  */
 typedef struct {
     char p_ch;
-    char p_flags;
+    int p_flags;
     ItemThing* p_item;
     MonsterThing* p_monst;
 } PLACE;

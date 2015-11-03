@@ -24,7 +24,7 @@ command()
 {
     register int ch;
     register int ntimes = 1;                        /* Number of player moves */
-    char *fp;
+    int *fp;
     MonsterThing *mp;
     static char countch, direction, newcount = FALSE;
 
@@ -217,7 +217,7 @@ over:
                     }
                     delta.y += hero.y;
                     delta.x += hero.x;
-                    if ( ((mp = moat(delta.y, delta.x)) == NULL)
+                    if ( ((mp = monster_at(delta.x, delta.y)) == NULL)
                         || ((!see_monst(mp)) && !on(player, SEEMONST)))
                     {
                         if (!terse)
@@ -387,8 +387,8 @@ illcom(int ch)
 void search()
 {
     register int y, x;
-    register char *fp;
-    register int ey, ex;
+    int *fp;
+    int ey, ex;
     int probinc;
     bool found;
 
@@ -503,14 +503,14 @@ identify()
         {WALL_BR,            "wall of a room",                FALSE},
         {'|',                "wall of a room",                FALSE},
         {'-',                "wall of a room",                FALSE},
-        {GOLD,                "gold",                                FALSE},
+        {GOLD,               "gold",                                FALSE},
         {STAIRS,        "a staircase",                        FALSE},
-        {DOOR,                "door",                                FALSE},
-        {FLOOR,                "room floor",                        FALSE},
+        {DOOR,               "door",                                FALSE},
+        {FLOOR,              "room floor",                        FALSE},
         {PLAYER,        "you",                                FALSE},
-        {PASSAGE2,        "passage",                        FALSE},
-        {PASSAGE,        "passage",                        FALSE},
-        {TRAP,                "trap",                                FALSE},
+        {PASSAGE_UNLIT,      "passage",                        FALSE},
+        {PASSAGE,            "passage",                        FALSE},
+        {TRAP,               "trap",                                FALSE},
         {POTION,        "potion",                        FALSE},
         {SCROLL,        "scroll",                        FALSE},
         {FOOD,                "food",                                FALSE},

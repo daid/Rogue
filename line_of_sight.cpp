@@ -22,7 +22,7 @@ bool has_line_of_sight(int x0, int y0, int x1, int y1)
         if (e2 >-dx) { err -= dy; x0 += sx; }
         if (e2 < dy) { err += dx; y0 += sy; }
 
-        if (x0==x1 && y0==y1 && !(ch == PASSAGE || ch == PASSAGE2))
+        if (x0==x1 && y0==y1 && !(ch == PASSAGE))
             break;
     }
     return true;

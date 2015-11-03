@@ -69,7 +69,7 @@ int fight(coord *mp, ItemThing *weap, bool thrown)
     /*
      * Find the monster we want to fight
      */
-    tp = moat(mp->y, mp->x);
+    tp = monster_at(mp->x, mp->y);
     /*
      * Since we are fighting, things are not quiet so no healing takes
      * place.
@@ -297,7 +297,7 @@ int attack(MonsterThing *mp)
                             steal = obj;
                     if (steal != NULL)
                     {
-                        remove_mon(&mp->pos, moat(mp->pos.y, mp->pos.x), FALSE);
+                        remove_mon(&mp->pos, monster_at(mp->pos.x, mp->pos.y), FALSE);
                         mp=NULL;
                         leave_pack(steal, FALSE, FALSE);
                         msg("she stole %s!", inv_name(steal, TRUE));
@@ -590,7 +590,7 @@ void remove_mon(coord *mp, MonsterThing *tp, bool waskill)
         else
             delete obj;
     }
-    moat(mp->y, mp->x) = nullptr;
+    monster_at(mp->x, mp->y) = nullptr;
     mlist.remove(tp);
     if (see_monst(tp))
         setMapDisplay(mp->x, mp->y, char_at_place(mp->x, mp->y));

@@ -41,7 +41,7 @@ do_run(int ch)
 void
 do_move(int dy, int dx)
 {
-    int ch, fl;
+    int fl;
 
     firstmove = FALSE;
     if (no_move)
@@ -86,21 +86,20 @@ over:
     if (running && ce(hero, nh))
         after = running = FALSE;
     fl = flat(nh.y, nh.x);
-    ch = winat(nh.y, nh.x);
-    if (!(fl & F_REAL) && ch == FLOOR)
+    if (!(fl & F_REAL) && char_at(nh.x, nh.y) == FLOOR)
     {
         if (!on(player, ISLEVIT))
         {
-            char_at(nh.x, nh.y) = ch = TRAP;
+            char_at(nh.x, nh.y) = TRAP;
             flat(nh.y, nh.x) |= F_REAL;
         }
     }
-    else if (on(player, ISHELD) && ch != 'F')
+    else if (on(player, ISHELD) && !monster_at(nh.x, nh.y))
     {
         msg("you are being held");
         return;
     }
-    switch (ch)
+    switch (char_at(nh.x, nh.y))
     {
         case ' ':
         case '|':
@@ -168,12 +167,14 @@ hit_bound:
                 enter_room(nh);
             goto move_stuff;
         case TRAP:
-            ch = be_trapped(&nh);
-            if (ch == T_DOOR || ch == T_TELEP)
-                return;
-            goto move_stuff;
+            {
+                int ch = be_trapped(&nh);
+                if (ch == T_DOOR || ch == T_TELEP)
+                    return;
+                goto move_stuff;
+            }
         case PASSAGE:
-        case PASSAGE2:
+        case PASSAGE_UNLIT:
             /*
              * when you're in a corridor, you don't know if you're in
              * a maze room or not, and there ain't no way to find out
@@ -191,11 +192,11 @@ hit_bound:
             /* FALLTHROUGH */
         default:
             running = FALSE;
-            if (isupper(ch) || moat(nh.y, nh.x))
+move_stuff:
+            if (monster_at(nh.x, nh.y))
                 fight(&nh, cur_weapon, FALSE);
             else
             {
-move_stuff:
                 if (item_at(nh.x, nh.y))
                     take = item_at(nh.x, nh.y)->type;
                 setMapDisplay(hero.x, hero.y, char_at_place(hero.x, hero.y));
@@ -247,15 +248,14 @@ turnref()
  *        that might move.
  */
 
-void
-door_open(struct room *rp)
+void door_open(struct room *rp)
 {
     int y, x;
 
     if (!(rp->r_flags & ISGONE))
         for (y = rp->r_pos.y; y < rp->r_pos.y + rp->r_max.y; y++)
             for (x = rp->r_pos.x; x < rp->r_pos.x + rp->r_max.x; x++)
-                if (isupper(winat(y, x)))
+                if (monster_at(x, y))
                     wake_monster(y, x);
 }
 
@@ -271,7 +271,7 @@ be_trapped(coord *tc)
     char tr;
 
     if (on(player, ISLEVIT))
-        return T_RUST;        /* anything that's not a door or teleport */
+        return T_RUST;        /* anything that's not a door or teleport, as returning those causes different handling */
     running = FALSE;
     count = FALSE;
     pp = INDEX(tc->y, tc->x);
@@ -379,15 +379,12 @@ coord* rndmove(MonsterThing *who)
         goto bad;
     else
     {
-        ch = winat(y, x);
-        if (!step_ok(ch))
+        if (!step_ok(char_at(x, y)))
             goto bad;
-        if (ch == SCROLL)
-        {
-            ItemThing* obj = find_obj(y, x);
-            if (obj != NULL && obj->which == S_SCARE)
-                goto bad;
-        }
+        if (monster_at(x, y))
+            goto bad;
+        if (item_at(x, y) && item_at(x, y)->type == SCROLL && item_at(x, y)->which == S_SCARE)
+            goto bad;
     }
     return &ret;
 

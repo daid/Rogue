@@ -112,12 +112,12 @@ do_zap()
         case WS_CANCEL:
             y = hero.y;
             x = hero.x;
-            while (step_ok(winat(y, x)))
+            while(step_ok(char_at(x, y)) && !monster_at(x, y))
             {
                 y += delta.y;
                 x += delta.x;
             }
-            if ((tp = moat(y, x)) != NULL)
+            if ((tp = monster_at(x, y)) != NULL)
             {
                 monster = tp->type;
                 if (monster == 'F')
@@ -176,9 +176,8 @@ do_zap()
             if (cur_weapon != NULL)
                 bolt.launch = cur_weapon->which;
             do_motion(&bolt, delta.y, delta.x);
-            if ((tp = moat(bolt.pos.y, bolt.pos.x)) != NULL
-                && !save_throw(VS_MAGIC, tp))
-                    hit_monster(unc(bolt.pos), &bolt);
+            if ((tp = monster_at(bolt.pos.x, bolt.pos.y)) != NULL && !save_throw(VS_MAGIC, tp))
+                hit_monster(unc(bolt.pos), &bolt);
             else if (terse)
                 msg("missle vanishes");
             else
@@ -187,12 +186,12 @@ do_zap()
         case WS_SLOW_M:
             y = hero.y;
             x = hero.x;
-            while (step_ok(winat(y, x)))
+            while (step_ok(char_at(x, y)) && !monster_at(x, y))
             {
                 y += delta.y;
                 x += delta.x;
             }
-            if ((tp = moat(y, x)) != NULL)
+            if ((tp = monster_at(x, y)) != NULL)
             {
                 if (obj->which == WS_HASTE_M)
                 {
@@ -285,8 +284,7 @@ drain()
  *        Fire a bolt in a given direction from a specific starting place
  */
 
-void
-fire_bolt(coord *start, coord *dir, const char *name)
+void fire_bolt(coord *start, coord *dir, const char *name)
 {
     coord *c1, *c2;
     MonsterThing *tp;
@@ -317,7 +315,7 @@ fire_bolt(coord *start, coord *dir, const char *name)
         pos.y += dir->y;
         pos.x += dir->x;
         *c1 = pos;
-        ch = winat(pos.y, pos.x);
+        ch = char_at(pos.x, pos.y);
         switch (ch)
         {
             case DOOR:
@@ -348,7 +346,7 @@ fire_bolt(coord *start, coord *dir, const char *name)
                 break;
             default:
 def:
-                if (!hit_hero && (tp = moat(pos.y, pos.x)) != NULL)
+                if (!hit_hero && (tp = monster_at(pos.x, pos.y)) != NULL)
                 {
                     hit_hero = TRUE;
                     changed = !changed;
@@ -387,7 +385,7 @@ def:
                             if (start == &hero)
                                 death('b');
                             else
-                                death(moat(start->y, start->x)->type);
+                                death(monster_at(start->x, start->y)->type);
                         }
                         used = TRUE;
                         if (terse)
@@ -404,6 +402,8 @@ def:
     }
     for (c2 = spotpos; c2 < c1; c2++)
         setMapDisplay(c2->x, c2->y, char_at_place(c2->x, c2->y));
+    refreshMap();
+    animationDelay();
 }
 
 /*

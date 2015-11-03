@@ -122,8 +122,7 @@ const char* type_name(int type)
  *        Bamf the hero someplace else
  */
 
-void
-teleport()
+void teleport()
 {
     static coord c;
 

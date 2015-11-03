@@ -82,15 +82,15 @@ void relocate(MonsterThing *th, coord *new_loc)
     if (!ce(*new_loc, th->pos))
     {
         if (see_monst(th))
-            setMapDisplay(th->pos.x, th->pos.y, winat(th->pos.y, th->pos.x));
+            setMapDisplay(th->pos.x, th->pos.y, char_at_place(th->pos.x, th->pos.y));
         th->room = roomin(*new_loc);
         oroom = th->room;
-        moat(th->pos.y, th->pos.x) = NULL;
+        monster_at(th->pos.x, th->pos.y) = NULL;
 
         if (oroom != th->room)
             th->dest = find_dest(th);
         th->pos = *new_loc;
-        moat(new_loc->y, new_loc->x) = th;
+        monster_at(new_loc->x, new_loc->y) = th;
     }
     if (see_monst(th))
         setMapDisplay(new_loc->x, new_loc->y, th->disguise);
@@ -243,7 +243,7 @@ void runto(const coord& runner)
     /*
      * If we couldn't find him, something is funny
      */
-    tp = moat(runner.y, runner.x);
+    tp = monster_at(runner.x, runner.y);
     /*
      * Start the beastie running
      */
@@ -264,7 +264,6 @@ chase(MonsterThing *tp, coord *ee)
     int x, y;
     int curdist, thisdist;
     coord *er = &tp->pos;
-    int ch;
     int plcnt = 1;
     static coord tryp;
 
@@ -273,8 +272,7 @@ chase(MonsterThing *tp, coord *ee)
      * Stalkers are slightly confused all of the time, and bats are
      * quite confused all the time
      */
-    if ((on(*tp, ISHUH) && rnd(5) != 0) || (tp->type == 'P' && rnd(5) == 0)
-        || (tp->type == 'B' && rnd(2) == 0))
+    if ((on(*tp, ISHUH) && rnd(5) != 0) || (tp->type == 'P' && rnd(5) == 0) || (tp->type == 'B' && rnd(2) == 0))
     {
         /*
          * get a valid random move
@@ -318,24 +316,18 @@ chase(MonsterThing *tp, coord *ee)
                 tryp.y = y;
                 if (!diag_ok(er, &tryp))
                     continue;
-                ch = winat(y, x);
-                if (step_ok(ch))
+                if (step_ok(char_at(x, y)) && !monster_at(x, y))
                 {
                     /*
                      * If it is a scroll, it might be a scare monster scroll
                      * so we need to look it up to see what type it is.
                      */
-                    if (ch == SCROLL)
+                    if (item_at(x, y))
                     {
-                        ItemThing* obj = find_obj(y, x);
-                        if (obj != NULL && obj->which == S_SCARE)
+                        ItemThing* obj = item_at(x, y);
+                        if (obj != NULL  && obj->type == SCROLL && obj->which == S_SCARE)
                             continue;
                     }
-                    /*
-                     * It can also be a Xeroc, which we shouldn't step on
-                     */
-                    if (moat(y, x) != NULL && moat(y, x)->type == 'X')
-                        continue;
                     /*
                      * If we didn't find any scrolls at this place or it
                      * wasn't a scare scroll, then this place counts
@@ -366,8 +358,8 @@ chase(MonsterThing *tp, coord *ee)
  */
 struct room * roomin(const coord& cp)
 {
-    register struct room *rp;
-    register char *fp;
+    struct room *rp;
+    int *fp;
 
 
     fp = &flat(cp.y, cp.x);

@@ -28,7 +28,8 @@ void look(bool wakeup)
     struct room *rp;
     int ey, ex;
     int passcount;
-    char pfl, *fp, pch;
+    char pfl, pch;
+    int* fp;
     int sy, sx, sumhero = 0, diffhero = 0;
 
     passcount = 0;
@@ -56,21 +57,10 @@ void look(bool wakeup)
     {
         visit_field_of_view(hero.x, hero.y, 20, [](int x, int y)
         {
-            int ch = char_at(x, y);
-            if (item_at(x, y))
-                ch = item_at(x, y)->type;
+            int ch = char_at_place(x, y);
             ch = trip_ch(y, x, ch);
-            MonsterThing* mp = moat(y, x);
-            if (mp)
-            {
-                if (!on(*mp, ISINVIS) || on(player, SEEMONST))
-                {
-                    ch = mp->disguise;
-                    if (on(player, ISHALU))
-                        ch = rnd(26) + 'A';
-                }
-            }
             setMapDisplay(x, y, ch);
+            flat(y, x) |= F_SEEN;
         });
     }
 
@@ -125,9 +115,6 @@ void look(bool wakeup)
             if (on(player, ISBLIND) && (y != hero.y || x != hero.x))
                 continue;
 
-            //if (tp != NULL || ch != getMapDisplay(x, y))
-            //    setMapDisplay(x, y, ch);
-
             if (door_stop && !firstmove && running)
             {
                 switch (runch)
@@ -164,7 +151,7 @@ void look(bool wakeup)
                             running = FALSE;
                         break;
                     case PASSAGE:
-                    case PASSAGE2:
+                    case PASSAGE_UNLIT:
                         if (x == hero.x || y == hero.y)
                             passcount++;
                         break;
@@ -199,8 +186,7 @@ void look(bool wakeup)
  *        Return the character appropriate for this space, taking into
  *        account whether or not the player is tripping.
  */
-int
-trip_ch(int y, int x, int ch)
+int trip_ch(int y, int x, int ch)
 {
     if (on(player, ISHALU) && after)
         switch (ch)
@@ -208,7 +194,7 @@ trip_ch(int y, int x, int ch)
             case FLOOR:
             case ' ':
             case PASSAGE:
-            case PASSAGE2:
+            case PASSAGE_UNLIT:
             case '-':
             case '|':
             case WALL_H:
@@ -221,7 +207,9 @@ trip_ch(int y, int x, int ch)
             case TRAP:
                 break;
             default:
-                if (y != stairs.y || x != stairs.x || !seenstairs)
+                if (ch >= 'A' && ch <= 'Z')
+                    ch = rnd(26) + 'A';
+                else if (y != stairs.y || x != stairs.x || !seenstairs)
                     ch = rnd_thing();
                 break;
         }
@@ -242,7 +230,7 @@ void erase_lamp(coord& pos, struct room *rp)
         if (getMapDisplay(x, y) == FLOOR)
             setMapDisplay(x, y, ' ');
         if (getMapDisplay(x, y) == PASSAGE)
-            setMapDisplay(x, y, PASSAGE2);
+            setMapDisplay(x, y, PASSAGE_UNLIT);
     });
 }
 
@@ -365,8 +353,7 @@ add_str(str_t *sp, int amt)
  * add_haste:
  *        Add a haste to the player
  */
-bool
-add_haste(bool potion)
+bool add_haste(bool potion)
 {
     if (on(player, ISHASTE))
     {

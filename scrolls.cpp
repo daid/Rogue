@@ -81,7 +81,7 @@ read_scroll()
                 if (x >= 0 && x < NUMCOLS)
                     for (y = hero.y - 2; y <= hero.y + 2; y++)
                         if (y >= 0 && y <= NUMLINES - 1)
-                            if ((m_obj = moat(y, x)) != NULL && on(*m_obj, ISRUN))
+                            if ((m_obj = monster_at(x, y)) != NULL && on(*m_obj, ISRUN))
                             {
                                 m_obj->flags &= ~ISRUN;
                                 m_obj->flags |= ISHELD;
@@ -125,11 +125,10 @@ read_scroll()
                     /*
                      * Or anything else nasty
                      */
-                    else if (step_ok(ch = winat(y, x)))
+                    else if (step_ok(char_at(x, y)) && !monster_at(x, y))
                     {
-                        if (ch == SCROLL
-                            && find_obj(y, x)->which == S_SCARE)
-                                continue;
+                        if (item_at(x, y) && item_at(x, y)->type == SCROLL && item_at(x, y)->which == S_SCARE)
+                            continue;
                         else if (rnd(++i) == 0)
                         {
                             mp.y = y;
@@ -203,7 +202,7 @@ pass:
                             if (!(pp->p_flags & F_REAL))
                                 pp->p_ch = PASSAGE;
                             pp->p_flags |= (F_SEEN|F_REAL);
-                            ch = PASSAGE2;
+                            ch = PASSAGE_UNLIT;
                             break;
 
                         case FLOOR:

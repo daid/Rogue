@@ -58,9 +58,8 @@ missile(int ydelta, int xdelta)
      * AHA! Here it has hit something.  If it is a wall or a door,
      * or if it misses (combat) the monster, put it on the floor
      */
-    if (moat(obj->pos.y, obj->pos.x) == NULL ||
-        !hit_monster(unc(obj->pos), obj))
-            fall(obj, TRUE);
+    if (monster_at(obj->pos.x, obj->pos.y) == NULL || !hit_monster(unc(obj->pos), obj))
+        fall(obj, TRUE);
 }
 
 /*
@@ -69,11 +68,8 @@ missile(int ydelta, int xdelta)
  *        across the room
  */
 
-void
-do_motion(ItemThing *obj, int ydelta, int xdelta)
+void do_motion(ItemThing *obj, int ydelta, int xdelta)
 {
-    int ch;
-
     /*
      * Come fly with us ...
      */
@@ -92,7 +88,7 @@ do_motion(ItemThing *obj, int ydelta, int xdelta)
          */
         obj->pos.y += ydelta;
         obj->pos.x += xdelta;
-        if (step_ok(ch = winat(obj->pos.y, obj->pos.x)) && ch != DOOR)
+        if (step_ok(char_at(obj->pos.x, obj->pos.y)) && char_at(obj->pos.x, obj->pos.y) != DOOR && !monster_at(obj->pos.x, obj->pos.y))
         {
             /*
              * It hasn't hit anything yet, so display it

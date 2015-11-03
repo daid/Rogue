@@ -292,7 +292,7 @@ int turn_see(int turn_off)
 
 /*
  * seen_stairs:
- *        Return TRUE if the player has seen the stairs
+ *        Return TRUE if the player has seen the stairs, called when starting to hallucinate
  */
 bool seen_stairs()
 {
@@ -306,7 +306,7 @@ bool seen_stairs()
     /*
      * if a monster is on the stairs, this gets hairy
      */
-    if ((tp = moat(stairs.y, stairs.x)) != NULL)
+    if ((tp = monster_at(stairs.x, stairs.y)) != NULL)
     {
         if (see_monst(tp) && on(*tp, ISRUN))        /* if it's visible and awake */
             return TRUE;                        /* it must have moved there */

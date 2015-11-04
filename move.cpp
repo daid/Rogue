@@ -364,7 +364,6 @@ be_trapped(coord *tc)
 coord* rndmove(MonsterThing *who)
 {
     int x, y;
-    int ch;
     static coord ret;  /* what we will be returning */
 
     y = ret.y = who->pos.y + rnd(3) - 1;

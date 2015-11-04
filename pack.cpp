@@ -28,7 +28,7 @@ void add_pack(ItemThing *obj, bool silent)
     from_floor = FALSE;
     if (obj == NULL)
     {
-        if ((obj = find_obj(hero.y, hero.x)) == NULL)
+        if ((obj = item_at(hero.x, hero.y)) == NULL)
             return;
         from_floor = TRUE;
     }
@@ -282,7 +282,7 @@ void pick_up(int ch)
     if (on(player, ISLEVIT))
         return;
 
-    obj = find_obj(hero.y, hero.x);
+    obj = item_at(hero.x, hero.y);
     if (move_on)
         move_msg(obj);
     else

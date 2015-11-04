@@ -170,6 +170,13 @@ void draw_room(struct room *rp)
         for (y = rp->r_pos.y + 1; y < rp->r_pos.y + rp->r_max.y - 1; y++)
             for (x = rp->r_pos.x + 1; x < rp->r_pos.x + rp->r_max.x - 1; x++)
                 char_at(x, y) = FLOOR;
+        /* if this room is not dark, lite up the whole floor/wall/doors */
+        if (!(rp->r_flags & ISDARK))
+        {
+            for (y = rp->r_pos.y; y < rp->r_pos.y + rp->r_max.y; y++)
+                for (x = rp->r_pos.x; x < rp->r_pos.x + rp->r_max.x; x++)
+                    flat(y, x) |= F_ISLIT;
+        }
     }
 }
 

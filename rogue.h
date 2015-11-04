@@ -17,31 +17,23 @@
 /*
  * Maximum number of different things
  */
-#define MAXROOMS        9
+#define MAXROOMS         9
 #define MAXTHINGS        9
-#define MAXOBJ             12   /* changed from 9 to increase number of items found in game */
-#define MAXPACK                23
-#define MAXTRAPS        10
-#define AMULETLEVEL        26
-#define        NUMTHINGS        7        /* number of types of things */
-#define MAXPASS                13        /* upper limit on number of passages */
-#define        NUMLINES        24
-#define        NUMCOLS                80
-#define BORE_LEVEL        50
+#define MAXOBJ           12   /* changed from 9 to increase number of items found in game */
+#define MAXPACK          23
+#define MAXTRAPS         10
+#define AMULETLEVEL      26
+#define NUMTHINGS        7        /* number of types of things */
+#define MAXPASS          13        /* upper limit on number of passages */
+#define NUMLINES         24
+#define NUMCOLS          80
+#define BORE_LEVEL       50
 
 /*
  * return values for get functions
  */
 #define        NORM        0        /* normal exit */
 #define        QUIT        1        /* quit option setting */
-#define        MINUS        2        /* back up one option */
-
-/*
- * inventory types
- */
-#define        INV_OVER        0
-#define        INV_SLOW        1
-#define        INV_CLEAR        2
 
 /*
  * All the fun defines
@@ -81,7 +73,7 @@
 #define FOOD                '\x09'
 #define WEAPON              ')'
 #define ARMOR               '\x03'
-#define AMULET              ','
+#define AMULET              '\x0a'
 #define RING                '\x06'
 #define STICK               '/'
 #define WALL_V              '\x10'
@@ -145,36 +137,37 @@
 #define        ISPROT        0000040                /* armor is permanently protected */
 
 /* flags for creatures */
-#define CANHUH        0000001                /* creature can confuse */
-#define CANSEE        0000002                /* creature can see invisible creatures */
-#define ISBLIND        0000004                /* creature is blind */
-#define ISCANC        0000010                /* creature has special qualities cancelled */
-#define ISLEVIT        0000010                /* hero is levitating */
-#define ISFOUND        0000020                /* creature has been seen (used for objects) */
-#define ISGREED        0000040                /* creature runs to protect gold */
-#define ISHASTE        0000100                /* creature has been hastened */
-#define ISTARGET 000200                /* creature is the target of an 'f' command */
-#define ISHELD        0000400                /* creature has been held */
+#define CANHUH       0000001                /* creature can confuse */
+#define CANSEE       0000002                /* creature can see invisible creatures */
+#define ISBLIND      0000004                /* creature is blind */
+#define ISCANC       0000010                /* creature has special qualities cancelled */
+#define ISLEVIT      0000010                /* hero is levitating */
+#define ISFOUND      0000020                /* creature has been seen (used for objects) */
+#define ISGREED      0000040                /* creature runs to protect gold */
+#define ISHASTE      0000100                /* creature has been hastened */
+#define ISTARGET     000200                /* creature is the target of an 'f' command */
+#define ISHELD       0000400                /* creature has been held */
 #define ISHUH        0001000                /* creature is confused */
-#define ISINVIS        0002000                /* creature is invisible */
-#define ISMEAN        0004000                /* creature can wake when player enters room */
-#define ISHALU        0004000                /* hero is on acid trip */
-#define ISREGEN        0010000                /* creature can regenerate */
+#define ISINVIS      0002000                /* creature is invisible */
+#define ISMEAN       0004000                /* creature can wake when player enters room */
+#define ISHALU       0004000                /* hero is on acid trip */
+#define ISREGEN      0010000                /* creature can regenerate */
 #define ISRUN        0020000                /* creature is running at the player */
-#define SEEMONST 040000                /* hero can detect unseen monsters */
+#define SEEMONST     0040000                /* hero can detect unseen monsters */
 #define ISFLY        0040000                /* creature can fly */
-#define ISSLOW        0100000                /* creature has been slowed */
+#define ISSLOW       0100000                /* creature has been slowed */
 
 /*
  * Flags for level map
  */
-#define F_PASS                0x80                /* is a passageway */
-#define F_SEEN                0x40                /* have seen this spot before */
-#define F_TMASK               0x07                /* trap number mask */
-#define F_LOCKED              0x20                /* door is locked */
-#define F_REAL                0x10                /* what you see is what you get */
-#define F_PNUM                0x0f                /* passage number mask */
-#define F_TMASK               0x07                /* trap number mask */
+#define F_PASS                0x0080                /* is a passageway */
+#define F_SEEN                0x0040                /* have seen this spot before */
+#define F_TMASK               0x0007                /* trap number mask */
+#define F_LOCKED              0x0020                /* door is locked */
+#define F_REAL                0x0010                /* what you see is what you get */
+#define F_PNUM                0x000f                /* passage number mask */
+#define F_TMASK               0x0007                /* trap number mask */
+#define F_ISLIT               0x0100                /* place is lit by static light */
 
 /*
  * Trap types
@@ -668,7 +661,6 @@ int        char_at_place(int x, int y);
 coord        *find_dest(MonsterThing *tp);
 coord        *rndmove(MonsterThing *who);
 
-ItemThing   *find_obj(int y, int x);
 ItemThing   *get_item(const char *purpose, int type);
 ItemThing   *leave_pack(ItemThing *obj, bool newobj, bool all);
 ItemThing   *new_thing();

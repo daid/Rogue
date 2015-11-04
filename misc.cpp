@@ -176,9 +176,6 @@ void look(bool wakeup)
         running = FALSE;
     if (!running || !jump)
         setMapDisplay(hero.x, hero.y, PLAYER);
-# ifdef DEBUG
-    done = FALSE;
-# endif /* DEBUG */
 }
 
 /*
@@ -227,25 +224,17 @@ void erase_lamp(coord& pos, struct room *rp)
     {
         if (x == hero.x && y == hero.y)
             return;
-        if (getMapDisplay(x, y) == FLOOR)
+        int ch = char_at_place(x, y);
+        if (flat(y, x) & F_SEEN)
+        {
+            if (ch == PASSAGE)
+                setMapDisplay(x, y, PASSAGE_UNLIT);
+            else if (!IS_WALL(ch) && ch != DOOR)
+                setMapDisplay(x, y, ' ');
+        }else{
             setMapDisplay(x, y, ' ');
-        if (getMapDisplay(x, y) == PASSAGE)
-            setMapDisplay(x, y, PASSAGE_UNLIT);
+        }
     });
-}
-
-/*
- * find_obj:
- *        Find the unclaimed object at y, x
- */
-ItemThing* find_obj(int y, int x)
-{
-    for(ItemThing* obj : lvl_obj)
-    {
-        if (obj->pos.y == y && obj->pos.x == x)
-                return obj;
-    }
-    return NULL;
 }
 
 /*

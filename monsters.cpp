@@ -184,7 +184,6 @@ wanderer()
 MonsterThing* wake_monster(int y, int x)
 {
     MonsterThing *tp;
-    struct room *rp;
     int ch;
     const char *mname;
 
@@ -200,12 +199,11 @@ MonsterThing* wake_monster(int y, int x)
         tp->dest = &hero;
         tp->flags |= ISRUN;
     }
-    if (ch == 'M' && !on(player, ISBLIND) && !on(player, ISHALU)
-        && !on(*tp, ISFOUND) && !on(*tp, ISCANC) && on(*tp, ISRUN))
+    
+    /* handle medusa's, which can confuse you on sight. */
+    if (ch == 'M' && !on(player, ISBLIND) && !on(player, ISHALU) && !on(*tp, ISFOUND) && !on(*tp, ISCANC) && on(*tp, ISRUN))
     {
-        rp = player.room;
-        if ((rp != NULL && !(rp->r_flags & ISDARK))
-            || dist(y, x, hero.y, hero.x) < LAMPDIST)
+        if ((flat(y, x) & F_ISLIT) || dist(y, x, hero.y, hero.x) < LAMPDIST)
         {
             tp->flags |= ISFOUND;
             if (!save(VS_MAGIC))

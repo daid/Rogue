@@ -393,19 +393,15 @@ bool diag_ok(coord *sp, coord *ep)
  */
 bool cansee(int y, int x)
 {
-    register struct room *rer;
-    static coord tp;
-
     if (on(player, ISBLIND))
         return FALSE;
     if (!has_line_of_sight(hero.x, hero.y, x, y))
         return FALSE;
     if (dist(y, x, hero.y, hero.x) < LAMPDIST)
         return TRUE;
-    tp.y = y;
-    tp.x = x;
-    rer = roomin(tp);
-    return (bool)(!(rer->r_flags & ISDARK));
+    if (flat(y, x) & F_ISLIT)
+        return TRUE;
+    return FALSE;
 }
 
 /*

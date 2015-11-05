@@ -98,24 +98,30 @@ int fight(coord *mp, ItemThing *weap, bool thrown)
     has_hit = (terse && !to_death);
     if (roll_em(&player, tp, weap, thrown))
     {
-        did_hit = FALSE;
         if (thrown)
             thunk(weap, mname, terse);
         else
             hit(NULL, mname, terse);
+        int old_flags = tp->flags;
         if (on(player, CANHUH))
         {
-            did_hit = TRUE;
             tp->flags |= ISHUH;
             player.flags &= ~CANHUH;
             endmsg();
             has_hit = FALSE;
             msg("your hands stop glowing %s", pick_color("red"));
         }
+        if (thrown && weap->type == POTION)
+        {
+            hit_by_potion(weap->which, tp);
+        }
         if (tp->stats.s_hpt <= 0)
             killed(tp, TRUE);
-        else if (did_hit && !on(player, ISBLIND))
-            msg("%s appears confused", mname);
+        else if (!on(player, ISBLIND))
+        {
+            if (!(old_flags & ISHUH) && (tp->flags & ISHUH))
+                msg("%s appears confused", mname);
+        }
         did_hit = TRUE;
     }
     else

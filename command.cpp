@@ -452,12 +452,10 @@ foundone:
 void help()
 {
     register struct h_list *strp;
+    /*
     register char helpch;
     helpch = displayMessage("character you want help for (* for all):");
-    /*
-     * If its not a *, print the right help string
-     * or an error if he typed a funny character.
-     */
+    // If its not a *, print the right help string or an error if he typed a funny character.
     if (helpch != '*')
     {
         for (strp = helpstr; strp->h_desc != NULL; strp++)
@@ -471,7 +469,7 @@ void help()
         msg("unknown character '%s'", getKeyName(helpch));
         return;
     }
-    
+    */
     startDisplayOfStringList();
     for (strp = helpstr; strp->h_desc != NULL; strp++)
         if (strp->h_print)

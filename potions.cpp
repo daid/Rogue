@@ -54,8 +54,7 @@ static PACT p_actions[] =
  *        Quaff a potion from the pack
  */
 
-void
-quaff()
+void quaff()
 {
     ItemThing *obj;
     bool discardit = FALSE;
@@ -350,4 +349,59 @@ void do_pot(int type, bool knowit)
     else
         lengthen(pp->pa_daemon, t);
     msg(choose_str(pp->pa_high, pp->pa_straight));
+}
+
+void hit_by_potion(int type, MonsterThing* mp)
+{
+    switch(type)
+    {
+    case P_CONFUSE:
+        if (!save_throw(VS_POISON, mp))
+        {
+            mp->flags |= ISHUH;
+        }
+    when P_LSD:
+        if (!save_throw(VS_POISON, mp))
+        {
+            mp->flags |= ISHUH;
+        }
+    when P_POISON:
+        if (!save_throw(VS_POISON, mp))
+        {
+            //Hit by a potion of poison. Do 1d6 damage. Plus 1d3 strength damage.
+            mp->stats.s_hpt -= roll(1, 6);
+            mp->stats.s_str -= roll(1, 3);
+            msg("%s melts from the liquid", set_mname(mp));
+        }
+    when P_STRENGTH:
+        if (!save_throw(VS_POISON, mp))
+        {
+            //Hit by a potion of strength, add a strength and tell the thrower that this was a bad move.
+            mp->stats.s_str += 1;
+            msg("%s looks stronger now...", set_mname(mp));
+        }
+    when P_SEEINVIS:
+    when P_HEALING:
+        if (!save_throw(VS_POISON, mp))
+        {
+            if ((mp->stats.s_hpt += roll(mp->stats.s_lvl, 4)) > mp->stats.s_maxhp)
+                mp->stats.s_hpt = ++mp->stats.s_maxhp;
+            msg("%s looks refreshed", set_mname(mp));
+        }
+    when P_MFIND:
+    when P_TFIND:
+    when P_RAISE:
+    when P_XHEAL:
+        if (!save_throw(VS_POISON, mp))
+        {
+            if ((mp->stats.s_hpt += roll(mp->stats.s_lvl, 8)) > mp->stats.s_maxhp)
+                mp->stats.s_hpt = ++mp->stats.s_maxhp;
+            msg("%s looks very refreshed", set_mname(mp));
+        }
+    when P_HASTE:
+    when P_RESTORE:
+    when P_BLIND:
+    when P_LEVIT:
+        break;
+    }
 }

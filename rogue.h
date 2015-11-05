@@ -185,21 +185,21 @@
 /*
  * Potion types
  */
-#define P_CONFUSE        0
-#define P_LSD                1
+#define P_CONFUSE       0
+#define P_LSD           1
 #define P_POISON        2
-#define P_STRENGTH        3
-#define P_SEEINVIS        4
-#define P_HEALING        5
-#define P_MFIND                6
+#define P_STRENGTH      3
+#define P_SEEINVIS      4
+#define P_HEALING       5
+#define P_MFIND         6
 #define P_TFIND         7
-#define P_RAISE          8
-#define P_XHEAL                9
-#define P_HASTE                10
-#define P_RESTORE        11
-#define P_BLIND                12
-#define P_LEVIT                13
-#define MAXPOTIONS        14
+#define P_RAISE         8
+#define P_XHEAL         9
+#define P_HASTE         10
+#define P_RESTORE       11
+#define P_BLIND         12
+#define P_LEVIT         13
+#define MAXPOTIONS      14
 
 /*
  * Scroll types
@@ -509,6 +509,7 @@ void        do_motion(ItemThing *obj, int ydelta, int xdelta);
 void        do_move(int dy, int dx);
 void        do_passages();
 void        do_pot(int type, bool knowit);
+void        hit_by_potion(int type, MonsterThing* thing);
 void        do_rooms();
 void        do_run(int ch);
 void        do_zap();

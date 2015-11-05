@@ -24,3 +24,8 @@ set(SRCS
 
 add_executable(rogue ${SRCS})
 
+include(GNUInstallDirs)
+install(TARGETS rogue DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+include(CPackConfig.cmake)
+

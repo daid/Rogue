@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <dirent.h>
 #endif
 
 #include "extern.h"
@@ -185,14 +186,17 @@ int md_readchar()
 
     if (handles.size() == 0)
     {
-        int number = 0;
-        while(true)
+        DIR* dh = opendir("/dev/input");
+        struct dirent* dent;
+        while((dent = readdir(dh)) != NULL)
         {
+            if (dent->d_type != DT_CHR)
+                continue;
             char buffer[128];
-            sprintf(buffer, "/dev/input/event%d", number++);
+            sprintf(buffer, "/dev/input/%s", dent->d_name);
             int handle = open(buffer, O_RDWR);
             if (handle == -1)
-                break;
+                continue;
             handles.push_back(handle);
         }
     }

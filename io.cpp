@@ -190,7 +190,7 @@ void status()
         //Hp: xxx/xxx Ac: xx XP: 800k,20
         //Hp: xxx/xxx Ac: xx [HUNGRY]
         char status_line[40];
-        char* c = status_line + sprintf(status_line, "Hp: %3d/%3d Ac: %2d ", player.stats.s_hpt, player.stats.s_maxhp, 10 - s_arm);
+        char* c = status_line + sprintf(status_line, " Hp: %3d/%3d Ac: %2d ", player.stats.s_hpt, player.stats.s_maxhp, 10 - s_arm);
         if (hungry_state == 0)
         {
             if (player.stats.s_exp < 2000)

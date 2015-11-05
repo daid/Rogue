@@ -413,13 +413,13 @@ coord* find_dest(MonsterThing *tp)
     
     int prob;
 
-    if ((prob = monsters[tp->type - 'A'].m_carry) <= 0 || tp->room == player.room || see_monst(tp))
+    if ((prob = monsters[tp->type - 'A'].m_carry) <= 0 || has_line_of_sight(hero.x, hero.y, tp->pos.x, tp->pos.y))
         return &hero;
     for(ItemThing* obj : lvl_obj)
     {
         if (obj->type == SCROLL && obj->which == S_SCARE)
             continue;
-        if (roomin(obj->pos) == tp->room && rnd(100) < prob)
+        if (has_line_of_sight(obj->pos.x, obj->pos.y, tp->pos.x, tp->pos.y) && rnd(100) < prob)
         {
             for(MonsterThing* mt : mlist)
             {

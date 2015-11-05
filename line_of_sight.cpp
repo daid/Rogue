@@ -36,12 +36,7 @@ void visit_field_of_view(int x, int y, int distance, std::function<void(int, int
         {
             if (has_line_of_sight(x, y, _x, _y))
             {
-                coord cp = {_x, _y};
-                room* r = roomin(cp);
-                if (!r || !r->r_flags || dist(y, x, _y, _x) < LAMPDIST)
-                {
-                    callback(_x, _y);
-                }
+                callback(_x, _y);
             }
         }
     }

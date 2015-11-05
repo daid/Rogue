@@ -57,10 +57,13 @@ void look(bool wakeup)
     {
         visit_field_of_view(hero.x, hero.y, 20, [](int x, int y)
         {
-            int ch = char_at_place(x, y);
-            ch = trip_ch(y, x, ch);
-            setMapDisplay(x, y, ch);
-            flat(y, x) |= F_SEEN;
+            if (dist(hero.y, hero.x, y, x) < LAMPDIST || (flat(y, x) & F_ISLIT))
+            {
+                int ch = char_at_place(x, y);
+                ch = trip_ch(y, x, ch);
+                setMapDisplay(x, y, ch);
+                flat(y, x) |= F_SEEN;
+            }
         });
     }
 

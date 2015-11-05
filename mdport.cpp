@@ -35,6 +35,7 @@
 #ifdef USE_SDL
 #include <SDL/SDL.h>
 #else
+#include <vector>
 #include <stdio.h>
 #include <linux/input.h>
 #include <unistd.h>
@@ -156,8 +157,10 @@ int md_readchar()
         }
     }
 #else
-    static int handle = -1;
+    static bool quit = false;
+    static std::vector<int> handles;
     static int mods = 0;
+    
     const int LEFT_SHIFT = 0x01;
     const int RIGHT_SHIFT = 0x02;
     const int ANY_SHIFT = LEFT_SHIFT | RIGHT_SHIFT;
@@ -180,279 +183,309 @@ int md_readchar()
 #define HANDLE_KEY_CHAR(k, n) \
     HANDLE_KEY(k, n, (n)-'a'+'A', CTRL(n), 0)
 
-    if (handle == -1)
+    if (handles.size() == 0)
     {
-        handle = open("/dev/input/event5", O_RDWR);
-    }
-
-    struct input_event event;
-    while(read(handle, &event, sizeof(event)) == sizeof(event))
-    {
-        if (event.type == EV_KEY)
+        int number = 0;
+        while(true)
         {
-            HANDLE_MOD_KEY(KEY_LEFTSHIFT, LEFT_SHIFT);
-            HANDLE_MOD_KEY(KEY_RIGHTSHIFT, RIGHT_SHIFT);
-            HANDLE_MOD_KEY(KEY_LEFTCTRL, LEFT_CTRL);
-            HANDLE_MOD_KEY(KEY_RIGHTCTRL, RIGHT_CTRL);
-            HANDLE_MOD_KEY(KEY_LEFTALT, LEFT_ALT);
-            HANDLE_MOD_KEY(KEY_RIGHTALT, RIGHT_ALT);
+            char buffer[128];
+            sprintf(buffer, "/dev/input/event%d", number++);
+            int handle = open(buffer, O_RDWR);
+            if (handle == -1)
+                break;
+            handles.push_back(handle);
+        }
+    }
+    
+    while(!quit)
+    {
+        fd_set readfd;
+        FD_ZERO(&readfd);
+        int max_handle = 0;
+        for(int handle : handles)
+        {
+            FD_SET(handle, &readfd);
+            max_handle = std::max(max_handle, handle);
+        }
+        select(max_handle + 1, &readfd, NULL, NULL, NULL);
+        for(int handle : handles)
+        {
+            if (FD_ISSET(handle, &readfd))
+            {
+                struct input_event event;
+                int read_size = read(handle, &event, sizeof(event));
+                if(read_size != sizeof(event))
+                {
+                    quit = true;
+                }else{
+                    if (event.type == EV_KEY)
+                    {
+                        HANDLE_MOD_KEY(KEY_LEFTSHIFT, LEFT_SHIFT);
+                        HANDLE_MOD_KEY(KEY_RIGHTSHIFT, RIGHT_SHIFT);
+                        HANDLE_MOD_KEY(KEY_LEFTCTRL, LEFT_CTRL);
+                        HANDLE_MOD_KEY(KEY_RIGHTCTRL, RIGHT_CTRL);
+                        HANDLE_MOD_KEY(KEY_LEFTALT, LEFT_ALT);
+                        HANDLE_MOD_KEY(KEY_RIGHTALT, RIGHT_ALT);
 
-            HANDLE_KEY(KEY_ESC, 27, 0, 0, 0);
-            HANDLE_KEY(KEY_1, '1', '!', 0, 0);
-            HANDLE_KEY(KEY_2, '2', '@', 0, 0);
-            HANDLE_KEY(KEY_3, '3', '#', 0, 0);
-            HANDLE_KEY(KEY_4, '4', '$', 0, 0);
-            HANDLE_KEY(KEY_5, '5', '%', 0, 0);
-            HANDLE_KEY(KEY_6, '6', '^', 0, 0);
-            HANDLE_KEY(KEY_7, '7', '&', 0, 0);
-            HANDLE_KEY(KEY_8, '8', '*', 0, 0);
-            HANDLE_KEY(KEY_9, '9', '(', 0, 0);
-            HANDLE_KEY(KEY_0, '0', ')', 0, 0);
-            HANDLE_KEY(KEY_MINUS, '-', '_', 0, 0);
-            HANDLE_KEY(KEY_EQUAL, '=', '+', 0, 0);
-            HANDLE_KEY(KEY_BACKSPACE, 8, 0, 0, 0);
-            HANDLE_KEY(KEY_TAB, 0, 0, 0, 0);
-            HANDLE_KEY_CHAR(KEY_Q, 'q');
-            HANDLE_KEY_CHAR(KEY_W, 'w');
-            HANDLE_KEY_CHAR(KEY_E, 'e');
-            HANDLE_KEY_CHAR(KEY_R, 'r');
-            HANDLE_KEY_CHAR(KEY_T, 't');
-            HANDLE_KEY_CHAR(KEY_Y, 'y');
-            HANDLE_KEY_CHAR(KEY_U, 'u');
-            HANDLE_KEY_CHAR(KEY_I, 'i');
-            HANDLE_KEY_CHAR(KEY_O, 'o');
-            HANDLE_KEY_CHAR(KEY_P, 'p');
-            HANDLE_KEY(KEY_LEFTBRACE, '[', '{', 0, 0);
-            HANDLE_KEY(KEY_RIGHTBRACE, ']', '}', 0, 0);
-            HANDLE_KEY(KEY_ENTER, 13, 0, 0, 0);
-            HANDLE_KEY_CHAR(KEY_A, 'a');
-            HANDLE_KEY_CHAR(KEY_S, 's');
-            HANDLE_KEY_CHAR(KEY_D, 'd');
-            HANDLE_KEY_CHAR(KEY_F, 'f');
-            HANDLE_KEY_CHAR(KEY_G, 'g');
-            HANDLE_KEY_CHAR(KEY_H, 'h');
-            HANDLE_KEY_CHAR(KEY_J, 'j');
-            HANDLE_KEY_CHAR(KEY_K, 'k');
-            HANDLE_KEY_CHAR(KEY_L, 'l');
-            HANDLE_KEY(KEY_SEMICOLON, ';', ':', 0, 0);
-            HANDLE_KEY(KEY_APOSTROPHE, '\'', '"', 0, 0);
-            HANDLE_KEY(KEY_GRAVE, '`', '~', 0, 0);
-            HANDLE_KEY(KEY_BACKSLASH, '\\', '|', 0, 0);
-            HANDLE_KEY_CHAR(KEY_Z, 'z');
-            HANDLE_KEY_CHAR(KEY_X, 'x');
-            HANDLE_KEY_CHAR(KEY_C, 'c');
-            HANDLE_KEY_CHAR(KEY_V, 'v');
-            HANDLE_KEY_CHAR(KEY_B, 'b');
-            HANDLE_KEY_CHAR(KEY_N, 'n');
-            HANDLE_KEY_CHAR(KEY_M, 'm');
-            HANDLE_KEY(KEY_COMMA, ',', '<', 0, 0);
-            HANDLE_KEY(KEY_DOT, '.', '>', 0, 0);
-            HANDLE_KEY(KEY_SLASH, '/', '?', 0, 0);
-            HANDLE_KEY(KEY_KPASTERISK, '*', 0, 0, 0);
-            HANDLE_KEY(KEY_SPACE, ' ', 0, 0, 0);
-            HANDLE_KEY(KEY_CAPSLOCK, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F1, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F2, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F3, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F4, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F5, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F6, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F7, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F8, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F9, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F10, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_NUMLOCK, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SCROLLLOCK, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_KP7, K_UP_LEFT, K_SHIFT_UP_LEFT, CTRL(K_SHIFT_UP_LEFT), 0);
-            HANDLE_KEY(KEY_KP8, K_UP, K_SHIFT_UP, CTRL(K_SHIFT_UP), 0);
-            HANDLE_KEY(KEY_KP9, K_UP_RIGHT, K_SHIFT_UP_RIGHT, CTRL(K_SHIFT_UP_RIGHT), 0);
-            HANDLE_KEY(KEY_KPMINUS, '-', 0, 0, 0);
-            HANDLE_KEY(KEY_KP4, K_LEFT, K_SHIFT_LEFT, CTRL(K_SHIFT_LEFT), 0);
-            HANDLE_KEY(KEY_KP5, '.', 0, 0, 0);
-            HANDLE_KEY(KEY_KP6, K_RIGHT, K_SHIFT_RIGHT, CTRL(K_SHIFT_RIGHT), 0);
-            HANDLE_KEY(KEY_KPPLUS, '+', 0, 0, 0);
-            HANDLE_KEY(KEY_KP1, K_DOWN_LEFT, K_SHIFT_DOWN_LEFT, CTRL(K_SHIFT_DOWN_LEFT), 0);
-            HANDLE_KEY(KEY_KP2, K_DOWN, K_SHIFT_DOWN, CTRL(K_SHIFT_DOWN), 0);
-            HANDLE_KEY(KEY_KP3, K_DOWN_RIGHT, K_SHIFT_DOWN_RIGHT, CTRL(K_SHIFT_DOWN_RIGHT), 0);
-            HANDLE_KEY(KEY_KP0, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_KPDOT, '.', 0, 0, 0);
+                        HANDLE_KEY(KEY_ESC, 27, 0, 0, 0);
+                        HANDLE_KEY(KEY_1, '1', '!', 0, 0);
+                        HANDLE_KEY(KEY_2, '2', '@', 0, 0);
+                        HANDLE_KEY(KEY_3, '3', '#', 0, 0);
+                        HANDLE_KEY(KEY_4, '4', '$', 0, 0);
+                        HANDLE_KEY(KEY_5, '5', '%', 0, 0);
+                        HANDLE_KEY(KEY_6, '6', '^', 0, 0);
+                        HANDLE_KEY(KEY_7, '7', '&', 0, 0);
+                        HANDLE_KEY(KEY_8, '8', '*', 0, 0);
+                        HANDLE_KEY(KEY_9, '9', '(', 0, 0);
+                        HANDLE_KEY(KEY_0, '0', ')', 0, 0);
+                        HANDLE_KEY(KEY_MINUS, '-', '_', 0, 0);
+                        HANDLE_KEY(KEY_EQUAL, '=', '+', 0, 0);
+                        HANDLE_KEY(KEY_BACKSPACE, 8, 0, 0, 0);
+                        HANDLE_KEY(KEY_TAB, 0, 0, 0, 0);
+                        HANDLE_KEY_CHAR(KEY_Q, 'q');
+                        HANDLE_KEY_CHAR(KEY_W, 'w');
+                        HANDLE_KEY_CHAR(KEY_E, 'e');
+                        HANDLE_KEY_CHAR(KEY_R, 'r');
+                        HANDLE_KEY_CHAR(KEY_T, 't');
+                        HANDLE_KEY_CHAR(KEY_Y, 'y');
+                        HANDLE_KEY_CHAR(KEY_U, 'u');
+                        HANDLE_KEY_CHAR(KEY_I, 'i');
+                        HANDLE_KEY_CHAR(KEY_O, 'o');
+                        HANDLE_KEY_CHAR(KEY_P, 'p');
+                        HANDLE_KEY(KEY_LEFTBRACE, '[', '{', 0, 0);
+                        HANDLE_KEY(KEY_RIGHTBRACE, ']', '}', 0, 0);
+                        HANDLE_KEY(KEY_ENTER, 13, 0, 0, 0);
+                        HANDLE_KEY_CHAR(KEY_A, 'a');
+                        HANDLE_KEY_CHAR(KEY_S, 's');
+                        HANDLE_KEY_CHAR(KEY_D, 'd');
+                        HANDLE_KEY_CHAR(KEY_F, 'f');
+                        HANDLE_KEY_CHAR(KEY_G, 'g');
+                        HANDLE_KEY_CHAR(KEY_H, 'h');
+                        HANDLE_KEY_CHAR(KEY_J, 'j');
+                        HANDLE_KEY_CHAR(KEY_K, 'k');
+                        HANDLE_KEY_CHAR(KEY_L, 'l');
+                        HANDLE_KEY(KEY_SEMICOLON, ';', ':', 0, 0);
+                        HANDLE_KEY(KEY_APOSTROPHE, '\'', '"', 0, 0);
+                        HANDLE_KEY(KEY_GRAVE, '`', '~', 0, 0);
+                        HANDLE_KEY(KEY_BACKSLASH, '\\', '|', 0, 0);
+                        HANDLE_KEY_CHAR(KEY_Z, 'z');
+                        HANDLE_KEY_CHAR(KEY_X, 'x');
+                        HANDLE_KEY_CHAR(KEY_C, 'c');
+                        HANDLE_KEY_CHAR(KEY_V, 'v');
+                        HANDLE_KEY_CHAR(KEY_B, 'b');
+                        HANDLE_KEY_CHAR(KEY_N, 'n');
+                        HANDLE_KEY_CHAR(KEY_M, 'm');
+                        HANDLE_KEY(KEY_COMMA, ',', '<', 0, 0);
+                        HANDLE_KEY(KEY_DOT, '.', '>', 0, 0);
+                        HANDLE_KEY(KEY_SLASH, '/', '?', 0, 0);
+                        HANDLE_KEY(KEY_KPASTERISK, '*', 0, 0, 0);
+                        HANDLE_KEY(KEY_SPACE, ' ', 0, 0, 0);
+                        HANDLE_KEY(KEY_CAPSLOCK, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F1, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F2, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F3, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F4, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F5, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F6, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F7, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F8, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F9, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F10, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_NUMLOCK, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SCROLLLOCK, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KP7, K_UP_LEFT, K_SHIFT_UP_LEFT, CTRL(K_SHIFT_UP_LEFT), 0);
+                        HANDLE_KEY(KEY_KP8, K_UP, K_SHIFT_UP, CTRL(K_SHIFT_UP), 0);
+                        HANDLE_KEY(KEY_KP9, K_UP_RIGHT, K_SHIFT_UP_RIGHT, CTRL(K_SHIFT_UP_RIGHT), 0);
+                        HANDLE_KEY(KEY_KPMINUS, '-', 0, 0, 0);
+                        HANDLE_KEY(KEY_KP4, K_LEFT, K_SHIFT_LEFT, CTRL(K_SHIFT_LEFT), 0);
+                        HANDLE_KEY(KEY_KP5, '.', 0, 0, 0);
+                        HANDLE_KEY(KEY_KP6, K_RIGHT, K_SHIFT_RIGHT, CTRL(K_SHIFT_RIGHT), 0);
+                        HANDLE_KEY(KEY_KPPLUS, '+', 0, 0, 0);
+                        HANDLE_KEY(KEY_KP1, K_DOWN_LEFT, K_SHIFT_DOWN_LEFT, CTRL(K_SHIFT_DOWN_LEFT), 0);
+                        HANDLE_KEY(KEY_KP2, K_DOWN, K_SHIFT_DOWN, CTRL(K_SHIFT_DOWN), 0);
+                        HANDLE_KEY(KEY_KP3, K_DOWN_RIGHT, K_SHIFT_DOWN_RIGHT, CTRL(K_SHIFT_DOWN_RIGHT), 0);
+                        HANDLE_KEY(KEY_KP0, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KPDOT, '.', 0, 0, 0);
 
-            HANDLE_KEY(KEY_ZENKAKUHANKAKU, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_102ND, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F11, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F12, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_RO, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_KATAKANA, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_HIRAGANA, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_HENKAN, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_KATAKANAHIRAGANA, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_MUHENKAN, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_KPJPCOMMA, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_KPENTER, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_KPSLASH, '/', 0, 0, 0);
-            HANDLE_KEY(KEY_SYSRQ, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_LINEFEED, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_HOME, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_UP, K_UP, K_SHIFT_UP, CTRL(K_SHIFT_UP), 0);
-            HANDLE_KEY(KEY_PAGEUP, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_LEFT, K_LEFT, K_SHIFT_LEFT, CTRL(K_SHIFT_LEFT), 0);
-            HANDLE_KEY(KEY_RIGHT, K_RIGHT, K_SHIFT_RIGHT, CTRL(K_SHIFT_RIGHT), 0);
-            HANDLE_KEY(KEY_END, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_DOWN, K_DOWN, K_SHIFT_DOWN, CTRL(K_SHIFT_DOWN), 0);
-            HANDLE_KEY(KEY_PAGEDOWN, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_INSERT, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_DELETE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_MACRO, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_MUTE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_VOLUMEDOWN, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_VOLUMEUP, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_POWER, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_KPEQUAL, '=', 0, 0, 0);
-            HANDLE_KEY(KEY_KPPLUSMINUS, '-', 0, 0, 0);
-            HANDLE_KEY(KEY_PAUSE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SCALE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_ZENKAKUHANKAKU, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_102ND, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F11, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F12, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_RO, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KATAKANA, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_HIRAGANA, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_HENKAN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KATAKANAHIRAGANA, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_MUHENKAN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KPJPCOMMA, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KPENTER, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KPSLASH, '/', 0, 0, 0);
+                        HANDLE_KEY(KEY_SYSRQ, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_LINEFEED, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_HOME, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_UP, K_UP, K_SHIFT_UP, CTRL(K_SHIFT_UP), 0);
+                        HANDLE_KEY(KEY_PAGEUP, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_LEFT, K_LEFT, K_SHIFT_LEFT, CTRL(K_SHIFT_LEFT), 0);
+                        HANDLE_KEY(KEY_RIGHT, K_RIGHT, K_SHIFT_RIGHT, CTRL(K_SHIFT_RIGHT), 0);
+                        HANDLE_KEY(KEY_END, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_DOWN, K_DOWN, K_SHIFT_DOWN, CTRL(K_SHIFT_DOWN), 0);
+                        HANDLE_KEY(KEY_PAGEDOWN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_INSERT, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_DELETE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_MACRO, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_MUTE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_VOLUMEDOWN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_VOLUMEUP, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_POWER, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KPEQUAL, '=', 0, 0, 0);
+                        HANDLE_KEY(KEY_KPPLUSMINUS, '-', 0, 0, 0);
+                        HANDLE_KEY(KEY_PAUSE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SCALE, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_KPCOMMA, ',', 0, 0, 0);
-            HANDLE_KEY(KEY_HANGEUL, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_HANGUEL, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_HANJA, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_YEN, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_LEFTMETA, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_RIGHTMETA, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_COMPOSE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KPCOMMA, ',', 0, 0, 0);
+                        HANDLE_KEY(KEY_HANGEUL, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_HANGUEL, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_HANJA, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_YEN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_LEFTMETA, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_RIGHTMETA, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_COMPOSE, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_STOP, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_AGAIN, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_PROPS, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_UNDO, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_FRONT, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_COPY, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_OPEN, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_PASTE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_FIND, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_CUT, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_HELP, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_MENU, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_CALC, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SETUP, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SLEEP, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_WAKEUP, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_FILE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SENDFILE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_DELETEFILE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_XFER, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_PROG1, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_PROG2, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_WWW, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_MSDOS, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_COFFEE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SCREENLOCK, 0, 0, 0, 0);
-            //HANDLE_KEY(KEY_ROTATE_DISPLAY, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_DIRECTION, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_CYCLEWINDOWS, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_MAIL, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_BOOKMARKS, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_COMPUTER, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_BACK, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_FORWARD, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_CLOSECD, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_EJECTCD, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_EJECTCLOSECD, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_NEXTSONG, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_PLAYPAUSE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_PREVIOUSSONG, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_STOPCD, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_RECORD, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_REWIND, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_PHONE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_ISO, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_CONFIG, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_HOMEPAGE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_REFRESH, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_EXIT, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_MOVE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_EDIT, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SCROLLUP, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SCROLLDOWN, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_KPLEFTPAREN, '(', 0, 0, 0);
-            HANDLE_KEY(KEY_KPRIGHTPAREN, ')', 0, 0, 0);
-            HANDLE_KEY(KEY_NEW, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_REDO, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_STOP, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_AGAIN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PROPS, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_UNDO, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_FRONT, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_COPY, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_OPEN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PASTE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_FIND, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_CUT, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_HELP, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_MENU, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_CALC, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SETUP, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SLEEP, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_WAKEUP, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_FILE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SENDFILE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_DELETEFILE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_XFER, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PROG1, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PROG2, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_WWW, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_MSDOS, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_COFFEE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SCREENLOCK, 0, 0, 0, 0);
+                        //HANDLE_KEY(KEY_ROTATE_DISPLAY, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_DIRECTION, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_CYCLEWINDOWS, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_MAIL, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_BOOKMARKS, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_COMPUTER, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_BACK, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_FORWARD, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_CLOSECD, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_EJECTCD, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_EJECTCLOSECD, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_NEXTSONG, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PLAYPAUSE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PREVIOUSSONG, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_STOPCD, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_RECORD, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_REWIND, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PHONE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_ISO, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_CONFIG, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_HOMEPAGE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_REFRESH, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_EXIT, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_MOVE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_EDIT, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SCROLLUP, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SCROLLDOWN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KPLEFTPAREN, '(', 0, 0, 0);
+                        HANDLE_KEY(KEY_KPRIGHTPAREN, ')', 0, 0, 0);
+                        HANDLE_KEY(KEY_NEW, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_REDO, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_F13, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F14, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F15, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F16, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F17, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F18, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F19, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F20, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F21, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F22, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F23, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_F24, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F13, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F14, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F15, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F16, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F17, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F18, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F19, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F20, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F21, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F22, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F23, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_F24, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_PLAYCD, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_PAUSECD, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_PROG3, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_PROG4, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_DASHBOARD, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SUSPEND, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_CLOSE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_PLAY, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_FASTFORWARD, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_BASSBOOST, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_PRINT, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_HP, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_CAMERA, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SOUND, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_QUESTION, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_EMAIL, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_CHAT, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SEARCH, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_CONNECT, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_FINANCE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SPORT, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SHOP, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_ALTERASE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_CANCEL, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_BRIGHTNESSDOWN, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_BRIGHTNESSUP, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_MEDIA, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PLAYCD, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PAUSECD, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PROG3, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PROG4, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_DASHBOARD, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SUSPEND, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_CLOSE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PLAY, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_FASTFORWARD, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_BASSBOOST, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_PRINT, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_HP, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_CAMERA, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SOUND, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_QUESTION, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_EMAIL, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_CHAT, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SEARCH, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_CONNECT, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_FINANCE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SPORT, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SHOP, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_ALTERASE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_CANCEL, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_BRIGHTNESSDOWN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_BRIGHTNESSUP, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_MEDIA, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_SWITCHVIDEOMODE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SWITCHVIDEOMODE, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_KBDILLUMTOGGLE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_KBDILLUMDOWN, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_KBDILLUMUP, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KBDILLUMTOGGLE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KBDILLUMDOWN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_KBDILLUMUP, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_SEND, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_REPLY, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_FORWARDMAIL, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_SAVE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_DOCUMENTS, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SEND, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_REPLY, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_FORWARDMAIL, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_SAVE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_DOCUMENTS, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_BATTERY, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_BATTERY, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_BLUETOOTH, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_WLAN, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_UWB, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_BLUETOOTH, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_WLAN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_UWB, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_UNKNOWN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_UNKNOWN, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_VIDEO_NEXT, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_VIDEO_PREV, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_BRIGHTNESS_CYCLE, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_BRIGHTNESS_AUTO, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_VIDEO_NEXT, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_VIDEO_PREV, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_BRIGHTNESS_CYCLE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_BRIGHTNESS_AUTO, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_BRIGHTNESS_ZERO, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_DISPLAY_OFF, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_BRIGHTNESS_ZERO, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_DISPLAY_OFF, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_WWAN, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_WIMAX, 0, 0, 0, 0);
-            HANDLE_KEY(KEY_RFKILL, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_WWAN, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_WIMAX, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_RFKILL, 0, 0, 0, 0);
 
-            HANDLE_KEY(KEY_MICMUTE, 0, 0, 0, 0);
+                        HANDLE_KEY(KEY_MICMUTE, 0, 0, 0, 0);
+                    }
+                }
+            }
         }
     }
     printf("Failed to read input device\n");

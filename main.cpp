@@ -27,7 +27,11 @@ int main(int argc, char **argv)
      * get home and options from environment
      */
 
+#ifdef __linux__
+    strcpy(file_name, "/var/lib/griffin/rogue.save");
+#else
     strcpy(file_name, "rogue.save");
+#endif
 
     open_score();
 

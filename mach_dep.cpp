@@ -48,7 +48,11 @@
 #include <time.h>
 #include "extern.h"
 
-#define SCOREFILE "rogue.score"
+#ifdef __linux__
+# define SCOREFILE "/var/lib/griffin/rogue.score"
+#else
+# define SCOREFILE "rogue.score"
+#endif
 
 # ifndef NUMSCORES
 #        define        NUMSCORES        10

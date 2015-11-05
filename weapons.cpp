@@ -248,8 +248,7 @@ bad:
  * fallpos:
  *        Pick a random position around the give (y, x) coordinates
  */
-bool
-fallpos(coord *pos, coord *newpos)
+bool fallpos(coord *pos, coord *newpos)
 {
     int y, x, cnt;
 
@@ -264,7 +263,7 @@ fallpos(coord *pos, coord *newpos)
              */
             if (y == hero.y && x == hero.x)
                 continue;
-            if (!item_at(y, x) && rnd(++cnt) == 0)
+            if (!item_at(y, x) && rnd(++cnt) == 0 && step_ok(char_at(x, y)))
             {
                 newpos->y = y;
                 newpos->x = x;

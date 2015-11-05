@@ -11,6 +11,7 @@
  * See the file LICENSE.TXT for full copyright and licensing information.
  */
 
+#include <vector>
 #include <string.h>
 #include <ctype.h>
 #include "rogue.h"
@@ -237,42 +238,29 @@ do_zap()
 void
 drain()
 {
-    struct room *corp;
-    MonsterThing **dp;
-    int cnt;
-    bool inpass;
-    static MonsterThing* drainee[40];
+    std::vector<MonsterThing*> drainee;
 
     /*
      * First cnt how many things we need to spread the hit points among
      */
-    cnt = 0;
-    if (char_at(hero.x, hero.y) == DOOR)
-        corp = &passages[flat(hero.y, hero.x) & F_PNUM];
-    else
-        corp = NULL;
-    inpass = (bool)(player.room->r_flags & ISGONE);
-    dp = drainee;
-    for (MonsterThing* mp : mlist)
-        if (mp->room == player.room || mp->room == corp ||
-            (inpass && char_at(mp->pos.x, mp->pos.y) == DOOR &&
-            &passages[flat(mp->pos.y, mp->pos.x) & F_PNUM] == player.room))
-                *dp++ = mp;
-    if ((cnt = (int)(dp - drainee)) == 0)
+    visit_field_of_view(hero.x, hero.y, 10, [&drainee](int x, int y)
+    {
+        if (monster_at(x, y))
+            drainee.push_back(monster_at(x, y));
+    });
+    if (drainee.size() == 0)
     {
         msg("you have a tingling feeling");
         return;
     }
-    *dp = NULL;
     player.stats.s_hpt /= 2;
-    cnt = player.stats.s_hpt / cnt;
+    int amount = player.stats.s_hpt / drainee.size();
     /*
      * Now zot all of the monsters
      */
-    for (dp = drainee; *dp; dp++)
+    for(MonsterThing* mp : drainee)
     {
-        MonsterThing* mp = *dp;
-        if ((mp->stats.s_hpt -= cnt) <= 0)
+        if ((mp->stats.s_hpt -= amount) <= 0)
             killed(mp, see_monst(mp));
         else
             runto(mp->pos);

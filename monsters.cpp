@@ -227,8 +227,8 @@ MonsterThing* wake_monster(int y, int x)
     if (on(*tp, ISGREED) && !on(*tp, ISRUN))
     {
         tp->flags |= ISRUN;
-        if (player.room->r_goldval)
-            tp->dest = &player.room->r_gold;
+        if (tp->room->r_goldval)
+            tp->dest = &tp->room->r_gold;
         else
             tp->dest = &hero;
     }

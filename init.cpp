@@ -77,6 +77,13 @@ init_player()
     obj->which = S_MAP;
     obj->count = 1;
     add_pack(obj, TRUE);
+
+    obj = new ItemThing();
+    obj->type = STICK;
+    obj->which = WS_FIRE;
+    obj->arm = 100;
+    obj->count = 1;
+    add_pack(obj, TRUE);
 #endif
 }
 

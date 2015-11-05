@@ -385,13 +385,12 @@ def:
                         msg("the %s whizzes by you", name);
                 }
                 setMapDisplay(pos.x, pos.y, dirch);
-                refreshMap();
         }
     }
+    refreshMapWithMore();
     for (c2 = spotpos; c2 < c1; c2++)
         setMapDisplay(c2->x, c2->y, char_at_place(c2->x, c2->y));
     refreshMap();
-    animationDelay();
 }
 
 /*

@@ -79,20 +79,14 @@ do_zap()
              * Reddy Kilowat wand.  Light up the room
              */
             ws_info[WS_LIGHT].oi_know = TRUE;
-            if (player.room->r_flags & ISGONE)
-                msg("the corridor glows and then fades");
-            else
+            visit_field_of_view(hero.x, hero.y, 10, [](int x, int y)
             {
-                player.room->r_flags &= ~ISDARK;
-                /*
-                 * Light the room and put the player back up
-                 */
-                enter_room(hero);
-                addmsg("the room is lit");
-                if (!terse)
-                    addmsg(" by a shimmering %s light", pick_color("blue"));
-                endmsg();
-            }
+                flat(y, x) |= F_ISLIT;
+            });
+            addmsg("your surroundings are lit");
+            if (!terse)
+                addmsg(" by a shimmering %s light", pick_color("blue"));
+            endmsg();
         when WS_DRAIN:
             /*
              * take away 1/2 of hero's hit points, then take it away

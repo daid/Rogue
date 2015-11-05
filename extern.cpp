@@ -27,7 +27,6 @@ bool lower_msg = FALSE;                        /* Messages should start w/lower 
 bool move_on = FALSE;                        /* Next move shouldn't pick up items */
 bool passgo = FALSE;                        /* Follow passages */
 bool playing = TRUE;                        /* True until he quits */
-bool q_comm = FALSE;                        /* Are we executing a 'Q' command? */
 bool running = FALSE;                        /* True if player is running */
 bool save_msg = TRUE;                        /* Remember last msg */
 bool stat_msg = FALSE;                        /* Should status() print as a msg() */

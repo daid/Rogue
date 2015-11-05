@@ -216,8 +216,7 @@ quaff()
  * is_magic:
  *        Returns true if an object radiates magic
  */
-bool
-is_magic(ItemThing *obj)
+bool is_magic(ItemThing *obj)
 {
     switch (obj->type)
     {
@@ -240,8 +239,7 @@ is_magic(ItemThing *obj)
  *        Turn on the ability to see invisible
  */
 
-void
-invis_on()
+void invis_on()
 {
     player.flags |= CANSEE;
     for(MonsterThing *mp : mlist)
@@ -322,8 +320,7 @@ bool seen_stairs()
  *        The guy just magically went up a level.
  */
 
-void
-raise_level()
+void raise_level()
 {
     player.stats.s_exp = e_levels[player.stats.s_lvl-1] + 1L;
     check_level();
@@ -335,8 +332,7 @@ raise_level()
  *        turns on a flag
  */
 
-void
-do_pot(int type, bool knowit)
+void do_pot(int type, bool knowit)
 {
     PACT *pp;
     int t;

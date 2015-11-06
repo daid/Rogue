@@ -15,6 +15,23 @@
 #include <ctype.h>
 #include "rogue.h"
 
+ItemThing::ItemThing()
+{
+    type = -1;                        /* What kind of object it is */
+    pos.x = pos.y = 0;                /* Where it lives on the screen */
+    launch = -1;                      /* What you need to launch it */
+    packch = 0;                       /* What character it is in the pack */
+    damage[0] = '\0';                 /* Damage if used like sword */
+    hurldmg[0] = '\0';                /* Damage if thrown */
+    count = 0;                        /* count for plural objects */
+    which = -1;                       /* Which object of a type it is */
+    hplus = 0;                        /* Plusses to hit */
+    dplus = 0;                        /* Plusses to damage */
+    arm = 0;                          /* Armor protection/charge count/gold amount */
+    flags = 0;                        /* information about objects */
+    group = 0;                        /* group number for this object */
+    label = nullptr;                  /* Label for object */
+}
 /*
  * inv_name:
  *        Return the name of something as it would appear in an

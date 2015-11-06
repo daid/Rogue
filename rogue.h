@@ -357,9 +357,10 @@ struct stats {
 class ItemThing
 {
 public:
+    ItemThing();
+    
     int type;                        /* What kind of object it is */
     coord pos;                        /* Where it lives on the screen */
-    char *text;                        /* What it says if you read it */
     int  launch;                        /* What you need to launch it */
     char packch;                        /* What character it is in the pack */
     char damage[8];                /* Damage if used like sword */

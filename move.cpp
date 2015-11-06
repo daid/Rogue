@@ -66,7 +66,6 @@ do_move(int dy, int dx)
     }
     else
     {
-over:
         nh.y = hero.y + dy;
         nh.x = hero.x + dx;
     }
@@ -111,60 +110,11 @@ over:
         case WALL_BL:
         case WALL_BR:
 hit_bound:
-            if (passgo && running && (player.room->r_flags & ISGONE)
-                && !on(player, ISBLIND))
-            {
-                bool        b1, b2;
-
-                switch (runch)
-                {
-                    case 'h': case K_LEFT:
-                    case 'l': case K_RIGHT:
-                        b1 = (bool)(hero.y != 1 && turn_ok(hero.y - 1, hero.x));
-                        b2 = (bool)(hero.y != NUMLINES - 2 && turn_ok(hero.y + 1, hero.x));
-                        if (!(b1 ^ b2))
-                            break;
-                        if (b1)
-                        {
-                            runch = 'k';
-                            dy = -1;
-                        }
-                        else
-                        {
-                            runch = 'j';
-                            dy = 1;
-                        }
-                        dx = 0;
-                        turnref();
-                        goto over;
-                    case 'j': case K_DOWN:
-                    case 'k': case K_UP:
-                        b1 = (bool)(hero.x != 0 && turn_ok(hero.y, hero.x - 1));
-                        b2 = (bool)(hero.x != NUMCOLS - 1 && turn_ok(hero.y, hero.x + 1));
-                        if (!(b1 ^ b2))
-                            break;
-                        if (b1)
-                        {
-                            runch = 'h';
-                            dx = -1;
-                        }
-                        else
-                        {
-                            runch = 'l';
-                            dx = 1;
-                        }
-                        dy = 0;
-                        turnref();
-                        goto over;
-                }
-            }
             running = FALSE;
             after = FALSE;
             break;
         case DOOR:
             running = FALSE;
-            if (flat(hero.y, hero.x) & F_PASS)
-                enter_room(nh);
             goto move_stuff;
         case TRAP:
             {
@@ -175,13 +125,6 @@ hit_bound:
             }
         case PASSAGE:
         case PASSAGE_UNLIT:
-            /*
-             * when you're in a corridor, you don't know if you're in
-             * a maze room or not, and there ain't no way to find out
-             * if you're leaving a maze room, so it is necessary to
-             * always recalculate player.room.
-             */
-            player.room = roomin(hero);
             goto move_stuff;
         case FLOOR:
             if (!(fl & F_REAL))
@@ -200,8 +143,6 @@ move_stuff:
                 if (item_at(nh.x, nh.y))
                     take = item_at(nh.x, nh.y)->type;
                 setMapDisplay(hero.x, hero.y, char_at_place(hero.x, hero.y));
-                if ((fl & F_PASS) && char_at(oldpos.x, oldpos.y) == DOOR)
-                    leave_room(nh);
                 hero = nh;
             }
     }
@@ -240,23 +181,6 @@ turnref()
         }
         pp->p_flags |= F_SEEN;
     }
-}
-
-/*
- * door_open:
- *        Called to illuminate a room.  If it is dark, remove anything
- *        that might move.
- */
-
-void door_open(struct room *rp)
-{
-    int y, x;
-
-    if (!(rp->r_flags & ISGONE))
-        for (y = rp->r_pos.y; y < rp->r_pos.y + rp->r_max.y; y++)
-            for (x = rp->r_pos.x; x < rp->r_pos.x + rp->r_max.x; x++)
-                if (monster_at(x, y))
-                    wake_monster(y, x);
 }
 
 /*

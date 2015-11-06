@@ -284,8 +284,18 @@ void pick_up(int ch)
 
     obj = item_at(hero.x, hero.y);
     if (move_on)
+    {
         move_msg(obj);
+    }
     else
+    {
+        //If a monster was going for this item, replace it's target with the hero.
+        for(MonsterThing* mp : mlist)
+        {
+            if (mp->dest == &obj->pos)
+                mp->dest = &hero;
+        }
+        
         switch (ch)
         {
             case GOLD:
@@ -295,7 +305,6 @@ void pick_up(int ch)
                 lvl_obj.remove(obj);
                 item_at(obj->pos.x, obj->pos.y) = nullptr;
                 delete obj;
-                player.room->r_goldval = 0;
                 break;
             default:
             case ARMOR:
@@ -309,6 +318,7 @@ void pick_up(int ch)
                 add_pack(NULL, FALSE);
                 break;
         }
+    }
 }
 
 /*

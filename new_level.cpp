@@ -92,11 +92,7 @@ new_level()
     char_at(stairs.x, stairs.y) = STAIRS;
     seenstairs = FALSE;
 
-    for(MonsterThing *tp : mlist)
-        tp->room = roomin(tp->pos);
-
     find_floor((struct room *) NULL, &hero, FALSE, TRUE);
-    enter_room(hero);
     setMapDisplay(hero.x, hero.y, PLAYER);
     if (on(player, SEEMONST))
         turn_see(FALSE);
@@ -188,8 +184,7 @@ put_things()
 #define MAXTRIES 10        /* max number of tries to put down a monster */
 
 
-void
-treas_room()
+void treas_room()
 {
     int nm;
     ItemThing *tp;

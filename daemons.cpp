@@ -115,8 +115,6 @@ int sight(int arg)
     {
         extinguish(sight);
         player.flags &= ~ISBLIND;
-        if (!(player.room->r_flags & ISGONE))
-            enter_room(hero);
         msg(choose_str("far out!  Everything is all cosmic again",
                        "the veil of darkness lifts"));
     }

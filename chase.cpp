@@ -10,6 +10,7 @@
  * See the file LICENSE.TXT for full copyright and licensing information.
  */
 
+#include <map>
 #include <stdlib.h>
 #include "rogue.h"
 
@@ -77,17 +78,13 @@ int move_monst(MonsterThing *tp)
  */
 void relocate(MonsterThing *th, coord *new_loc)
 {
-    struct room *oroom;
-
     if (!ce(*new_loc, th->pos))
     {
         if (see_monst(th))
             setMapDisplay(th->pos.x, th->pos.y, char_at_place(th->pos.x, th->pos.y));
-        th->room = roomin(*new_loc);
-        oroom = th->room;
         monster_at(th->pos.x, th->pos.y) = NULL;
 
-        if (oroom != th->room)
+        if (has_line_of_sight(th->pos.x, th->pos.y, new_loc->x, new_loc->y))
             th->dest = find_dest(th);
         th->pos = *new_loc;
         monster_at(new_loc->x, new_loc->y) = th;
@@ -106,103 +103,130 @@ void relocate(MonsterThing *th, coord *new_loc)
  */
 int do_chase(MonsterThing *th)
 {
-    coord *cp;
-    struct room *rer, *ree;        /* room of chaser, room of chasee */
-    int mindist = 32767, curdist;
-    bool stoprun = FALSE;        /* TRUE means we are there */
-    bool door;
-    static coord _this;                        /* Temporary destination for chaser */
-
-    rer = th->room;                /* Find room of chaser */
-    if (on(*th, ISGREED) && rer->r_goldval == 0)
-        th->dest = &hero;        /* If gold has been taken, run after hero */
-    if (th->dest == &hero)        /* Find room of chasee */
-        ree = player.room;
-    else
-        ree = roomin(*th->dest);
     /*
-     * We don't count doors as inside rooms for this routine
+     * For dragons check and see if (a) the hero is on a straight
+     * line from it, and (b) that it is within shooting distance,
+     * but outside of striking range.
      */
-    door = (char_at(th->pos.x, th->pos.y) == DOOR);
-    /*
-     * If the object of our desire is in a different room,
-     * and we are not in a corridor, run to the door nearest to
-     * our goal.
-     */
-over:
-    if (rer != ree)
+    if (th->type == 'D' && (th->pos.y == hero.y || th->pos.x == hero.x || abs(th->pos.y - hero.y) == abs(th->pos.x - hero.x))
+        && dist_cp(&th->pos, &hero) <= BOLT_LENGTH * BOLT_LENGTH && !on(*th, ISCANC) && rnd(DRAGONSHOT) == 0 &&
+        has_line_of_sight(hero.x, hero.y, th->pos.x, th->pos.y))
     {
-        for (cp = rer->r_exit; cp < &rer->r_exit[rer->r_nexits]; cp++)
+        delta.y = sign(hero.y - th->pos.y);
+        delta.x = sign(hero.x - th->pos.x);
+        if (has_hit)
+            endmsg();
+        fire_bolt(&th->pos, &delta, "flame");
+        running = FALSE;
+        count = 0;
+        quiet = 0;
+        if (to_death && !on(*th, ISTARGET))
         {
-            curdist = dist_cp(th->dest, cp);
-            if (curdist < mindist)
-            {
-                _this = *cp;
-                mindist = curdist;
-            }
+            to_death = FALSE;
+            kamikaze = FALSE;
         }
-        if (door)
-        {
-            rer = &passages[flat(th->pos.y, th->pos.x) & F_PNUM];
-            door = FALSE;
-            goto over;
-        }
+        return(0);
     }
-    else
+    
+    class AStarSolver
     {
-        _this = *th->dest;
-        /*
-         * For dragons check and see if (a) the hero is on a straight
-         * line from it, and (b) that it is within shooting distance,
-         * but outside of striking range.
-         */
-        if (th->type == 'D' && (th->pos.y == hero.y || th->pos.x == hero.x
-            || abs(th->pos.y - hero.y) == abs(th->pos.x - hero.x))
-            && dist_cp(&th->pos, &hero) <= BOLT_LENGTH * BOLT_LENGTH
-            && !on(*th, ISCANC) && rnd(DRAGONSHOT) == 0)
+        class AStarInfo
         {
-            delta.y = sign(hero.y - th->pos.y);
-            delta.x = sign(hero.x - th->pos.x);
-            if (has_hit)
-                endmsg();
-            fire_bolt(&th->pos, &delta, "flame");
-            running = FALSE;
-            count = 0;
-            quiet = 0;
-            if (to_death && !on(*th, ISTARGET))
+        public:
+            coord origin;
+            int base_score;
+        };
+        
+        std::map<int, AStarInfo> info;
+        std::list<int> open_list;
+        
+        void addToList(int x, int y, coord origin, int base_score)
+        {
+            if (x < 0 || x >= NUMCOLS || y < 0 || y >= NUMLINES)
+                return;
+            if (!step_ok(char_at(x, y)))
+                return;
+            if (monster_at(x, y))
+                return;
+            int pos = x | y << 16;
+            if (info.find(pos) != info.end())
             {
-                to_death = FALSE;
-                kamikaze = FALSE;
+                if (info[pos].base_score <= base_score)
+                    return;
             }
-            return(0);
+            info[pos].base_score = base_score;
+            info[pos].origin = origin;
+            //TODO: Apply heuristic and insert in the proper location in the open list.
+            open_list.push_back(pos);
         }
-    }
+    
+    public:
+        coord solve(coord start, coord end)
+        {
+            coord co;
+            co.x = start.x;     co.y = start.y - 1; addToList(co.x, co.y, co, 1);
+            co.x = start.x - 1; co.y = start.y;     addToList(co.x, co.y, co, 1);
+            co.x = start.x + 1; co.y = start.y;     addToList(co.x, co.y, co, 1);
+            co.x = start.x;     co.y = start.y + 1; addToList(co.x, co.y, co, 1);
+            
+            co.x = start.x - 1; co.y = start.y - 1; addToList(co.x, co.y, co, 1);
+            co.x = start.x + 1; co.y = start.y - 1; addToList(co.x, co.y, co, 1);
+            co.x = start.x - 1; co.y = start.y + 1; addToList(co.x, co.y, co, 1);
+            co.x = start.x + 1; co.y = start.y + 1; addToList(co.x, co.y, co, 1);
+            
+            while(open_list.size() > 0)
+            {
+                int pos = open_list.front();
+                open_list.pop_front();
+                
+                int score = info[pos].base_score;
+                coord origin = info[pos].origin;
+                
+                coord co = {pos & 0xFFFF, pos >> 16};
+                if (ce(co, end))
+                    return origin;
+                
+                addToList(co.x,     co.y - 1, origin, score + 1);
+                addToList(co.x - 1, co.y,     origin, score + 1);
+                addToList(co.x + 1, co.y,     origin, score + 1);
+                addToList(co.x,     co.y + 1, origin, score + 1);
+                
+                addToList(co.x - 1, co.y - 1, origin, score + 1);
+                addToList(co.x + 1, co.y - 1, origin, score + 1);
+                addToList(co.x - 1, co.y + 1, origin, score + 1);
+                addToList(co.x + 1, co.y + 1, origin, score + 1);
+            }
+            return start;
+        }
+    };
+    
+    AStarSolver solver;
+    coord target = solver.solve(th->pos, *th->dest);
+    
+    bool stoprun = false;
     /*
      * This now contains what we want to run to this time
      * so we run to it.  If we hit it we either want to fight it
      * or stop running
      */
-    if (!chase(th, &_this))
+    if (!chase(th, &target))
     {
-        if (ce(_this, hero))
+        if (ce(target, hero))
         {
             return( attack(th) );
         }
-        else if (ce(_this, *th->dest))
+        else if (ce(target, *th->dest))
         {
-            for (ItemThing* obj : lvl_obj)
+            ItemThing* obj = item_at(th->dest->x, th->dest->y);
+            if (obj && &obj->pos == th->dest)
             {
-                if (th->dest == &obj->pos)
-                {
-                    lvl_obj.remove(obj);
-                    item_at(obj->pos.x, obj->pos.y) = nullptr;
-                    th->pack.push_front(obj);
-                    th->dest = find_dest(th);
-                    break;
-                }
+                lvl_obj.remove(obj);
+                item_at(obj->pos.x, obj->pos.y) = nullptr;
+                th->pack.push_front(obj);
+                th->dest = find_dest(th);
             }
             if (th->type != 'F')
-                stoprun = TRUE;
+                stoprun = true;
         }
     }
     else
@@ -258,8 +282,7 @@ void runto(const coord& runner)
  *        chasee(ee).  Returns TRUE if we want to keep on chasing later
  *        FALSE if we reach the goal.
  */
-bool
-chase(MonsterThing *tp, coord *ee)
+bool chase(MonsterThing *tp, coord *ee)
 {
     int x, y;
     int curdist, thisdist;
@@ -349,29 +372,6 @@ chase(MonsterThing *tp, coord *ee)
         }
     }
     return (bool)(curdist != 0 && !ce(ch_ret, hero));
-}
-
-/*
- * roomin:
- *        Find what room some coordinates are in. NULL means they aren't
- *        in any room.
- */
-struct room * roomin(const coord& cp)
-{
-    struct room *rp;
-    int *fp;
-
-
-    fp = &flat(cp.y, cp.x);
-    if (*fp & F_PASS)
-        return &passages[*fp & F_PNUM];
-
-    for (rp = rooms; rp < &rooms[MAXROOMS]; rp++)
-        if (cp.x <= rp->r_pos.x + rp->r_max.x && rp->r_pos.x <= cp.x
-         && cp.y <= rp->r_pos.y + rp->r_max.y && rp->r_pos.y <= cp.y)
-            return rp;
-
-    return NULL;
 }
 
 /*

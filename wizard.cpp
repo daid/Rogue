@@ -128,17 +128,8 @@ void teleport()
 
     setMapDisplay(hero.x, hero.y, char_at_place(hero.x, hero.y));
     find_floor((struct room *) NULL, &c, FALSE, TRUE);
-    if (roomin(c) != player.room)
-    {
-        leave_room(hero);
-        hero = c;
-        enter_room(hero);
-    }
-    else
-    {
-        hero = c;
-        look(TRUE);
-    }
+    hero = c;
+    look(TRUE);
     setMapDisplay(hero.x, hero.y, PLAYER);
     /*
      * turn off ISHELD in case teleportation was done while fighting

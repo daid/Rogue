@@ -25,7 +25,6 @@ void look(bool wakeup)
     int ch;
     MonsterThing *tp;
     PLACE *pp;
-    struct room *rp;
     int ey, ex;
     int passcount;
     char pfl, pch;
@@ -33,12 +32,10 @@ void look(bool wakeup)
     int sy, sx, sumhero = 0, diffhero = 0;
 
     passcount = 0;
-    rp = player.room;
     if (!ce(oldpos, hero))
     {
-        erase_lamp(oldpos, oldrp);
+        erase_lamp(oldpos);
         oldpos = hero;
-        oldrp = rp;
     }
     ey = hero.y + 1;
     ex = hero.x + 1;
@@ -55,7 +52,7 @@ void look(bool wakeup)
     
     if (!on(player, ISBLIND))
     {
-        visit_field_of_view(hero.x, hero.y, 20, [](int x, int y)
+        visit_field_of_view(hero.x, hero.y, 20, [wakeup](int x, int y)
         {
             if (dist(hero.y, hero.x, y, x) < LAMPDIST || (flat(y, x) & F_ISLIT))
             {
@@ -63,6 +60,9 @@ void look(bool wakeup)
                 ch = trip_ch(y, x, ch);
                 setMapDisplay(x, y, ch);
                 flat(y, x) |= F_SEEN;
+                
+                if (wakeup && monster_at(x, y))
+                    wake_monster(y, x);
             }
         });
     }
@@ -105,8 +105,6 @@ void look(bool wakeup)
                 }
                 else
                 {
-                    if (wakeup)
-                        wake_monster(y, x);
                     if (see_monst(tp))
                     {
                         if (on(player, ISHALU))
@@ -221,7 +219,7 @@ int trip_ch(int y, int x, int ch)
  *        Erase the area shown by a lamp in a dark room.
  */
 
-void erase_lamp(coord& pos, struct room *rp)
+void erase_lamp(coord& pos)
 {
     visit_field_of_view(pos.x, pos.y, 20, [](int x, int y)
     {

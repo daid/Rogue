@@ -374,6 +374,7 @@ public:
     int group;                        /* group number for this object */
     char *label;                        /* Label for object */
 };
+
 class MonsterThing
 {
 public:    
@@ -384,7 +385,6 @@ public:
     coord *dest;                        /* Where it is running to */
     short flags;                        /* State word */
     struct stats stats;                 /* Physical description */
-    struct room *room;                  /* Current room for thing */
     std::list<ItemThing*> pack;         /* What the thing is carrying */
     int reserved;                       /* Used during saving/loading */
 
@@ -516,7 +516,6 @@ void        do_run(int ch);
 void        do_zap();
 void        doadd(const char *fmt, va_list args);
 void        door(struct room *rm, coord *cp);
-void        door_open(struct room *rp);
 void        drain();
 void        draw_room(struct room *rp);
 void        drop();
@@ -525,7 +524,7 @@ size_t  encread(void *start, size_t size, FILE *inf);
 size_t  encwrite(const void *start, size_t size, FILE *outf);
 int        endmsg();
 void enter_room(const coord& cp);
-void        erase_lamp(coord& pos, struct room *rp);
+void        erase_lamp(coord& pos);
 void        extinguish(daemon_function_t func);
 void        fall(ItemThing *obj, bool pr);
 void        fire_bolt(coord *start, coord *dir, const char *name);
@@ -539,7 +538,6 @@ void        give_pack(MonsterThing *tp);
 void        help();
 void        hit(const char *er, const char *ee, bool noend);
 void        horiz(struct room *rp, int starty);
-void        leave_room(const coord& cp);
 void        lengthen(daemon_function_t func, int xtime);
 void        look(bool wakeup);
 int        hit_monster(int y, int x, ItemThing *obj);
@@ -666,8 +664,6 @@ coord        *rndmove(MonsterThing *who);
 ItemThing   *get_item(const char *purpose, int type);
 ItemThing   *leave_pack(ItemThing *obj, bool newobj, bool all);
 ItemThing   *new_thing();
-
-struct room* roomin(const coord& cp);
 
 #define MAXDAEMONS 20
 

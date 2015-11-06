@@ -1111,8 +1111,7 @@ rs_read_daemons(FILE *inf, struct delayed_action *d_list, int count)
     return(READSTAT);
 }       
         
-int
-rs_write_obj_info(FILE *savef, struct obj_info *i, int count)
+static int rs_write_obj_info(FILE *savef, struct obj_info *i, int count)
 {
     int n;
     
@@ -1134,8 +1133,7 @@ rs_write_obj_info(FILE *savef, struct obj_info *i, int count)
     return(WRITESTAT);
 }
 
-int
-rs_read_obj_info(FILE *inf, struct obj_info *mi, int count)
+static int rs_read_obj_info(FILE *inf, struct obj_info *mi, int count)
 {
     int n;
     int value;
@@ -1162,8 +1160,7 @@ rs_read_obj_info(FILE *inf, struct obj_info *mi, int count)
     return(READSTAT);
 }
 
-int
-rs_write_room(FILE *savef, struct room *r)
+static int rs_write_room(FILE *savef, struct room *r)
 {
     if (write_error)
         return(WRITESTAT);
@@ -1190,8 +1187,7 @@ rs_write_room(FILE *savef, struct room *r)
     return(WRITESTAT);
 }
 
-int
-rs_read_room(FILE *inf, struct room *r)
+static int rs_read_room(FILE *inf, struct room *r)
 {
     if (read_error || format_error)
         return(READSTAT);
@@ -1248,36 +1244,6 @@ static int rs_read_rooms(FILE *inf, struct room *r, int count)
     for(n = 0; n < value; n++)
         rs_read_room(inf,&r[n]);
 
-    return(READSTAT);
-}
-
-static int rs_write_room_reference(FILE *savef, struct room *rp)
-{
-    int i, room = -1;
-    
-    if (write_error)
-        return(WRITESTAT);
-
-    for (i = 0; i < MAXROOMS; i++)
-        if (&rooms[i] == rp)
-            room = i;
-
-    rs_write_int(savef, room);
-
-    return(WRITESTAT);
-}
-
-static int rs_read_room_reference(FILE *inf, struct room **rp)
-{
-    int i;
-    
-    if (read_error || format_error)
-        return(READSTAT);
-
-    rs_read_int(inf, &i);
-
-    *rp = &rooms[i];
-            
     return(READSTAT);
 }
 
@@ -1550,7 +1516,6 @@ static int rs_write_thing(FILE *savef, MonsterThing *t)
     
     rs_write_short(savef, t->flags);
     rs_write_stats(savef, &t->stats);
-    rs_write_room_reference(savef, t->room);
     rs_write_object_list(savef, t->pack);
     
     return(WRITESTAT);
@@ -1624,7 +1589,6 @@ rs_read_thing(FILE *inf, MonsterThing *t)
             
     rs_read_short(inf,&t->flags);
     rs_read_stats(inf,&t->stats);
-    rs_read_room_reference(inf, &t->room);
     rs_read_object_list(inf, t->pack);
     
     return(READSTAT);
@@ -1911,8 +1875,7 @@ rs_save_file(FILE *savef)
     rs_write_places(savef,places,MAXLINES*MAXCOLS);
 
     rs_write_stats(savef,&max_stats); 
-    rs_write_rooms(savef, rooms, MAXROOMS);             
-    rs_write_room_reference(savef, oldrp);              
+    rs_write_rooms(savef, rooms, MAXROOMS);
     rs_write_rooms(savef, passages, MAXPASS);
 
     rs_write_monsters(savef,monsters,26);               
@@ -2019,7 +1982,6 @@ rs_restore_file(FILE *inf)
 
     rs_read_stats(inf, &max_stats);
     rs_read_rooms(inf, rooms, MAXROOMS);
-    rs_read_room_reference(inf, &oldrp);
     rs_read_rooms(inf, passages, MAXPASS);
 
     rs_read_monsters(inf,monsters,26);                  

@@ -28,7 +28,6 @@ read_scroll()
     int ch;
     int i;
     bool discardit = FALSE;
-    struct room *cur_room;
     ItemThing *orig_obj;
     static coord mp;
 
@@ -253,9 +252,9 @@ def:
              * Make him dissapear and reappear
              */
             {
-                cur_room = player.room;
+                coord old_pos = hero;
                 teleport();
-                if (cur_room != player.room)
+                if (!has_line_of_sight(old_pos.x, old_pos.y, hero.x, hero.y))
                     scr_info[S_TELEP].oi_know = TRUE;
             }
         when S_ENCH:

@@ -634,14 +634,13 @@ killed(MonsterThing *tp, bool pr)
         {
             ItemThing *gold;
 
-            if (fallpos(&tp->pos, &tp->room->r_gold) && level >= max_level)
+            if (level >= max_level)
             {
                 gold = new ItemThing();
                 gold->type = GOLD;
                 gold->arm = GOLDCALC;
                 if (save(VS_MAGIC))
-                    gold->arm += GOLDCALC + GOLDCALC
-                                     + GOLDCALC + GOLDCALC;
+                    gold->arm += GOLDCALC + GOLDCALC + GOLDCALC + GOLDCALC;
                 tp->pack.push_front(gold);
             }
         }

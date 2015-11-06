@@ -66,7 +66,6 @@ MonsterThing::MonsterThing()
     stats.s_hpt = 0;                        /* Hit points */
     stats.s_dmg[0] = 0;                        /* String describing damage done */
     stats.s_maxhp = 0;                        /* Max hit points */
-    room = NULL;                /* Current room for thing */
     reserved = 0;
 }
 
@@ -85,7 +84,6 @@ MonsterThing::MonsterThing(char type, const coord& cp)
     this->type = type;
     this->disguise = type;
     this->pos = cp;
-    this->room = roomin(cp);
     monster_at(cp.x, cp.y) = this;
     mp = &monsters[this->type-'A'];
     this->stats.s_lvl = mp->m_stats.s_lvl + lev_add;
@@ -165,7 +163,7 @@ wanderer()
     do
     {
         find_floor((struct room *) NULL, &cp, FALSE, TRUE);
-    } while (roomin(cp) == player.room);
+    } while (has_line_of_sight(cp.x, cp.y, hero.x, hero.y));
     tp = new MonsterThing(randmonster(TRUE), cp);
     if (on(player, SEEMONST))
     {
@@ -227,9 +225,13 @@ MonsterThing* wake_monster(int y, int x)
     if (on(*tp, ISGREED) && !on(*tp, ISRUN))
     {
         tp->flags |= ISRUN;
-        if (tp->room->r_goldval)
-            tp->dest = &tp->room->r_gold;
-        else
+        tp->dest = nullptr;
+        visit_field_of_view(tp->pos.x, tp->pos.y, 10, [tp](int x, int y)
+        {
+            if (item_at(x, y) && item_at(x, y)->type == GOLD)
+                tp->dest = &item_at(x, y)->pos;
+        });
+        if (tp->dest == nullptr)
             tp->dest = &hero;
     }
     return tp;
@@ -240,8 +242,7 @@ MonsterThing* wake_monster(int y, int x)
  *        Give a pack to a monster if it deserves one
  */
 
-void
-give_pack(MonsterThing *tp)
+void give_pack(MonsterThing *tp)
 {
     if (level >= max_level && rnd(100) < monsters[tp->type-'A'].m_carry)
         tp->pack.push_front(new_thing());

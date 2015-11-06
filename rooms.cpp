@@ -372,35 +372,3 @@ find_floor(struct room *rp, coord *cp, int limit, bool monst)
             return TRUE;
     }
 }
-
-/*
- * enter_room:
- *        Code that is executed whenver you appear in a room
- */
-
-void enter_room(const coord& cp)
-{
-    struct room *rp;
-
-    rp = player.room = roomin(cp);
-    door_open(rp);
-}
-
-/*
- * leave_room:
- *        Code for when we exit a room
- */
-
-void leave_room(const coord& cp)
-{
-    struct room *rp;
-
-    rp = player.room;
-
-    if (rp->r_flags & ISMAZE)
-        return;
-
-    player.room = &passages[flat(cp.y, cp.x) & F_PNUM];
-
-    door_open(rp);
-}

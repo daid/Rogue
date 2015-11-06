@@ -154,8 +154,7 @@ int MonsterThing::experienceAdd()
  *        Create a new wandering monster and aim it at the player
  */
 
-void
-wanderer()
+void wanderer()
 {
     MonsterThing *tp;
     static coord cp;

@@ -19,12 +19,12 @@
  */
 #define MAXROOMS         9
 #define MAXTHINGS        9
-#define MAXOBJ           12   /* changed from 9 to increase number of items found in game */
+#define MAXOBJ           15   /* changed from 9 to increase number of items found in game */
 #define MAXPACK          23
 #define MAXTRAPS         10
 #define AMULETLEVEL      26
-#define NUMTHINGS        7        /* number of types of things */
-#define MAXPASS          13        /* upper limit on number of passages */
+#define NUMTHINGS        7    /* number of types of things */
+#define MAXPASS          13   /* upper limit on number of passages */
 #define NUMLINES         24
 #define NUMCOLS          80
 #define BORE_LEVEL       50

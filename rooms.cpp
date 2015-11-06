@@ -26,8 +26,7 @@ typedef struct spot {                /* position matrix for maze positions */
  *        Create rooms and corridors with a connectivity graph
  */
 
-void
-do_rooms()
+void do_rooms()
 {
     int i;
     struct room *rp;
@@ -247,8 +246,7 @@ do_maze(struct room *rp)
  *        Dig out from around where we are now, if possible
  */
 
-void
-dig(int y, int x)
+void dig(int y, int x)
 {
     coord *cp;
     int cnt, newy, newx, nexty = 0, nextx = 0;
@@ -307,8 +305,7 @@ dig(int y, int x)
  *        Account for maze exits
  */
 
-void
-accnt_maze(int y, int x, int ny, int nx)
+void accnt_maze(int y, int x, int ny, int nx)
 {
     SPOT *sp;
     coord *cp;
@@ -326,8 +323,7 @@ accnt_maze(int y, int x, int ny, int nx)
  *        Pick a random spot in a room
  */
 
-void
-rnd_pos(struct room *rp, coord *cp)
+void rnd_pos(struct room *rp, coord *cp)
 {
     cp->x = rp->r_pos.x + rnd(rp->r_max.x - 2) + 1;
     cp->y = rp->r_pos.y + rnd(rp->r_max.y - 2) + 1;
@@ -338,8 +334,7 @@ rnd_pos(struct room *rp, coord *cp)
  *        Find a valid floor spot in this room.  If rp is NULL, then
  *        pick a new room each time around the loop.
  */
-bool
-find_floor(struct room *rp, coord *cp, int limit, bool monst)
+bool find_floor(struct room *rp, coord *cp, int limit, bool monst)
 {
     PLACE *pp;
     int cnt;

@@ -18,8 +18,7 @@
 #define MAXTREAS 10        /* maximum number of treasures in a treasure room */
 #define MINTREAS 2        /* minimum number of treasures in a treasure room */
 
-void
-new_level()
+void new_level()
 {
     PLACE *pp;
     int *sp;
@@ -104,8 +103,7 @@ new_level()
  * rnd_room:
  *        Pick a room that is really there
  */
-int
-rnd_room()
+int rnd_room()
 {
     int rm;
 
@@ -121,8 +119,7 @@ rnd_room()
  *        Put potions and scrolls on this level
  */
 
-void
-put_things()
+void put_things()
 {
     int i;
     ItemThing *obj;
@@ -142,6 +139,7 @@ put_things()
      * Do MAXOBJ attempts to put things on a level
      */
     for (i = 0; i < MAXOBJ; i++)
+    {
         if (rnd(100) < 36)
         {
             /*
@@ -155,6 +153,7 @@ put_things()
             find_floor((struct room *) NULL, &obj->pos, FALSE, FALSE);
             item_at(obj->pos.x, obj->pos.y) = obj;
         }
+    }
     /*
      * If he is really deep in the dungeon and he hasn't found the
      * amulet yet, put it somewhere on the ground

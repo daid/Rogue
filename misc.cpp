@@ -283,8 +283,7 @@ void eat()
  *        Check to see if the guy has gone up a level.
  */
 
-void
-check_level()
+void check_level()
 {
     int i, add, olevel;
 
@@ -309,8 +308,7 @@ check_level()
  *        highest it has been, just in case
  */
 
-void
-chg_str(int amt)
+void chg_str(int amt)
 {
     str_t comp;
 
@@ -330,8 +328,7 @@ chg_str(int amt)
  * add_str:
  *        Perform the actual add, checking upper and lower bound limits
  */
-void
-add_str(str_t *sp, int amt)
+void add_str(str_t *sp, int amt)
 {
     if ((*sp += amt) < 3)
         *sp = 3;
@@ -367,11 +364,8 @@ bool add_haste(bool potion)
  *        Aggravate all the monsters on this level
  */
 
-void
-aggravate()
+void aggravate()
 {
-    
-
     for(MonsterThing *mp : mlist)
         runto(mp->pos);
 }
@@ -400,8 +394,7 @@ const char * vowelstr(const char *str)
  * is_current:
  *        See if the object is one of the currently used items
  */
-bool
-is_current(ItemThing *obj)
+bool is_current(ItemThing *obj)
 {
     if (obj == NULL)
         return FALSE;
@@ -421,8 +414,7 @@ is_current(ItemThing *obj)
  *      Set up the direction co_ordinate for use in varios "prefix"
  *        commands
  */
-bool
-get_dir()
+bool get_dir()
 {
     const char *prompt;
     bool gotit;
@@ -478,8 +470,7 @@ get_dir()
  * sign:
  *        Return the sign of the number
  */
-int
-sign(int nm)
+int sign(int nm)
 {
     if (nm < 0)
         return -1;
@@ -491,8 +482,7 @@ sign(int nm)
  * spread:
  *        Give a spread around a given number (+/- 20%)
  */
-int
-spread(int nm)
+int spread(int nm)
 {
     return nm - nm / 20 + rnd(nm / 10);
 }
@@ -502,8 +492,7 @@ spread(int nm)
  *        Call an object something after use.
  */
 
-void
-call_it(struct obj_info *info)
+void call_it(struct obj_info *info)
 {
     if (info->oi_know)
     {
@@ -530,8 +519,7 @@ call_it(struct obj_info *info)
  * rnd_thing:
  *        Pick a random thing appropriate for this level
  */
-char
-rnd_thing()
+char rnd_thing()
 {
     int i;
     static char thing_list[] = {

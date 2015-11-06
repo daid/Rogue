@@ -1167,7 +1167,6 @@ static int rs_write_room(FILE *savef, struct room *r)
 
     rs_write_coord(savef, r->r_pos);
     rs_write_coord(savef, r->r_max);
-    rs_write_coord(savef, r->r_gold);
     rs_write_int(savef,   r->r_goldval);
     rs_write_short(savef, r->r_flags);
     rs_write_int(savef, r->r_nexits);
@@ -1194,7 +1193,6 @@ static int rs_read_room(FILE *inf, struct room *r)
 
     rs_read_coord(inf,&r->r_pos);
     rs_read_coord(inf,&r->r_max);
-    rs_read_coord(inf,&r->r_gold);
     rs_read_int(inf,&r->r_goldval);
     rs_read_short(inf,&r->r_flags);
     rs_read_int(inf,&r->r_nexits);
@@ -1394,17 +1392,6 @@ static int rs_read_object_reference(FILE *inf, std::list<ItemThing*>& list, Item
     return(READSTAT);
 }
 
-static int find_room_coord(struct room *rmlist, coord *c, int n)
-{
-    int i = 0;
-    
-    for(i = 0; i < n; i++)
-        if(&rmlist[i].r_gold == c)
-            return(i);
-    
-    return(-1);
-}
-
 static int find_monster_index_for_coord(coord *c)
 {
     int i = 0;
@@ -1493,18 +1480,8 @@ static int rs_write_thing(FILE *savef, MonsterThing *t)
             }
             else
             {
-                i = find_room_coord(rooms, t->dest, MAXROOMS);
-        
-                if (i >= 0) 
-                {
-                    rs_write_int(savef, 3);
-                    rs_write_int(savef, i);
-                }
-                else 
-                {
-                    rs_write_int(savef, 0);
-                    rs_write_int(savef, 1); /* chase the hero anyway */
-                }
+                rs_write_int(savef, 0);
+                rs_write_int(savef, 1); /* chase the hero anyway */
             }
         }
     }
@@ -1579,10 +1556,6 @@ rs_read_thing(FILE *inf, MonsterThing *t)
         {
             t->dest = &obj->pos;
         }
-    }
-    else if (listid == 3) /* gold */
-    {
-        t->dest = &rooms[index].r_gold;
     }
     else
         t->dest = NULL;

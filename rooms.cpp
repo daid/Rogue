@@ -121,13 +121,12 @@ do_rooms()
 
             gold = new ItemThing();
             gold->arm = rp->r_goldval = GOLDCALC;//gold value is stored in arm field (used to be handled with ugly define)
-            find_floor(rp, &rp->r_gold, FALSE, FALSE);
-            gold->pos = rp->r_gold;
+            find_floor(rp, &gold->pos, FALSE, FALSE);
             gold->flags = ISMANY;
             gold->group = GOLDGRP;
             gold->type = GOLD;
             lvl_obj.push_front(gold);
-            item_at(rp->r_gold.x, rp->r_gold.y) = gold;
+            item_at(gold->pos.x, gold->pos.y) = gold;
         }
         /*
          * Put the monster in

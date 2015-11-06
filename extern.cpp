@@ -143,22 +143,21 @@ MonsterThing player;                                /* His stats */
 
 struct stats max_stats = INIT_STATS;        /* The maximum for the player */
 
-struct room *oldrp;                        /* Roomin(&oldpos) */
 struct room rooms[MAXROOMS];                /* One for each room -- A level */
 struct room passages[MAXPASS] =                /* One for each passage */
 {
-    { {0, 0}, {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} }
+    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
+    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
+    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
+    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
+    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
+    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
+    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
+    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
+    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
+    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
+    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
+    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} }
 };
 
 #define ___ 1

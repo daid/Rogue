@@ -330,7 +330,6 @@ struct obj_info {
 struct room {
     coord r_pos;                        /* Upper left corner */
     coord r_max;                        /* Size of room */
-    coord r_gold;                        /* Where the gold is */
     int r_goldval;                        /* How much the gold is worth */
     short r_flags;                        /* info about the room */
     int r_nexits;                        /* Number of exits */
@@ -463,7 +462,7 @@ extern MonsterThing player;
 
 extern struct h_list        helpstr[];
 
-extern struct room        *oldrp, passages[], rooms[];
+extern struct room        passages[], rooms[];
 
 extern struct stats        max_stats;
 
@@ -523,7 +522,6 @@ void        eat();
 size_t  encread(void *start, size_t size, FILE *inf);
 size_t  encwrite(const void *start, size_t size, FILE *outf);
 int        endmsg();
-void enter_room(const coord& cp);
 void        erase_lamp(coord& pos);
 void        extinguish(daemon_function_t func);
 void        fall(ItemThing *obj, bool pr);

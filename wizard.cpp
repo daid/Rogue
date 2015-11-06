@@ -21,8 +21,7 @@
  *        What a certin object is
  */
 
-void
-whatis(bool insist, int type)
+void whatis(bool insist, int type)
 {
     ItemThing *obj;
 

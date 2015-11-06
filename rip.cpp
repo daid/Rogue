@@ -207,6 +207,34 @@ void death(char monst)
     }
     refreshMap();
     md_readchar();
+
+    startDisplayOfStringList();
+    displayStringListItem("Your items:");
+    for (ItemThing* obj : player.pack)
+    {
+        obj->flags |= ISKNOW;
+        switch (obj->type)
+        {
+            case FOOD:
+            when WEAPON:
+                weap_info[obj->which].oi_know = true;
+            when ARMOR:
+                arm_info[obj->which].oi_know = true;
+            when SCROLL:
+                scr_info[obj->which].oi_know = true;
+            when POTION:
+                pot_info[obj->which].oi_know = true;
+            when RING:
+                ring_info[obj->which].oi_know = true;
+            when STICK:
+                ws_info[obj->which].oi_know = true;
+            when AMULET:
+                break;
+        }
+        displayStringListItem("%c) %s", obj->packch, inv_name(obj, FALSE));
+    }
+    finishDisplayOfStringList();
+
     score(purse, amulet ? 3 : 0, monst);
     my_exit(0);
 }

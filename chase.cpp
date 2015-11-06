@@ -136,9 +136,15 @@ int do_chase(MonsterThing *th)
             coord origin;
             int base_score;
         };
+        coord end;
         
         std::map<int, AStarInfo> info;
         std::list<int> open_list;
+        
+        int heuristicScore(int x, int y)
+        {
+            return abs(x - end.x) + abs(y - end.y);
+        }
         
         void addToList(int x, int y, coord origin, int base_score)
         {
@@ -156,13 +162,26 @@ int do_chase(MonsterThing *th)
             }
             info[pos].base_score = base_score;
             info[pos].origin = origin;
-            //TODO: Apply heuristic and insert in the proper location in the open list.
+            
+            int score = heuristicScore(x, y) + base_score;
+            for(auto it=open_list.begin(); it != open_list.end(); it++)
+            {
+                int p = *it;
+                int s = info[p].base_score + heuristicScore(p & 0xFFFF, p >> 16);
+                if (score < s)
+                {
+                    open_list.insert(it, pos);
+                    return;
+                }
+            }
             open_list.push_back(pos);
         }
     
     public:
         coord solve(coord start, coord end)
         {
+            this->end = end;
+            
             coord co;
             co.x = start.x;     co.y = start.y - 1; addToList(co.x, co.y, co, 1);
             co.x = start.x - 1; co.y = start.y;     addToList(co.x, co.y, co, 1);

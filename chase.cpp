@@ -38,7 +38,7 @@ int runners(int arg)
             wastarget = on(*tp, ISTARGET);
             if (move_monst(tp) == -1)
                 continue;
-            if (on(*tp, ISFLY) && dist_cp(&hero, &tp->pos) >= 3)
+            if (on(*tp, ISFLY) && dist_cp(&hero, &tp->pos) >= 7)
                 move_monst(tp);
             if (wastarget && !ce(orig_pos, tp->pos))
             {

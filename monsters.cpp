@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <string.h>
 #include "rogue.h"
+#include "areas.h"
 #include <ctype.h>
 
 /*
@@ -161,7 +162,7 @@ void wanderer()
 
     do
     {
-        find_floor((struct room *) NULL, &cp, FALSE, TRUE);
+        cp = Area::random_position(Area::ForMonster);
     } while (has_line_of_sight(cp.x, cp.y, hero.x, hero.y));
     tp = new MonsterThing(randmonster(TRUE), cp);
     if (on(player, SEEMONST))

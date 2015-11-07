@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "rogue.h"
+#include "areas.h"
 
 /************************************************************************/
 /* Save State Code                                                      */
@@ -1160,74 +1161,44 @@ static int rs_read_obj_info(FILE *inf, struct obj_info *mi, int count)
     return(READSTAT);
 }
 
-static int rs_write_room(FILE *savef, struct room *r)
+static int rs_write_area(FILE *savef, Area* area)
 {
     if (write_error)
         return(WRITESTAT);
 
-    rs_write_coord(savef, r->r_pos);
-    rs_write_coord(savef, r->r_max);
-    rs_write_int(savef,   r->r_goldval);
-    rs_write_short(savef, r->r_flags);
-    rs_write_int(savef, r->r_nexits);
-    rs_write_coord(savef, r->r_exit[0]);
-    rs_write_coord(savef, r->r_exit[1]);
-    rs_write_coord(savef, r->r_exit[2]);
-    rs_write_coord(savef, r->r_exit[3]);
-    rs_write_coord(savef, r->r_exit[4]);
-    rs_write_coord(savef, r->r_exit[5]);
-    rs_write_coord(savef, r->r_exit[6]);
-    rs_write_coord(savef, r->r_exit[7]);
-    rs_write_coord(savef, r->r_exit[8]);
-    rs_write_coord(savef, r->r_exit[9]);
-    rs_write_coord(savef, r->r_exit[10]);
-    rs_write_coord(savef, r->r_exit[11]);
+    rs_write_coord(savef, area->position);
+    rs_write_coord(savef, area->size);
     
     return(WRITESTAT);
 }
 
-static int rs_read_room(FILE *inf, struct room *r)
+static int rs_read_area(FILE *inf, Area *area)
 {
     if (read_error || format_error)
         return(READSTAT);
 
-    rs_read_coord(inf,&r->r_pos);
-    rs_read_coord(inf,&r->r_max);
-    rs_read_int(inf,&r->r_goldval);
-    rs_read_short(inf,&r->r_flags);
-    rs_read_int(inf,&r->r_nexits);
-    rs_read_coord(inf,&r->r_exit[0]);
-    rs_read_coord(inf,&r->r_exit[1]);
-    rs_read_coord(inf,&r->r_exit[2]);
-    rs_read_coord(inf,&r->r_exit[3]);
-    rs_read_coord(inf,&r->r_exit[4]);
-    rs_read_coord(inf,&r->r_exit[5]);
-    rs_read_coord(inf,&r->r_exit[6]);
-    rs_read_coord(inf,&r->r_exit[7]);
-    rs_read_coord(inf,&r->r_exit[8]);
-    rs_read_coord(inf,&r->r_exit[9]);
-    rs_read_coord(inf,&r->r_exit[10]);
-    rs_read_coord(inf,&r->r_exit[11]);
+    rs_read_coord(inf,&area->position);
+    rs_read_coord(inf,&area->size);
 
     return(READSTAT);
 }
 
-static int rs_write_rooms(FILE *savef, struct room r[], int count)
+static int rs_write_areas(FILE *savef)
 {
-    int n = 0;
+    unsigned int n = 0;
 
     if (write_error)
         return(WRITESTAT);
 
-    rs_write_int(savef, count);
+    rs_write_int(savef, areas.size());
     
-    for(n = 0; n < count; n++)
-        rs_write_room(savef, &r[n]);
+    for(n = 0; n < areas.size(); n++)
+        rs_write_area(savef, &areas[n]);
     
     return(WRITESTAT);
 }
 
-static int rs_read_rooms(FILE *inf, struct room *r, int count)
+static int rs_read_areas(FILE *inf)
 {
     int value = 0, n = 0;
 
@@ -1236,11 +1207,12 @@ static int rs_read_rooms(FILE *inf, struct room *r, int count)
 
     rs_read_int(inf,&value);
 
-    if (value > count)
+    if (value < 0)
         format_error = TRUE;
-
+    
+    areas.resize(value);
     for(n = 0; n < value; n++)
-        rs_read_room(inf,&r[n]);
+        rs_read_area(inf, &areas[n]);
 
     return(READSTAT);
 }
@@ -1812,7 +1784,6 @@ rs_save_file(FILE *savef)
     rs_write_int(savef,last_comm);
     rs_write_int(savef,last_dir);
     rs_write_int(savef,n_objs);
-    rs_write_int(savef, ntraps);
     rs_write_int(savef, hungry_state);
     rs_write_int(savef, inpack);
     rs_write_int(savef, inv_type);
@@ -1848,8 +1819,7 @@ rs_save_file(FILE *savef)
     rs_write_places(savef,places,MAXLINES*MAXCOLS);
 
     rs_write_stats(savef,&max_stats); 
-    rs_write_rooms(savef, rooms, MAXROOMS);
-    rs_write_rooms(savef, passages, MAXPASS);
+    rs_write_areas(savef);
 
     rs_write_monsters(savef,monsters,26);               
     rs_write_obj_info(savef, things,   NUMTHINGS);   
@@ -1916,7 +1886,6 @@ rs_restore_file(FILE *inf)
     rs_read_int(inf, &last_comm);
     rs_read_int(inf, &last_dir);
     rs_read_int(inf, &n_objs);
-    rs_read_int(inf, &ntraps);
     rs_read_int(inf, &hungry_state);
     rs_read_int(inf, &inpack);
     rs_read_int(inf, &inv_type);
@@ -1954,8 +1923,7 @@ rs_restore_file(FILE *inf)
     rs_read_places(inf,places,MAXLINES*MAXCOLS);
 
     rs_read_stats(inf, &max_stats);
-    rs_read_rooms(inf, rooms, MAXROOMS);
-    rs_read_rooms(inf, passages, MAXPASS);
+    rs_read_areas(inf);
 
     rs_read_monsters(inf,monsters,26);                  
     rs_read_obj_info(inf, things,   NUMTHINGS);         

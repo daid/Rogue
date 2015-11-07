@@ -69,7 +69,6 @@ const char *tr_name[] = {                        /* Names of the traps */
 
 
 int n_objs;                                /* # items listed in inventory() call */
-int ntraps;                                /* Number of traps on this level */
 int hungry_state = 0;                        /* How hungry is he */
 int inpack = 0;                                /* Number of things in pack */
 int inv_type = 0;                        /* Type of inventory to use */
@@ -142,23 +141,6 @@ MonsterThing player;                                /* His stats */
 #define INIT_STATS { 16, 0, 1, 10, 16, "1x4", 16 }
 
 struct stats max_stats = INIT_STATS;        /* The maximum for the player */
-
-struct room rooms[MAXROOMS];                /* One for each room -- A level */
-struct room passages[MAXPASS] =                /* One for each passage */
-{
-    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} },
-    { {0, 0}, {0, 0}, 0, ISGONE|ISDARK, 0, {{0,0}} }
-};
 
 #define ___ 1
 #define XX 10

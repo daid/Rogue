@@ -13,16 +13,13 @@
 
 #include <string.h>
 #include "rogue.h"
+#include "areas.h"
 
-#define TREAS_ROOM 20        /* one chance in TREAS_ROOM for a treasure room */
-#define MAXTREAS 10        /* maximum number of treasures in a treasure room */
-#define MINTREAS 2        /* minimum number of treasures in a treasure room */
+#include "mapgen/classic/classic.h"
 
 void new_level()
 {
     PLACE *pp;
-    int *sp;
-    int i;
 
     player.flags &= ~ISHELD;        /* unhold when you go down just in case */
     if (level > max_level)
@@ -54,177 +51,21 @@ void new_level()
     for(ItemThing* obj : lvl_obj)
         delete obj;
     lvl_obj.clear();
-    do_rooms();                                /* Draw rooms */
-    do_passages();                        /* Draw passages */
-    no_food++;
-    put_things();                        /* Place objects (if any) */
-    /*
-     * Place the traps
-     */
-    if (rnd(10) < level)
-    {
-        ntraps = rnd(level / 4) + 1;
-        if (ntraps > MAXTRAPS)
-            ntraps = MAXTRAPS;
-        i = ntraps;
-        while (i--)
-        {
-            /*
-             * not only wouldn't it be NICE to have traps in mazes
-             * (not that we care about being nice), since the trap
-             * number is stored where the passage number is, we
-             * can't actually do it.
-             */
-            do
-            {
-                find_floor((struct room *) NULL, &stairs, FALSE, FALSE);
-            } while (char_at(stairs.x, stairs.y) != FLOOR);
-            sp = &flat(stairs.y, stairs.x);
-            *sp &= ~F_REAL;
-            *sp |= rnd(NTRAPS);
-        }
-    }
-    /*
-     * Place the staircase down.
-     */
-    find_floor((struct room *) NULL, &stairs, FALSE, FALSE);
-    char_at(stairs.x, stairs.y) = STAIRS;
-    seenstairs = FALSE;
+    
+    //Clear out the area definitions
+    areas.clear();
 
-    find_floor((struct room *) NULL, &hero, FALSE, TRUE);
+    //Increase the counter for how many levels we haven't spawned food.
+    no_food++;
+
+    //Create a map generator and run it.
+    ClassicMapGenerator generator;
+    generator.generate();
+
+    //The map generater placed the hero somewhere, display him, and redraw what's needed.
     setMapDisplay(hero.x, hero.y, PLAYER);
     if (on(player, SEEMONST))
         turn_see(FALSE);
     if (on(player, ISHALU))
         visuals(0);
-}
-
-/*
- * rnd_room:
- *        Pick a room that is really there
- */
-int rnd_room()
-{
-    int rm;
-
-    do
-    {
-        rm = rnd(MAXROOMS);
-    } while (rooms[rm].r_flags & ISGONE);
-    return rm;
-}
-
-/*
- * put_things:
- *        Put potions and scrolls on this level
- */
-
-void put_things()
-{
-    int i;
-    ItemThing *obj;
-
-    /*
-     * Once you have found the amulet, the only way to get new stuff is
-     * go down into the dungeon.
-     */
-    if (amulet && level < max_level)
-        return;
-    /*
-     * check for treasure rooms, and if so, put it in.
-     */
-    if (rnd(TREAS_ROOM) == 0)
-        treas_room();
-    /*
-     * Do MAXOBJ attempts to put things on a level
-     */
-    for (i = 0; i < MAXOBJ; i++)
-    {
-        if (rnd(100) < 36)
-        {
-            /*
-             * Pick a new object and link it in the list
-             */
-            obj = new_thing();
-            lvl_obj.push_front(obj);
-            /*
-             * Put it somewhere
-             */
-            find_floor((struct room *) NULL, &obj->pos, FALSE, FALSE);
-            item_at(obj->pos.x, obj->pos.y) = obj;
-        }
-    }
-    /*
-     * If he is really deep in the dungeon and he hasn't found the
-     * amulet yet, put it somewhere on the ground
-     */
-    if (level >= AMULETLEVEL && !amulet)
-    {
-        obj = new ItemThing();
-        lvl_obj.push_front(obj);
-        obj->hplus = 0;
-        obj->dplus = 0;
-        strncpy(obj->damage,"0x0",sizeof(obj->damage));
-        strncpy(obj->hurldmg,"0x0",sizeof(obj->hurldmg));
-        obj->arm = 11;
-        obj->type = AMULET;
-        /*
-         * Put it somewhere
-         */
-        find_floor((struct room *) NULL, &obj->pos, FALSE, FALSE);
-        item_at(obj->pos.x, obj->pos.y) = obj;
-    }
-}
-
-/*
- * treas_room:
- *        Add a treasure room
- */
-#define MAXTRIES 10        /* max number of tries to put down a monster */
-
-
-void treas_room()
-{
-    int nm;
-    ItemThing *tp;
-    MonsterThing *monster_p;
-    struct room *rp;
-    int spots, num_monst;
-    static coord mp;
-
-    rp = &rooms[rnd_room()];
-    spots = (rp->r_max.y - 2) * (rp->r_max.x - 2) - MINTREAS;
-    if (spots > (MAXTREAS - MINTREAS))
-        spots = (MAXTREAS - MINTREAS);
-    num_monst = nm = rnd(spots) + MINTREAS;
-    while (nm--)
-    {
-        find_floor(rp, &mp, 2 * MAXTRIES, FALSE);
-        tp = new_thing();
-        tp->pos = mp;
-        lvl_obj.push_front(tp);
-        item_at(tp->pos.x, tp->pos.y) = tp;
-    }
-
-    /*
-     * fill up room with monsters from the next level down
-     */
-
-    if ((nm = rnd(spots) + MINTREAS) < num_monst + 2)
-        nm = num_monst + 2;
-    spots = (rp->r_max.y - 2) * (rp->r_max.x - 2);
-    if (nm > spots)
-        nm = spots;
-    level++;
-    while (nm--)
-    {
-        spots = 0;
-        if (find_floor(rp, &mp, MAXTRIES, TRUE))
-        {
-            monster_p = new MonsterThing(randmonster(FALSE), mp);
-            monster_p->flags |= ISMEAN;        /* no sloughers in THIS room */
-            give_pack(monster_p);
-        }
-    }
-    level--;
 }

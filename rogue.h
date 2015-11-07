@@ -9,6 +9,8 @@
  *
  * See the file LICENSE.TXT for full copyright and licensing information.
  */
+#ifndef ROGUE_INCLUDE_H
+#define ROGUE_INCLUDE_H
 
 #include <list>
 #include "extern.h"
@@ -17,14 +19,12 @@
 /*
  * Maximum number of different things
  */
-#define MAXROOMS         9
 #define MAXTHINGS        9
 #define MAXOBJ           15   /* changed from 9 to increase number of items found in game */
 #define MAXPACK          23
 #define MAXTRAPS         10
 #define AMULETLEVEL      26
 #define NUMTHINGS        7    /* number of types of things */
-#define MAXPASS          13   /* upper limit on number of passages */
 #define NUMLINES         24
 #define NUMCOLS          80
 #define BORE_LEVEL       50
@@ -43,7 +43,7 @@
 #define until(expr)        while(!(expr))
 #define ce(a,b)                ((a).x == (b).x && (a).y == (b).y)
 #define hero                player.pos
-#define max(a,b)        ((a) > (b) ? (a) : (b))
+template<typename T> T max(const T a, const T b) { if (a > b) return a; return b; }
 #define on(thing,flag)        ((bool)(((thing).flags & (flag)) != 0))
 #define GOLDCALC        (rnd(50 + 10 * level) + 2)
 #define ISRING(h,r)        (cur_ring[h] != NULL && cur_ring[h]->which == r)
@@ -123,11 +123,6 @@
 /*
  * Various flag bits
  */
-/* flags for rooms */
-#define ISDARK        0000001                /* room is dark */
-#define ISGONE        0000002                /* room is gone (a corridor) */
-#define ISMAZE        0000004                /* room is gone (a corridor) */
-
 /* flags for objects */
 #define ISCURSED 000001                /* object is cursed */
 #define ISKNOW        0000002                /* player knows details about the object */
@@ -325,18 +320,6 @@ struct obj_info {
 };
 
 /*
- * Room structure
- */
-struct room {
-    coord r_pos;                        /* Upper left corner */
-    coord r_max;                        /* Size of room */
-    int r_goldval;                        /* How much the gold is worth */
-    short r_flags;                        /* info about the room */
-    int r_nexits;                        /* Number of exits */
-    coord r_exit[12];                        /* Where the exits are */
-};
-
-/*
  * Structure describing a fighting being
  */
 struct stats {
@@ -442,7 +425,7 @@ extern const char *ws_type[];
 
 extern int      a_class[], count, food_left, hungry_state, inpack,
                 inv_type, lastscore, level, max_hit, max_level, runch,
-                n_objs, no_command, no_food, no_move, ntraps, purse,
+                n_objs, no_command, no_food, no_move, purse,
                 l_last_comm, l_last_dir, last_comm, last_dir, dir_ch,
                 quiet, vf_hit;
 
@@ -462,8 +445,6 @@ extern MonsterThing player;
 
 extern struct h_list        helpstr[];
 
-extern struct room        passages[], rooms[];
-
 extern struct stats        max_stats;
 
 extern struct monster        monsters[];
@@ -479,7 +460,6 @@ bool        add_haste(bool potion);
 void        add_pack(ItemThing *obj, bool silent);
 void        add_pass();
 void        add_str(str_t *sp, int amt);
-void        accnt_maze(int y, int x, int ny, int nx);
 void        aggravate();
 int        attack(MonsterThing *mp);
 void        badcheck(const char *name, struct obj_info *info, int bound);
@@ -489,34 +469,26 @@ void        call_it(struct obj_info *info);
 bool        cansee(int y, int x);
 void        chg_str(int amt);
 void        check_level();
-void        conn(int r1, int r2);
 void        command();
 void        create_obj();
-
 void        current(ItemThing *cur, const char *how, const char *where);
 void        d_level();
 void        death(char monst);
 char        death_monst();
-void        dig(int y, int x);
 void        discovered();
 int        dist(int y1, int x1, int y2, int x2);
 int        dist_cp(coord *c1, coord *c2);
 int        do_chase(MonsterThing *th);
 void        do_daemons(int flag);
 void        do_fuses(int flag);
-void        do_maze(struct room *rp);
 void        do_motion(ItemThing *obj, int ydelta, int xdelta);
 void        do_move(int dy, int dx);
-void        do_passages();
 void        do_pot(int type, bool knowit);
 void        hit_by_potion(int type, MonsterThing* thing);
-void        do_rooms();
 void        do_run(int ch);
 void        do_zap();
 void        doadd(const char *fmt, va_list args);
-void        door(struct room *rm, coord *cp);
 void        drain();
-void        draw_room(struct room *rp);
 void        drop();
 void        eat();
 size_t  encread(void *start, size_t size, FILE *inf);
@@ -535,7 +507,6 @@ int        gethand();
 void        give_pack(MonsterThing *tp);
 void        help();
 void        hit(const char *er, const char *ee, bool noend);
-void        horiz(struct room *rp, int starty);
 void        lengthen(daemon_function_t func, int xtime);
 void        look(bool wakeup);
 int        hit_monster(int y, int x, ItemThing *obj);
@@ -562,18 +533,14 @@ void        move_msg(ItemThing *obj);
 int        msg(const char *fmt, ...);
 void        nameit(ItemThing *obj, const char *type, const char *which, struct obj_info *op, const char *(*prfunc)(ItemThing *));
 void        new_level();
-void        numpass(int y, int x);
 void        option();
 void        open_score();
-void         passnum();
 const char* pick_color(const char *col);
 int         pick_one(struct obj_info *info, int nitems);
 void        pick_up(int ch);
 void        picky_inven();
 void        pr_spec(struct obj_info *info, int nitems);
 void        pr_list();
-void        put_things();
-void        putpass(coord *cp);
 void        quaff();
 void        raise_level();
 char        randmonster(bool wander);
@@ -586,7 +553,6 @@ int        ring_eat(int hand);
 void        ring_on();
 void        ring_off();
 int        rnd(int range);
-int        rnd_room();
 int        roll(int number, int sides);
 int        rs_save_file(FILE *savef);
 int        rs_restore_file(FILE *inf);
@@ -612,12 +578,10 @@ void        take_off();
 void        teleport();
 void        total_winner();
 void        thunk(ItemThing *weap, const char *mname, bool noend);
-void        treas_room();
 void        turnref();
 void        u_level();
 void        uncurse(ItemThing *obj);
 void        unlock_sc();
-void        vert(struct room *rp, int startx);
 MonsterThing *wake_monster(int y, int x);
 void        wanderer();
 void        waste_time();
@@ -629,7 +593,6 @@ bool        chase(MonsterThing *tp, coord *ee);
 bool        diag_ok(coord *sp, coord *ep);
 bool        dropcheck(ItemThing *obj);
 bool        fallpos(coord *pos, coord *newpos);
-bool        find_floor(struct room *rp, coord *cp, int limit, bool monst);
 bool        is_magic(ItemThing *obj);
 bool        levit_check();
 bool        pack_room(bool from_floor, ItemThing *obj);
@@ -688,3 +651,5 @@ extern const char *wood[];
 extern int        cNWOOD;
 extern const char *metal[];
 extern int        cNMETAL;
+
+#endif//ROGUE_INCLUDE_H

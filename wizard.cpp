@@ -15,6 +15,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "rogue.h"
+#include "areas.h"
 
 /*
  * whatis:
@@ -123,11 +124,8 @@ const char* type_name(int type)
 
 void teleport()
 {
-    static coord c;
-
     setMapDisplay(hero.x, hero.y, char_at_place(hero.x, hero.y));
-    find_floor((struct room *) NULL, &c, FALSE, TRUE);
-    hero = c;
+    hero = Area::random_position(Area::ForMonster);
     look(TRUE);
     setMapDisplay(hero.x, hero.y, PLAYER);
     /*

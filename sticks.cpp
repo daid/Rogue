@@ -15,6 +15,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "rogue.h"
+#include "areas.h"
 
 /*
  * fix_stick:
@@ -145,10 +146,7 @@ do_zap()
 
                         if (obj->which == WS_TELAWAY)
                         {
-                            do
-                            {
-                                find_floor(NULL, &new_pos, FALSE, TRUE);
-                            } while (ce(new_pos, hero));
+                            new_pos = Area::random_position(Area::ForMonster);
                         }
                         else
                         {

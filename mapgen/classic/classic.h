@@ -36,7 +36,6 @@ private:
     void vert(struct room *rp, int startx);
     void horiz(struct room *rp, int starty);
 
-    void put_things();
     void treas_room();
     
     void do_passages();

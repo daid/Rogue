@@ -109,6 +109,7 @@ do_move(int dy, int dx)
         case WALL_TR:
         case WALL_BL:
         case WALL_BR:
+        case SOLID_WALL:
 hit_bound:
             running = FALSE;
             after = FALSE;

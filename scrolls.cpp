@@ -164,10 +164,11 @@ read_scroll()
             /*
              * take all the things we want to keep hidden out of the window
              */
-            for (y = 1; y < NUMLINES - 1; y++)
+            for (y = 0; y < NUMLINES; y++)
                 for (x = 0; x < NUMCOLS; x++)
                 {
                     pp = INDEX(y, x);
+                    pp->p_flags |= F_SEEN;
                     switch (ch = pp->p_ch)
                     {
                         case DOOR:
@@ -182,6 +183,7 @@ read_scroll()
                         case WALL_TR:
                         case WALL_BL:
                         case WALL_BR:
+                        case SOLID_WALL:
                             if (!(pp->p_flags & F_REAL))
                             {
                                 ch = pp->p_ch = DOOR;

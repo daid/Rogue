@@ -165,6 +165,7 @@ void look(bool wakeup)
                     case WALL_TR:
                     case WALL_BL:
                     case WALL_BR:
+                    case SOLID_WALL:
                     case ' ':
                         break;
                     default:
@@ -201,6 +202,7 @@ int trip_ch(int y, int x, int ch)
             case WALL_TR:
             case WALL_BL:
             case WALL_BR:
+            case SOLID_WALL:
             case DOOR:
             case TRAP:
                 break;
@@ -230,7 +232,7 @@ void erase_lamp(coord& pos)
         {
             if (ch == PASSAGE)
                 setMapDisplay(x, y, PASSAGE_UNLIT);
-            else if (!IS_WALL(ch) && ch != DOOR)
+            else if (!IS_WALL(ch) && ch != DOOR && ch != STAIRS)
                 setMapDisplay(x, y, ' ');
         }else{
             setMapDisplay(x, y, ' ');

@@ -35,41 +35,18 @@ bool ClassicMapGenerator::generate()
         areas.push_back(area);
     }
     do_passages();  /* Draw passages */
-    put_things();   /* Place objects (if any) */
-    /*
-     * Place the traps
-     */
-    if (rnd(10) < level)
-    {
-        int ntraps = rnd(level / 4) + 1;
-        if (ntraps > MAXTRAPS)
-            ntraps = MAXTRAPS;
-        int i = ntraps;
-        while (i--)
-        {
-            /*
-             * not only wouldn't it be NICE to have traps in mazes
-             * (not that we care about being nice), since the trap
-             * number is stored where the passage number is, we
-             * can't actually do it.
-             */
-            coord co;
-            do
-            {
-                find_floor((struct room *) NULL, &co, FALSE, FALSE);
-            } while (char_at(co.x, co.y) != FLOOR);
-            flat(co.y, co.x) &=~F_REAL;
-            flat(co.y, co.x) |= rnd(NTRAPS);
-        }
-    }
-    /*
-     * Place the staircase down.
-     */
-    find_floor((struct room *) NULL, &stairs, FALSE, FALSE);
-    char_at(stairs.x, stairs.y) = STAIRS;
-    seenstairs = FALSE;
 
-    find_floor((struct room *) NULL, &hero, FALSE, TRUE);
+    /*
+     * check for treasure rooms, and if so, put it in.
+     */
+    if (!amulet && level == max_level && rnd(TREAS_ROOM) == 0)
+        treas_room();
+
+    placeRandomItems();
+    placeAmuletIfRequired();
+    placeRandomTraps();
+    placeRandomStairs();
+    placeRandomHero();
     
     return true;
 }
@@ -320,67 +297,6 @@ void ClassicMapGenerator::rnd_pos(struct room *rp, coord *cp)
 {
     cp->x = rp->r_pos.x + rnd(rp->r_max.x - 2) + 1;
     cp->y = rp->r_pos.y + rnd(rp->r_max.y - 2) + 1;
-}
-
-/*
- * put_things:
- *        Put potions and scrolls on this level
- */
-void ClassicMapGenerator::put_things()
-{
-    int i;
-    ItemThing *obj;
-
-    /*
-     * Once you have found the amulet, the only way to get new stuff is
-     * go down into the dungeon.
-     */
-    if (amulet && level < max_level)
-        return;
-    /*
-     * check for treasure rooms, and if so, put it in.
-     */
-    if (rnd(TREAS_ROOM) == 0)
-        treas_room();
-    /*
-     * Do MAXOBJ attempts to put things on a level
-     */
-    for (i = 0; i < MAXOBJ; i++)
-    {
-        if (rnd(100) < 36)
-        {
-            /*
-             * Pick a new object and link it in the list
-             */
-            obj = new_thing();
-            lvl_obj.push_front(obj);
-            /*
-             * Put it somewhere
-             */
-            find_floor((struct room *) NULL, &obj->pos, FALSE, FALSE);
-            item_at(obj->pos.x, obj->pos.y) = obj;
-        }
-    }
-    /*
-     * If he is really deep in the dungeon and he hasn't found the
-     * amulet yet, put it somewhere on the ground
-     */
-    if (level >= AMULETLEVEL && !amulet)
-    {
-        obj = new ItemThing();
-        lvl_obj.push_front(obj);
-        obj->hplus = 0;
-        obj->dplus = 0;
-        strncpy(obj->damage,"0x0",sizeof(obj->damage));
-        strncpy(obj->hurldmg,"0x0",sizeof(obj->hurldmg));
-        obj->arm = 11;
-        obj->type = AMULET;
-        /*
-         * Put it somewhere
-         */
-        find_floor((struct room *) NULL, &obj->pos, FALSE, FALSE);
-        item_at(obj->pos.x, obj->pos.y) = obj;
-    }
 }
 
 /*

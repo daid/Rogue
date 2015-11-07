@@ -7,11 +7,13 @@ Area::Area()
 {
     position.x = position.y = 0;
     size.x = size.y = 0;
+    flags = 0;
 }
 
 Area::Area(coord position, coord size)
 : position(position), size(size)
 {
+    flags = 0;
 }
 
 coord Area::random_position(ERandomPositionType type)
@@ -24,7 +26,10 @@ coord Area::random_position(ERandomPositionType type)
     {
         if (areas.size() > 0)
         {
-            area = areas[rnd(areas.size())];
+            do
+            {
+                area = areas[rnd(areas.size())];
+            }while(!area.allowsRandomPositionType(type));
         }
         coord co;
         co.x = area.position.x + rnd(area.size.x);
@@ -43,5 +48,18 @@ coord Area::random_position(ERandomPositionType type)
                 break;
             }
         }
+    }
+}
+
+bool Area::allowsRandomPositionType(ERandomPositionType type)
+{
+    switch(type)
+    {
+    case ForMonster:
+        return !(flags & NoMonsters);
+    case ForItem:
+        return !(flags & NoItems);
+    default:
+        return true;
     }
 }

@@ -16,6 +16,7 @@
 #include "areas.h"
 
 #include "mapgen/classic/classic.h"
+#include "mapgen/cave/cave.h"
 
 void new_level()
 {
@@ -57,10 +58,17 @@ void new_level()
 
     //Increase the counter for how many levels we haven't spawned food.
     no_food++;
+    
+    //We've not seen the stairs yet (used during hallucinations)
+    seenstairs = false;
 
-    //Create a map generator and run it.
-    ClassicMapGenerator generator;
-    generator.generate();
+    //Select a map generator and run it.
+    if (level == 1) //First level is always a classic
+        ClassicMapGenerator().generate();
+    else if (rnd(3) == 0)   //1 out of 3 change of having a cave map.
+        CaveMapGenerator().generate();
+    else
+        ClassicMapGenerator().generate();
 
     //The map generater placed the hero somewhere, display him, and redraw what's needed.
     setMapDisplay(hero.x, hero.y, PLAYER);

@@ -117,6 +117,7 @@ step_ok(int ch)
         case WALL_TR:
         case WALL_BL:
         case WALL_BR:
+        case SOLID_WALL:
             return FALSE;
         default:
             return (!isalpha(ch));

@@ -315,6 +315,7 @@ void fire_bolt(coord *start, coord *dir, const char *name)
             case WALL_TR:
             case WALL_BL:
             case WALL_BR:
+            case SOLID_WALL:
             case ' ':
                 if (!changed)
                     hit_hero = !hit_hero;

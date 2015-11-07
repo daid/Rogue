@@ -82,12 +82,13 @@ template<typename T> T max(const T a, const T b) { if (a > b) return a; return b
 #define WALL_TR             '\x13'
 #define WALL_BL             '\x14'
 #define WALL_BR             '\x15'
+#define SOLID_WALL          '\x17'
 
 //CALLABLE or RING/STICK defines to used in inventory selection lists
 #define CALLABLE            -1
 #define R_OR_S              -2
 
-#define IS_WALL(n) ((n) == '|' || (n) == '-' || (n) == WALL_V || (n) == WALL_H || (n) == WALL_TL || (n) == WALL_TR || (n) == WALL_BL || (n) == WALL_BR)
+#define IS_WALL(n) ((n) == '|' || (n) == '-' || (n) == WALL_V || (n) == WALL_H || (n) == WALL_TL || (n) == WALL_TR || (n) == WALL_BL || (n) == WALL_BR || (n) == SOLID_WALL)
 
 /*
  * Various constants

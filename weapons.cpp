@@ -111,8 +111,7 @@ void do_motion(ItemThing *obj, int ydelta, int xdelta)
  *        Drop an item someplace around here.
  */
 
-void
-fall(ItemThing *obj, bool pr)
+void fall(ItemThing *obj, bool pr)
 {
     static coord fpos;
 

@@ -14,17 +14,27 @@
 class Area
 {
 public:
-    coord position;  /* Upper left corner of the area */
-    coord size;      /* Size of the area */
-    
-    Area();
-    Area(coord position, coord size);
-    
+    static constexpr int NoMonsters = 0x0001;
+    static constexpr int NoItems =    0x0002;
+
     enum ERandomPositionType
     {
         ForMonster,
         ForItem
     };
+
+public:
+    coord position;  /* Upper left corner of the area */
+    coord size;      /* Size of the area */
+    int flags;
+    
+public:
+    Area();
+    Area(coord position, coord size);
+    
+    bool allowsRandomPositionType(ERandomPositionType type);
+
+public:
     static coord random_position(ERandomPositionType type);
 };
 

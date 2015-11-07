@@ -1168,6 +1168,7 @@ static int rs_write_area(FILE *savef, Area* area)
 
     rs_write_coord(savef, area->position);
     rs_write_coord(savef, area->size);
+    rs_write_int(savef, area->flags);
     
     return(WRITESTAT);
 }
@@ -1179,6 +1180,7 @@ static int rs_read_area(FILE *inf, Area *area)
 
     rs_read_coord(inf,&area->position);
     rs_read_coord(inf,&area->size);
+    rs_read_int(inf,&area->flags);
 
     return(READSTAT);
 }

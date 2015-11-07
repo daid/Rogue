@@ -1,7 +1,9 @@
 #include <string.h>
 #include "../../rogue.h"
 #include "../../areas.h"
+#include "../util.h"
 #include "classic.h"
+#include "maze.h"
 
 #define TREAS_ROOM 20        /* one chance in TREAS_ROOM for a treasure room */
 #define MAXTREAS 10        /* maximum number of treasures in a treasure room */
@@ -219,7 +221,7 @@ bool ClassicMapGenerator::find_floor(struct room *rp, coord *cp, int limit, bool
     bool pickroom;
 
     pickroom = (bool)(rp == NULL);
-
+if(!limit) limit = 50;
     if (!pickroom)
         compchar = ((rp->r_flags & ISMAZE) ? PASSAGE : FLOOR);
     cnt = limit;
@@ -256,7 +258,8 @@ void ClassicMapGenerator::draw_room(struct room *rp)
 
     if (rp->r_flags & ISMAZE)
     {
-        do_maze(rp);
+        ClassicMazeGenerator maze_generator;
+        maze_generator.generate(rp->r_pos, rp->r_max);
     }
     else
     {
@@ -637,11 +640,11 @@ void ClassicMapGenerator::conn(int r1, int r2)
     if (!(rpf->r_flags & ISGONE))
         door(rpf, &spos);
     else
-        putpass(&spos);
+        placePassage(spos);
     if (!(rpt->r_flags & ISGONE))
         door(rpt, &epos);
     else
-        putpass(&epos);
+        placePassage(epos);
     /*
      * Get ready to move...
      */
@@ -660,37 +663,20 @@ void ClassicMapGenerator::conn(int r1, int r2)
         if (distance == turn_spot)
             while (turn_distance--)
             {
-                putpass(&curr);
+                placePassage(curr);
                 curr.x += turn_delta.x;
                 curr.y += turn_delta.y;
             }
         /*
          * Continue digging along
          */
-        putpass(&curr);
+        placePassage(curr);
         distance--;
     }
     curr.x += del.x;
     curr.y += del.y;
     if (!ce(curr, epos))
         msg("warning, connectivity problem on this level");
-}
-
-/*
- * putpass:
- *        add a passage character or secret passage here
- */
-
-void ClassicMapGenerator::putpass(coord *cp)
-{
-    PLACE *pp;
-
-    pp = INDEX(cp->y, cp->x);
-    pp->p_flags |= F_PASS;
-    if (rnd(10) + 1 < level && rnd(40) == 0)
-        pp->p_flags &= ~F_REAL;
-    else
-        pp->p_ch = PASSAGE;
 }
 
 /*
@@ -787,122 +773,4 @@ void ClassicMapGenerator::numpass(int y, int x)
     numpass(y - 1, x);
     numpass(y, x + 1);
     numpass(y, x - 1);
-}
-
-
-
-typedef struct spot {                /* position matrix for maze positions */
-        int        nexits;
-        coord        exits[4];
-        int        used;
-} SPOT;
-
-/*
- * do_maze:
- *        Dig a maze
- */
-
-static int        Maxy, Maxx, Starty, Startx;
-
-static SPOT        maze[NUMLINES/3+1][NUMCOLS/3+1];
-
-void ClassicMapGenerator::do_maze(struct room *rp)
-{
-    SPOT *sp;
-    int starty, startx;
-    static coord pos;
-
-    for (sp = &maze[0][0]; sp <= &maze[NUMLINES / 3][NUMCOLS / 3]; sp++)
-    {
-        sp->used = FALSE;
-        sp->nexits = 0;
-    }
-
-    Maxy = rp->r_max.y;
-    Maxx = rp->r_max.x;
-    Starty = rp->r_pos.y;
-    Startx = rp->r_pos.x;
-    starty = (rnd(rp->r_max.y) / 2) * 2;
-    startx = (rnd(rp->r_max.x) / 2) * 2;
-    pos.y = starty + Starty;
-    pos.x = startx + Startx;
-    putpass(&pos);
-    dig(starty, startx);
-}
-
-/*
- * dig:
- *        Dig out from around where we are now, if possible
- */
-
-void ClassicMapGenerator::dig(int y, int x)
-{
-    coord *cp;
-    int cnt, newy, newx, nexty = 0, nextx = 0;
-    static coord pos;
-    static coord del[4] = {
-        {2, 0}, {-2, 0}, {0, 2}, {0, -2}
-    };
-
-    for (;;)
-    {
-        cnt = 0;
-        for (cp = del; cp <= &del[3]; cp++)
-        {
-            newy = y + cp->y;
-            newx = x + cp->x;
-            if (newy < 0 || newy > Maxy || newx < 0 || newx > Maxx)
-                continue;
-            if (flat(newy + Starty, newx + Startx) & F_PASS)
-                continue;
-            if (rnd(++cnt) == 0)
-            {
-                nexty = newy;
-                nextx = newx;
-            }
-        }
-        if (cnt == 0)
-            return;
-        accnt_maze(y, x, nexty, nextx);
-        accnt_maze(nexty, nextx, y, x);
-        if (nexty == y)
-        {
-            pos.y = y + Starty;
-            if (nextx - x < 0)
-                pos.x = nextx + Startx + 1;
-            else
-                pos.x = nextx + Startx - 1;
-        }
-        else
-        {
-            pos.x = x + Startx;
-            if (nexty - y < 0)
-                pos.y = nexty + Starty + 1;
-            else
-                pos.y = nexty + Starty - 1;
-        }
-        putpass(&pos);
-        pos.y = nexty + Starty;
-        pos.x = nextx + Startx;
-        putpass(&pos);
-        dig(nexty, nextx);
-    }
-}
-
-/*
- * accnt_maze:
- *        Account for maze exits
- */
-
-void ClassicMapGenerator::accnt_maze(int y, int x, int ny, int nx)
-{
-    SPOT *sp;
-    coord *cp;
-
-    sp = &maze[y][x];
-    for (cp = sp->exits; cp < &sp->exits[sp->nexits]; cp++)
-        if (cp->y == ny && cp->x == nx)
-            return;
-    cp->y = ny;
-    cp->x = nx;
 }

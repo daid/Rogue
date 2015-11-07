@@ -36,16 +36,11 @@ private:
     void vert(struct room *rp, int startx);
     void horiz(struct room *rp, int starty);
 
-    void do_maze(struct room *rp);
-    void dig(int y, int x);
-    void accnt_maze(int y, int x, int ny, int nx);
-
     void put_things();
     void treas_room();
     
     void do_passages();
     void conn(int r1, int r2);
-    void putpass(coord *cp);
     void door(struct room *rm, coord *cp);
     void passnum();
     void numpass(int y, int x);

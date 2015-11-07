@@ -15,6 +15,11 @@ bool CaveMapGenerator::generate()
         for(int x=0; x<NUMCOLS; x++)
             char_at(x, y) = SOLID_WALL;
 
+    if (rnd(10) >= level - 1)
+        for(int y=0; y<NUMLINES; y++)
+            for(int x=0; x<NUMCOLS; x++)
+                flags_at(x, y) |= F_ISLIT;                /* cave is lit */
+
     //Now randomly walk the map and cut out walls, till 1/4 of the map is cleared.
     int x = NUMCOLS / 2;
     int y = NUMLINES / 2;

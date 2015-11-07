@@ -52,6 +52,7 @@ template<typename T> T max(const T a, const T b) { if (a > b) return a; return b
 #define INDEX(y,x)        (&places[((x) << 5) + (y)])
 #define char_at(x,y)     (places[((x) << 5) + (y)].p_ch)
 #define flat(y,x)        (places[((x) << 5) + (y)].p_flags)
+#define flags_at(x,y)        (places[((x) << 5) + (y)].p_flags)
 #define item_at(x,y)     (places[((x) << 5) + (y)].p_item)
 #define monster_at(x,y)  (places[((x) << 5) + (y)].p_monst)
 #define unc(cp)                (cp).y, (cp).x

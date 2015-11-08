@@ -6,7 +6,7 @@ ClassicMazeGenerator::ClassicMazeGenerator()
 {
     SPOT *sp;
     
-    for (sp = &maze[0][0]; sp <= &maze[NUMLINES / 3][NUMCOLS / 3]; sp++)
+    for (sp = &maze[0][0]; sp <= &maze[NUMLINES-1][NUMCOLS-1]; sp++)
     {
         sp->used = FALSE;
         sp->nexits = 0;

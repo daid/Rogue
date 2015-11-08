@@ -551,15 +551,8 @@ int char_at_place(int x, int y)
     MonsterThing* mp = monster_at(x, y);
     if (mp)
     {
-        if (cansee(mp->pos.y, mp->pos.x))
-        {
-            if (!on(*mp, ISINVIS) || on(player, CANSEE))
-                return mp->disguise;
-        }
-        else if (on(player, SEEMONST))
-        {
-            return mp->disguise | DISPLAY_INVERT;
-        }
+        if (!on(*mp, ISINVIS) || on(player, CANSEE) || on(player, SEEMONST))
+            return mp->disguise;
     }
     if (item_at(x, y))
         return item_at(x, y)->type;

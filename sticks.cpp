@@ -68,10 +68,30 @@ do_zap()
         after = FALSE;
         return;
     }
-    if (obj->arm == 0) //amount of charges is stored in the arm field.
+    if (obj->arm <= 0) //amount of charges is stored in the arm field.
     {
-        msg("nothing happens");
-        return;
+        //When trying to zap an empty wand, usually nothing happens.
+        if (rnd(3))
+        {
+            msg("nothing happens");
+            return;
+        }
+        //But sometimes you can still use it.
+        //However...
+        if (rnd(3) < -obj->arm)
+        {
+            //The wand explodes, take 2d6 damage!
+            msg("The %s explodes!", inv_name(obj, false));
+
+            leave_pack(obj, false, true);
+            delete obj;
+
+            if ((player.stats.s_hpt -= roll(2, 6)) <= 0)
+            {
+                death('z');
+            }
+            return;
+        }
     }
     switch (obj->which)
     {
@@ -397,8 +417,8 @@ const char * charge_str(ItemThing *obj)
     if (!(obj->flags & ISKNOW))
         buf[0] = '\0';
     else if (terse)
-        sprintf(buf, " [%d]", obj->arm);//amount of charges is stored in the arm field
+        sprintf(buf, " [%d]", std::max(0, obj->arm));//amount of charges is stored in the arm field
     else
-        sprintf(buf, " [%d charges]", obj->arm);
+        sprintf(buf, " [%d charges]", std::max(0, obj->arm));
     return buf;
 }

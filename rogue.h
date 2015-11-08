@@ -25,7 +25,7 @@
 #define MAXTRAPS         10
 #define AMULETLEVEL      26
 #define NUMTHINGS        7    /* number of types of things */
-#define NUMLINES         24
+#define NUMLINES         32
 #define NUMCOLS          80
 #define BORE_LEVEL       50
 

@@ -81,7 +81,8 @@ init_player()
     obj = new ItemThing();
     obj->type = STICK;
     obj->which = WS_LIGHT;
-    obj->arm = 100;
+    obj->flags |= ISKNOW;
+    obj->arm = 1;
     obj->count = 1;
     add_pack(obj, TRUE);
 #endif

@@ -134,6 +134,7 @@ void ClassicMapGenerator::do_rooms()
             }
         }
         else
+        {
             do
             {
                 rp->r_max.x = rnd(bsze.x - 4) + 4;
@@ -141,6 +142,7 @@ void ClassicMapGenerator::do_rooms()
                 rp->r_pos.x = top.x + rnd(bsze.x - rp->r_max.x);
                 rp->r_pos.y = top.y + rnd(bsze.y - rp->r_max.y);
             } until (rp->r_pos.y != 0);
+        }
         draw_room(rp);
         /*
          * Put the gold in

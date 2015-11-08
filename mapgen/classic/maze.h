@@ -12,7 +12,7 @@ private:
 
     int Maxy, Maxx, Starty, Startx;
 
-    SPOT maze[NUMLINES/3+1][NUMCOLS/3+1];//TODO: This is fixed size by assumption
+    SPOT maze[NUMLINES][NUMCOLS];
 
     void dig(int y, int x);
     void accnt_maze(int y, int x, int ny, int nx);

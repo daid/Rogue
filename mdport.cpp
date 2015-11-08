@@ -45,6 +45,7 @@
 #include <dirent.h>
 #endif
 
+#include "rogue.h"
 #include "extern.h"
 
 void md_init()
@@ -52,7 +53,7 @@ void md_init()
 #ifdef USE_SDL
     SDL_Init(SDL_INIT_VIDEO);
     atexit(SDL_Quit);
-    SDL_SetVideoMode(900, 480, 32, SDL_SWSURFACE);
+    SDL_SetVideoMode(128 * 5 + NUMCOLS * 4 * 2, std::max(64 * 5, NUMLINES * 6 * 2), 32, SDL_SWSURFACE);
 #endif
 }
 

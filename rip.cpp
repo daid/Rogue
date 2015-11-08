@@ -339,10 +339,11 @@ const char* killname(char monst, bool doart)
     bool article;
     static struct h_list nlist[] = {
         {'a',        "arrow",                TRUE},
-        {'b',        "bolt",                        TRUE},
-        {'d',        "dart",                        TRUE},
-        {'h',        "hypothermia",                FALSE},
-        {'s',        "starvation",                FALSE},
+        {'b',        "bolt",                 TRUE},
+        {'d',        "dart",                 TRUE},
+        {'h',        "hypothermia",          FALSE},
+        {'s',        "starvation",           FALSE},
+        {'z',        "exploding wand",       TRUE},
         {'\0'}
     };
 

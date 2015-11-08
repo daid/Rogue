@@ -70,6 +70,27 @@ static void refreshDisplay()
 {
 #ifdef USE_SDL
     SDL_Surface* screen = SDL_GetVideoSurface();
+#ifdef DEBUG
+    for(int x=0; x<NUMCOLS; x++)
+    {
+        for(int y=0; y<NUMLINES; y++)
+        {
+            int c = char_at_place(x, y);
+            
+            for(int _x=0; _x<4; _x++)
+            {
+                for(int _y=0; _y<6; _y++)
+                {
+                    int color = (font_data[c * 6 + _y] & (0x08>>_x)) ? 0x8080AF : 0x202020;
+                    if (!(flags_at(x, y) & F_SEEN))
+                        color /= 2;
+                    SDL_Rect rect = {Sint16(128 * 5 + x * 4 * 2 + _x * 2), Sint16(y * 6 * 2 + _y * 2), 2, 2};
+                    SDL_FillRect(screen, &rect, color);
+                }
+            }
+        }
+    }
+#endif
     for(int x=0; x<DISPLAY_WIDTH; x++)
     {
         for(int y=0; y<DISPLAY_HEIGHT; y++)

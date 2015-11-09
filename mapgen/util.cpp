@@ -68,7 +68,7 @@ void placeRandomItems()
      */
     for (int i = 0; i < MAXOBJ; i++)
     {
-        if (rnd(100) < 36)
+        if (rnd(100) < 36 + (std::max(0, 5 - level) * 5))
         {
             /*
              * Pick a new object and link it in the list

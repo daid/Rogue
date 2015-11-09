@@ -314,9 +314,8 @@ bad:
 
 void rust_armor(ItemThing *arm)
 {
-    if (arm == NULL || arm->type != ARMOR || arm->which == LEATHER ||
-        arm->arm >= 9)
-            return;
+    if (arm == NULL || arm->type != ARMOR || arm->which == LEATHER || arm->arm >= 9)
+        return;
 
     if ((arm->flags & ISPROT) || ISWEARING(R_SUSTARM))
     {

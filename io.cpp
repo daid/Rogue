@@ -13,7 +13,7 @@
  * msg:
  *        Display a message at the top of the screen.
  */
-#define MAXMSG        (NUMCOLS - sizeof "--More--")
+#define MAXMSG        (150)
 
 static char msgbuf[2*MAXMSG+1];
 static int newpos = 0;

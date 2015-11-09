@@ -18,8 +18,7 @@
  *        Read a scroll from the pack and do the appropriate thing
  */
 
-void
-read_scroll()
+void read_scroll()
 {
     ItemThing *obj;
     MonsterThing* m_obj;
@@ -306,7 +305,7 @@ def:
                 scr_info[S_HINT].oi_know = true;
                 msg("There is just some text on this");
             }
-            switch(rnd(9))
+            switch(rnd(11))
             {
             case 0: msg("Did you know you can eat scrolls if you are really hungry?");
             when 1: msg("Scrolls of scare monster work on the floor");
@@ -317,7 +316,8 @@ def:
             when 6: msg("Throwing potions at monster sometimes helps");
             when 7: msg("2h sword over long sword over mace. Throw everything else");
             when 8: msg("Find the amulet on level 26 to escape!");
-            when 9: msg("Every item has some kind of use. Except for one");
+            when 9: msg("Every item has some kind of use. Except for one type of wand");
+            when 10: msg("Waiting recovers my health, but too much waiting and monsters show up.");
             }
     }
     obj = orig_obj;

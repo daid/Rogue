@@ -149,19 +149,18 @@ gethand()
  * ring_eat:
  *        How much food does this ring use up?
  */
-int
-ring_eat(int hand)
+int ring_eat(int hand)
 {
     ItemThing *ring;
     int eat;
     static int uses[] = {
-         1,        /* R_PROTECT */                 1,        /* R_ADDSTR */
-         1,        /* R_SUSTSTR */                -3,        /* R_SEARCH */
+         1,        /* R_PROTECT */          1,        /* R_ADDSTR */
+         1,        /* R_SUSTSTR */         -3,        /* R_SEARCH */
         -5,        /* R_SEEINVIS */         0,        /* R_NOP */
-         0,        /* R_AGGR */                -3,        /* R_ADDHIT */
-        -3,        /* R_ADDDAM */                 2,        /* R_REGEN */
-        -2,        /* R_DIGEST */                 0,        /* R_TELEPORT */
-         1,        /* R_STEALTH */                 1        /* R_SUSTARM */
+         0,        /* R_AGGR */            -3,        /* R_ADDHIT */
+        -3,        /* R_ADDDAM */           2,        /* R_REGEN */
+        -2,        /* R_DIGEST */           0,        /* R_TELEPORT */
+         1,        /* R_STEALTH */          1        /* R_SUSTARM */
     };
 
     if ((ring = cur_ring[hand]) == NULL)

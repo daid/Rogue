@@ -62,7 +62,11 @@ void look(bool wakeup)
                 flat(y, x) |= F_SEEN;
                 
                 if (wakeup && monster_at(x, y))
+                {
                     wake_monster(y, x);
+                    if (!firstmove)
+                        running = false;
+                }
             }
         });
     }
@@ -81,7 +85,7 @@ void look(bool wakeup)
             pp = INDEX(y, x);
             ch = pp->p_ch;
             if (ch == ' ')                /* nothing need be done with a ' ' */
-                    continue;
+                continue;
             fp = &pp->p_flags;
             if (pch != DOOR && ch != DOOR)
                 if ((pfl & F_PASS) != (*fp & F_PASS))
@@ -115,6 +119,9 @@ void look(bool wakeup)
                 }
             if (on(player, ISBLIND) && (y != hero.y || x != hero.x))
                 continue;
+            
+            if ((door_stop || (x == hero.x && y == hero.y)) && item_at(x, y) && !firstmove)
+                running = false;
 
             if (door_stop && !firstmove && running)
             {

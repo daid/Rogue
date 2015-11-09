@@ -77,6 +77,8 @@ void quaff()
     if (obj == cur_weapon)
         cur_weapon = NULL;
 
+    //Add some food for drinking a potion
+    add_food(rnd(100));
     /*
      * Calculate the effect it has on the poor guy.
      */

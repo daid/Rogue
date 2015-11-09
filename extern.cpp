@@ -180,11 +180,11 @@ struct monster monsters[26] =
 struct obj_info things[NUMTHINGS] = {
     { 0,                        26 },        /* potion */
     { 0,                        36 },        /* scroll */
-    { 0,                        16 },        /* food */
+    { 0,                        14 },        /* food */
     { 0,                         7 },        /* weapon */
     { 0,                         7 },        /* armor */
-    { 0,                         4 },        /* ring */
-    { 0,                         4 },        /* stick */
+    { 0,                         5 },        /* ring */
+    { 0,                         5 },        /* stick */
 };
 
 struct obj_info arm_info[MAXARMORS] = {

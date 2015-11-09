@@ -493,6 +493,7 @@ void        doadd(const char *fmt, va_list args);
 void        drain();
 void        drop();
 void        eat();
+void add_food(int amount);
 size_t  encread(void *start, size_t size, FILE *inf);
 size_t  encwrite(const void *start, size_t size, FILE *outf);
 int        endmsg();

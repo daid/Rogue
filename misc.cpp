@@ -251,33 +251,72 @@ void eat()
 
     if ((obj = get_item("eat", FOOD)) == NULL)
         return;
-    if (obj->type != FOOD)
+    if (obj->type == FOOD)
     {
+        add_food(HUNGERTIME - 200 + rnd(400));
+
+        if (obj->which == 1)
+        {
+            msg("my, that was a yummy %s", fruit);
+        }
+        else
+        {
+            if (rnd(100) > 70)
+            {
+                player.stats.s_exp++;
+                msg("%s, this food tastes awful", choose_str("bummer", "yuk"));
+                check_level();
+            }
+            else
+            {
+                msg("%s, that tasted good", choose_str("oh, wow", "yum"));
+            }
+        }
+    }else if (obj->type == SCROLL)
+    {
+        //Sure, eat a scroll, it's good for you... (well, not really. But it does help with the hunger)
+        msg("blegh, that was hard to digest");
+        if (hungry_state)
+            msg("but it helps stilling the hunger");
+        add_food(400 + rnd(100));
+        if ((player.stats.s_hpt -= roll(1, 3)) <= 0)
+        {
+            death('e');
+        }
+    }else if (obj->type == POTION)
+    {
+        msg("that's Inedible! Quaff potions instead.");
+    }else{
         if (!terse)
             msg("ugh, you would get ill if you ate that");
         else
             msg("that's Inedible!");
         return;
     }
-    if (food_left < 0)
-        food_left = 0;
-    if ((food_left += HUNGERTIME - 200 + rnd(400)) > STOMACHSIZE)
-        food_left = STOMACHSIZE;
-    hungry_state = 0;
+
     if (obj == cur_weapon)
         cur_weapon = NULL;
-    if (obj->which == 1)
-        msg("my, that was a yummy %s", fruit);
-    else
-        if (rnd(100) > 70)
-        {
-            player.stats.s_exp++;
-            msg("%s, this food tastes awful", choose_str("bummer", "yuk"));
-            check_level();
-        }
-        else
-            msg("%s, that tasted good", choose_str("oh, wow", "yum"));
     leave_pack(obj, FALSE, FALSE);
+}
+
+void add_food(int amount)
+{
+    if (food_left < 0)
+        food_left = 0;
+    if ((food_left += amount) > STOMACHSIZE)
+        food_left = STOMACHSIZE;
+    if (food_left < MORETIME)
+    {
+        hungry_state = 2;
+    }
+    else if (food_left < 2 * MORETIME)
+    {
+        hungry_state = 1;
+    }
+    else
+    {
+        hungry_state = 0;
+    }
 }
 
 /*

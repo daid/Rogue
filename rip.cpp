@@ -344,6 +344,7 @@ const char* killname(char monst, bool doart)
         {'h',        "hypothermia",          FALSE},
         {'s',        "starvation",           FALSE},
         {'z',        "exploding wand",       TRUE},
+        {'e',        "eating a scroll",      FALSE},
         {'\0'}
     };
 

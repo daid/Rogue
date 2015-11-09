@@ -234,14 +234,8 @@ be_trapped(coord *tc)
         when T_ARROW:
             if (swing(player.stats.s_lvl - 1, player.stats.s_arm, 1))
             {
-                player.stats.s_hpt -= roll(1, 6);
-                if (player.stats.s_hpt <= 0)
-                {
-                    msg("an arrow killed you");
-                    death('a');
-                }
-                else
-                    msg("oh no! An arrow shot you");
+                msg("oh no! An arrow shot you");
+                take_damage(roll(1, 6), 'a');
             }
             else
             {
@@ -264,15 +258,10 @@ be_trapped(coord *tc)
                 msg("a small dart whizzes by your ear and vanishes");
             else
             {
-                player.stats.s_hpt -= roll(1, 4);
-                if (player.stats.s_hpt <= 0)
-                {
-                    msg("a poisoned dart killed you");
-                    death('d');
-                }
+                msg("a small dart just hit you in the shoulder");
+                take_damage(roll(1, 4), 'd');
                 if (!ISWEARING(R_SUSTSTR) && !save(VS_POISON))
                     chg_str(-1);
-                msg("a small dart just hit you in the shoulder");
             }
         when T_RUST:
             msg("a gush of water hits you on the head");

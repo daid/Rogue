@@ -201,25 +201,26 @@ template<typename T> T max(const T a, const T b) { if (a > b) return a; return b
 /*
  * Scroll types
  */
-#define S_CONFUSE        0
-#define S_MAP                1
-#define S_HOLD                2
-#define S_SLEEP                3
-#define S_ARMOR                4
-#define S_ID_POTION        5
-#define S_ID_SCROLL        6
-#define S_ID_WEAPON        7
-#define S_ID_ARMOR        8
-#define S_ID_R_OR_S        9
-#define S_SCARE                10
-#define S_FDET                11
-#define S_TELEP                12
-#define S_ENCH                13
+#define S_CONFUSE       0
+#define S_MAP           1
+#define S_HOLD          2
+#define S_SLEEP         3
+#define S_ARMOR         4
+#define S_ID_POTION     5
+#define S_ID_SCROLL     6
+#define S_ID_WEAPON     7
+#define S_ID_ARMOR      8
+#define S_ID_R_OR_S     9
+#define S_SCARE         10
+#define S_FDET          11
+#define S_TELEP         12
+#define S_ENCH          13
 #define S_CREATE        14
 #define S_REMOVE        15
-#define S_AGGR                16
-#define S_PROTECT        17
-#define MAXSCROLLS        18
+#define S_AGGR          16
+#define S_PROTECT       17
+#define S_HINT          18
+#define MAXSCROLLS      19
 
 /*
  * Weapon types
@@ -233,7 +234,7 @@ template<typename T> T max(const T a, const T b) { if (a > b) return a; return b
 #define DART                6
 #define SHIRAKEN        7
 #define SPEAR                8
-#define FLAME                9        /* fake entry for dragon breath (ick) */
+#define FLAME                9        /* fake entry for dragon breath (ick) and wire/electric/cold wands */
 #define MAXWEAPONS        9        /* this should equal FLAME */
 
 /*
@@ -503,6 +504,7 @@ void        fall(ItemThing *obj, bool pr);
 void        fire_bolt(coord *start, coord *dir, const char *name);
 void        flush_type();
 int        fight(coord *mp, ItemThing *weap, bool thrown);
+bool take_damage(int amount, int type);
 void        fix_stick(ItemThing *cur);
 void        fuse(daemon_function_t func, int arg, int time, int type);
 bool        get_dir();

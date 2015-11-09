@@ -279,7 +279,7 @@ over:
                     refreshMap();
                 when 'v':
                     after = FALSE;
-                    msg("version %s.", release);
+                    msg("version %s", release);
                 when 'M':
                     after = FALSE;
                     displayLargeMap();

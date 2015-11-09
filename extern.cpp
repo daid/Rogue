@@ -248,6 +248,7 @@ struct obj_info scr_info[MAXSCROLLS] = {
     { "remove curse",                   7, 105, NULL, FALSE },
     { "aggravate monsters",             3,  20, NULL, FALSE },
     { "protect armor",                  2, 250, NULL, FALSE },
+    { "hint",                           0,   0, NULL, FALSE },
 };
 struct obj_info weap_info[MAXWEAPONS + 1] = {
     { "mace",                          11,   8, NULL, FALSE },
@@ -259,7 +260,7 @@ struct obj_info weap_info[MAXWEAPONS + 1] = {
     { "dart",                          12,   2, NULL, FALSE },
     { "shuriken",                      12,   5, NULL, FALSE },
     { "spear",                         12,   5, NULL, FALSE },
-    { NULL, 0 },        /* DO NOT REMOVE: fake entry for dragon's breath */
+    { NULL, 0 },        /* DO NOT REMOVE: fake entry for dragon's breath and wire/electric/cold wands */
 };
 struct obj_info ws_info[MAXSTICKS] = {
     { "light",                        12, 250, NULL, FALSE },

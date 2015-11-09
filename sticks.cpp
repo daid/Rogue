@@ -45,8 +45,7 @@ fix_stick(ItemThing *cur)
  *        Perform a zap with a wand
  */
 
-void
-do_zap()
+void do_zap()
 {
     ItemThing *obj;
     MonsterThing *tp;
@@ -86,10 +85,7 @@ do_zap()
             leave_pack(obj, false, true);
             delete obj;
 
-            if ((player.stats.s_hpt -= roll(2, 6)) <= 0)
-            {
-                death('z');
-            }
+            take_damage(roll(2, 6), 'z');
             return;
         }
     }
@@ -381,13 +377,7 @@ def:
                     changed = !changed;
                     if (!save(VS_MAGIC))
                     {
-                        if ((player.stats.s_hpt -= roll(6, 6)) <= 0)
-                        {
-                            if (start == &hero)
-                                death('b');
-                            else
-                                death(monster_at(start->x, start->y)->type);
-                        }
+                        take_damage(roll(6, 6), (start == &hero) ? ('b') : (monster_at(start->x, start->y)->type));
                         used = TRUE;
                         if (terse)
                             msg("the %s hits", name);

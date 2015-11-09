@@ -246,7 +246,12 @@ ItemThing* new_thing()
             cur->which = pick_one(pot_info, MAXPOTIONS);
         when 1:
             cur->type = SCROLL;
-            cur->which = pick_one(scr_info, MAXSCROLLS);
+            if (rnd(100) < std::max(0, 5 - level) * 10)
+            {
+                cur->which = S_HINT;
+            }else{
+                cur->which = pick_one(scr_info, MAXSCROLLS);
+            }
         when 2:
             cur->type = FOOD;
             no_food = 0;
@@ -304,8 +309,7 @@ ItemThing* new_thing()
  * pick_one:
  *        Pick an item out of a list of nitems possible objects
  */
-int
-pick_one(struct obj_info *info, int nitems)
+int pick_one(struct obj_info *info, int nitems)
 {
     struct obj_info *end;
     struct obj_info *start;

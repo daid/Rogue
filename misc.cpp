@@ -286,10 +286,7 @@ void eat()
         if (hungry_state)
             msg("but it helps stilling the hunger");
         add_food(400 + rnd(100));
-        if ((player.stats.s_hpt -= roll(1, 3)) <= 0)
-        {
-            death('e');
-        }
+        take_damage(roll(1, 3), 'e');
     }else if (obj->type == POTION)
     {
         msg("that's Inedible! Quaff potions instead.");

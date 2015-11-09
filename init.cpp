@@ -74,8 +74,8 @@ init_player()
 #ifdef DEBUG
     obj = new ItemThing();
     obj->type = SCROLL;
-    obj->which = S_MAP;
-    obj->count = 1;
+    obj->which = S_HINT;
+    obj->count = 5;
     add_pack(obj, TRUE);
 
     obj = new ItemThing();
@@ -274,8 +274,7 @@ init_colors()
  */
 #define MAXNAME        40        /* Max number of characters in a name */
 
-void
-init_names()
+void init_names()
 {
     int nsyl;
     char *cp;
@@ -385,7 +384,7 @@ init_materials()
  */
 void sumprobs(struct obj_info *info, int bound, const char *name)
 {
-#ifdef MASTER
+#ifdef DEBUG
     struct obj_info *start = info;
 #endif
     struct obj_info *endp;
@@ -393,7 +392,7 @@ void sumprobs(struct obj_info *info, int bound, const char *name)
     endp = info + bound;
     while (++info < endp)
         info->oi_prob += (info - 1)->oi_prob;
-#ifdef MASTER
+#ifdef DEBUG
     badcheck(name, start, bound);
 #endif
 }
@@ -417,7 +416,7 @@ void init_probs()
  * badcheck:
  *        Check to see if a series of probabilities sums to 100
  */
-void badcheck(char *name, struct obj_info *info, int bound)
+void badcheck(const char *name, struct obj_info *info, int bound)
 {
     register struct obj_info *end;
 

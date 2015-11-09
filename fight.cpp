@@ -323,9 +323,7 @@ int attack(MonsterThing *mp)
         }
         if (mp->type == 'F')
         {
-            player.stats.s_hpt -= vf_hit;
-            if (player.stats.s_hpt <= 0)
-                death(mp->type);        /* Bye bye life ... */
+            take_damage(vf_hit, 'F');
         }
         miss(mname, NULL, FALSE);
     }
@@ -671,4 +669,14 @@ killed(MonsterThing *tp, bool pr)
     check_level();
     if (fight_flush)
         flush_type();
+}
+
+bool take_damage(int amount, int type)
+{
+    if ((player.stats.s_hpt -= amount) <= 0)
+    {
+        death(type);
+        return true;
+    }
+    return false;
 }

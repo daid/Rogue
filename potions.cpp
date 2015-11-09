@@ -225,8 +225,9 @@ bool is_magic(ItemThing *obj)
             return (bool)((obj->flags&ISPROT) || obj->arm != a_class[obj->which]);
         case WEAPON:
             return (bool)(obj->hplus != 0 || obj->dplus != 0);
-        case POTION:
         case SCROLL:
+            return obj->which != S_HINT;
+        case POTION:
         case STICK:
         case RING:
         case AMULET:

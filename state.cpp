@@ -1518,7 +1518,6 @@ int rs_save_file(FILE *savef)
     rs_write_boolean(savef, stat_msg);              /* 24 */
     rs_write_boolean(savef, terse);                 /* 25 */
     rs_write_boolean(savef, to_death);              /* 26 */
-    rs_write_boolean(savef, tombstone);             /* 27 */
     rs_write_booleans(savef, pack_used, 26);        /* 29 */
     rs_write_int(savef, dir_ch);
     rs_write_chars(savef, file_name, MAXSTR);
@@ -1618,7 +1617,6 @@ int rs_restore_file(FILE *inf)
     rs_read_boolean(inf, &stat_msg);            /* 24 */
     rs_read_boolean(inf, &terse);               /* 25 */
     rs_read_boolean(inf, &to_death);            /* 26 */
-    rs_read_boolean(inf, &tombstone);           /* 27 */
     rs_read_booleans(inf, pack_used, 26);       /* 29 */
     rs_read_int(inf, &dir_ch);
     rs_read_chars(inf, file_name, MAXSTR);

@@ -80,7 +80,7 @@ init_player()
 
     obj = new ItemThing();
     obj->type = STICK;
-    obj->which = WS_LIGHT;
+    obj->which = WS_FIRE;
     obj->flags |= ISKNOW;
     obj->arm = 1;
     obj->count = 1;

@@ -175,36 +175,31 @@ void death(char monst)
     clearMapDisplay();
     setMapViewTarget(16, 5);
     killer = killname(monst, FALSE);
-    if (!tombstone)
+
+    dp = rip;
+    int x = 0;
+    int y = 0;
+    while (*dp)
     {
-        msg("Killed by %s%s%s with %d gold", (monst != 's' && monst != 'h') ? "a" : "", (monst != 's' && monst != 'h') ? vowelstr(killer) : "", killer, purse);
+        const char* str = *dp++;
+        x = 0;
+        while(*str)
+            setMapDisplay(x++, y, *str++);
+        y++;
     }
+
+    if (monst == 's' || monst == 'h' || monst == 'e')
+        setMapDisplay(20, 5, ' ');
     else
-    {
-        dp = rip;
-        int x = 0;
-        int y = 0;
-        while (*dp)
-        {
-            const char* str = *dp++;
-            x = 0;
-            while(*str)
-                setMapDisplay(x++, y, *str++);
-            y++;
-        }
+        setMapDisplay(21, 5, vowelstr(killer)[0]);
 
-        if (monst == 's' || monst == 'h')
-            setMapDisplay(20, 5, ' ');
-        else
-            setMapDisplay(21, 5, vowelstr(killer)[0]);
+    char buffer[32];
+    sprintf(buffer, "%14d gold", purse);
+    setStatusLine(buffer);
+    x = (32 - strlen(killer)) / 2;
+    while(*killer)
+        setMapDisplay(x++, 6, *killer++);
 
-        char buffer[32];
-        sprintf(buffer, "%14d gold", purse);
-        setStatusLine(buffer);
-        x = (32 - strlen(killer)) / 2;
-        while(*killer)
-            setMapDisplay(x++, 6, *killer++);
-    }
     refreshMap();
     md_readchar();
 

@@ -18,8 +18,7 @@
  *        Start the hero running
  */
 
-void
-do_run(int ch)
+void do_run(int ch)
 {
     running = TRUE;
     after = FALSE;
@@ -158,8 +157,7 @@ move_stuff:
  * turn_ok:
  *        Decide whether it is legal to turn onto the given space
  */
-bool
-turn_ok(int y, int x)
+bool turn_ok(int y, int x)
 {
     PLACE *pp;
 

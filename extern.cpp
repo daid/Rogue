@@ -32,7 +32,6 @@ bool save_msg = TRUE;                        /* Remember last msg */
 bool stat_msg = FALSE;                        /* Should status() print as a msg() */
 bool terse = FALSE;                        /* True if we should be short */
 bool to_death = FALSE;                        /* Fighting is to the death! */
-bool tombstone = TRUE;                        /* Print out tombstone at end */
 bool pack_used[26] = {                        /* Is the character used in the pack? */
     FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
     FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,

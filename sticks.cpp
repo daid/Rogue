@@ -98,7 +98,7 @@ void do_zap()
             ws_info[WS_LIGHT].oi_know = TRUE;
             visit_field_of_view(hero.x, hero.y, 10, [](int x, int y)
             {
-                flat(y, x) |= F_ISLIT;
+                flags_at(x, y) |= F_ISLIT;
             });
             addmsg("your surroundings are lit");
             if (!terse)

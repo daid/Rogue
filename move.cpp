@@ -84,13 +84,13 @@ do_move(int dy, int dx)
     }
     if (running && ce(hero, nh))
         after = running = FALSE;
-    fl = flat(nh.y, nh.x);
+    fl = flags_at(nh.x, nh.y);
     if (!(fl & F_REAL) && char_at(nh.x, nh.y) == FLOOR)
     {
         if (!on(player, ISLEVIT))
         {
             char_at(nh.x, nh.y) = TRAP;
-            flat(nh.y, nh.x) |= F_REAL;
+            flags_at(nh.x, nh.y) |= F_REAL;
         }
     }
     else if (on(player, ISHELD) && !monster_at(nh.x, nh.y))

@@ -418,7 +418,7 @@ bool cansee(int y, int x)
         return FALSE;
     if (dist(y, x, hero.y, hero.x) < LAMPDIST)
         return TRUE;
-    if (flat(y, x) & F_ISLIT)
+    if (flags_at(x, y) & F_ISLIT)
         return TRUE;
     return FALSE;
 }

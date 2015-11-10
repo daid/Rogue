@@ -49,8 +49,8 @@ void placeRandomTraps()
             {
                 co = Area::random_position(Area::ForItem);
             } while (char_at(co.x, co.y) != FLOOR);
-            flat(co.y, co.x) &=~F_REAL;
-            flat(co.y, co.x) |= rnd(NTRAPS);
+            flags_at(co.x, co.y) &=~F_REAL;
+            flags_at(co.x, co.y) |= rnd(NTRAPS);
         }
     }
 }

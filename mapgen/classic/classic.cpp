@@ -262,7 +262,7 @@ void ClassicMapGenerator::draw_room(struct room *rp)
         {
             for (y = rp->r_pos.y; y < rp->r_pos.y + rp->r_max.y; y++)
                 for (x = rp->r_pos.x; x < rp->r_pos.x + rp->r_max.x; x++)
-                    flat(y, x) |= F_ISLIT;
+                    flags_at(x, y) |= F_ISLIT;
         }
     }
 }
@@ -511,12 +511,12 @@ void ClassicMapGenerator::conn(int r1, int r2)
             {
                 spos.x = rpf->r_pos.x + rnd(rpf->r_max.x - 2) + 1;
                 spos.y = rpf->r_pos.y + rpf->r_max.y - 1;
-            } while ((rpf->r_flags&ISMAZE) && !(flat(spos.y, spos.x)&F_PASS));
+            } while ((rpf->r_flags&ISMAZE) && !(flags_at(spos.x, spos.y)&F_PASS));
         if (!(rpt->r_flags & ISGONE))
             do
             {
                 epos.x = rpt->r_pos.x + rnd(rpt->r_max.x - 2) + 1;
-            } while ((rpt->r_flags&ISMAZE) && !(flat(epos.y, epos.x)&F_PASS));
+            } while ((rpt->r_flags&ISMAZE) && !(flags_at(epos.x, epos.y)&F_PASS));
         distance = abs(spos.y - epos.y) - 1;        /* distance to move */
         turn_delta.y = 0;                        /* direction to turn */
         turn_delta.x = (spos.x < epos.x ? 1 : -1);
@@ -537,12 +537,12 @@ void ClassicMapGenerator::conn(int r1, int r2)
             {
                 spos.x = rpf->r_pos.x + rpf->r_max.x - 1;
                 spos.y = rpf->r_pos.y + rnd(rpf->r_max.y - 2) + 1;
-            } while ((rpf->r_flags&ISMAZE) && !(flat(spos.y, spos.x)&F_PASS));
+            } while ((rpf->r_flags&ISMAZE) && !(flags_at(spos.x, spos.y)&F_PASS));
         if (!(rpt->r_flags & ISGONE))
             do
             {
                 epos.y = rpt->r_pos.y + rnd(rpt->r_max.y - 2) + 1;
-            } while ((rpt->r_flags&ISMAZE) && !(flat(epos.y, epos.x)&F_PASS));
+            } while ((rpt->r_flags&ISMAZE) && !(flags_at(epos.x, epos.y)&F_PASS));
         distance = abs(spos.x - epos.x) - 1;
         turn_delta.y = (spos.y < epos.y ? 1 : -1);
         turn_delta.x = 0;
@@ -662,7 +662,7 @@ void ClassicMapGenerator::numpass(int y, int x)
 
     if (x >= NUMCOLS || x < 0 || y >= NUMLINES || y <= 0)
         return;
-    fp = &flat(y, x);
+    fp = &flags_at(x, y);
     if (*fp & F_PNUM)
         return;
     if (newpnum)

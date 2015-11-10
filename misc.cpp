@@ -54,12 +54,12 @@ void look(bool wakeup)
     {
         visit_field_of_view(hero.x, hero.y, 20, [wakeup](int x, int y)
         {
-            if (dist(hero.y, hero.x, y, x) < LAMPDIST || (flat(y, x) & F_ISLIT))
+            if (dist(hero.y, hero.x, y, x) < LAMPDIST || (flags_at(x, y) & F_ISLIT))
             {
                 int ch = char_at_place(x, y);
                 ch = trip_ch(y, x, ch);
                 setMapDisplay(x, y, ch);
-                flat(y, x) |= F_SEEN;
+                flags_at(x, y) |= F_SEEN;
                 
                 if (wakeup && monster_at(x, y))
                 {
@@ -235,7 +235,7 @@ void erase_lamp(coord& pos)
         if (x == hero.x && y == hero.y)
             return;
         int ch = char_at_place(x, y);
-        if (flat(y, x) & F_SEEN)
+        if (flags_at(x, y) & F_SEEN)
         {
             if (ch == PASSAGE)
                 setMapDisplay(x, y, PASSAGE_UNLIT);

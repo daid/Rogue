@@ -40,8 +40,7 @@ static struct init_weaps {
  *        Fire a missile in a given direction
  */
 
-void
-missile(int ydelta, int xdelta)
+void missile(int ydelta, int xdelta)
 {
     ItemThing *obj;
 

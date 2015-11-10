@@ -201,7 +201,7 @@ MonsterThing* wake_monster(int y, int x)
     /* handle medusa's, which can confuse you on sight. */
     if (ch == 'M' && !on(player, ISBLIND) && !on(player, ISHALU) && !on(*tp, ISFOUND) && !on(*tp, ISCANC) && on(*tp, ISRUN))
     {
-        if ((flat(y, x) & F_ISLIT) || dist(y, x, hero.y, hero.x) < LAMPDIST)
+        if ((flags_at(x, y) & F_ISLIT) || dist(y, x, hero.y, hero.x) < LAMPDIST)
         {
             tp->flags |= ISFOUND;
             if (!save(VS_MAGIC))

@@ -291,10 +291,11 @@ over:
                 when ' ': after = FALSE;        /* "Legal" illegal command */
                 when '^':
                     after = FALSE;
-                    if (get_dir()) {
+                    if (get_dir())
+                    {
                         delta.y += hero.y;
                         delta.x += hero.x;
-                        fp = &flat(delta.y, delta.x);
+                        fp = &flags_at(delta.x, delta.y);
                         if (!terse)
                             addmsg("You have found ");
                         if (char_at(delta.x, delta.y) != TRAP)
@@ -400,7 +401,7 @@ void search()
         {
             if (y == hero.y && x == hero.x)
                 continue;
-            fp = &flat(y, x);
+            fp = &flags_at(x, y);
             if (!(*fp & F_REAL))
             {
                 switch (char_at(x, y))

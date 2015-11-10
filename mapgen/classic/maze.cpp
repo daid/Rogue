@@ -55,7 +55,7 @@ void ClassicMazeGenerator::dig(int y, int x)
             newx = x + cp->x;
             if (newy < 0 || newy > Maxy || newx < 0 || newx > Maxx)
                 continue;
-            if (flat(newy + Starty, newx + Startx) & F_PASS)
+            if (flags_at(newx + Startx, newy + Starty) & F_PASS)
                 continue;
             if (rnd(++cnt) == 0)
             {

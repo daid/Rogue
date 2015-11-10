@@ -458,7 +458,6 @@ void ClassicMapGenerator::do_passages()
             r2->isconn[i] = TRUE;
         }
     }
-    passnum();
 }
 
 /*
@@ -623,72 +622,4 @@ void ClassicMapGenerator::door(struct room *rm, coord *cp)
     }
     else
         pp->p_ch = DOOR;
-}
-
-/*
- * passnum:
- *        Assign a number to each passageway
- */
-static int pnum;
-static bool newpnum;
-
-void ClassicMapGenerator::passnum()
-{
-    struct room *rp;
-    int i;
-
-    pnum = 0;
-    newpnum = FALSE;
-    for (rp = passages; rp < &passages[MAXPASS]; rp++)
-        rp->r_nexits = 0;
-    for (rp = rooms; rp < &rooms[MAXROOMS]; rp++)
-        for (i = 0; i < rp->r_nexits; i++)
-        {
-            newpnum++;
-            numpass(rp->r_exit[i].y, rp->r_exit[i].x);
-        }
-}
-
-/*
- * numpass:
- *        Number a passageway square and its brethren
- */
-
-void ClassicMapGenerator::numpass(int y, int x)
-{
-    int *fp;
-    struct room *rp;
-    int ch;
-
-    if (x >= NUMCOLS || x < 0 || y >= NUMLINES || y <= 0)
-        return;
-    fp = &flags_at(x, y);
-    if (*fp & F_PNUM)
-        return;
-    if (newpnum)
-    {
-        pnum++;
-        newpnum = FALSE;
-    }
-    /*
-     * check to see if it is a door or secret door, i.e., a new exit,
-     * or a numerable type of place
-     */
-    if ((ch = char_at(x, y)) == DOOR ||
-        (!(*fp & F_REAL) && IS_WALL(ch)))
-    {
-        rp = &passages[pnum];
-        rp->r_exit[rp->r_nexits].y = y;
-        rp->r_exit[rp->r_nexits++].x = x;
-    }
-    else if (!(*fp & F_PASS))
-        return;
-    *fp |= pnum;
-    /*
-     * recurse on the surrounding places
-     */
-    numpass(y + 1, x);
-    numpass(y - 1, x);
-    numpass(y, x + 1);
-    numpass(y, x - 1);
 }

@@ -37,23 +37,23 @@
 /*
  * All the fun defines
  */
-#define when                break;case
+#define when             break;case
 #define otherwise        break;default
-#define until(expr)        while(!(expr))
-#define ce(a,b)                ((a).x == (b).x && (a).y == (b).y)
-#define hero                player.pos
+#define until(expr)      while(!(expr))
+#define ce(a,b)          ((a).x == (b).x && (a).y == (b).y)
+#define hero             player.pos
 template<typename T> T max(const T a, const T b) { if (a > b) return a; return b; }
-#define on(thing,flag)        ((bool)(((thing).flags & (flag)) != 0))
-#define GOLDCALC        (rnd(50 + 10 * level) + 2)
-#define ISRING(h,r)        (cur_ring[h] != NULL && cur_ring[h]->which == r)
-#define ISWEARING(r)        (ISRING(LEFT, r) || ISRING(RIGHT, r))
-#define ISMULT(type)         (type == POTION || type == SCROLL || type == FOOD)
-#define INDEX(y,x)        (&places[((x) << 5) + (y)])
+#define on(thing,flag)   ((bool)(((thing).flags & (flag)) != 0))
+#define GOLDCALC         (rnd(50 + 10 * level) + 2)
+#define ISRING(h,r)      (cur_ring[h] != NULL && cur_ring[h]->which == r)
+#define ISWEARING(r)     (ISRING(LEFT, r) || ISRING(RIGHT, r))
+#define ISMULT(type)     (type == POTION || type == SCROLL || type == FOOD)
+#define INDEX(y,x)       (&places[((x) << 5) + (y)])
 #define char_at(x,y)     (places[((x) << 5) + (y)].p_ch)
-#define flags_at(x,y)        (places[((x) << 5) + (y)].p_flags)
+#define flags_at(x,y)    (places[((x) << 5) + (y)].p_flags)
 #define item_at(x,y)     (places[((x) << 5) + (y)].p_item)
 #define monster_at(x,y)  (places[((x) << 5) + (y)].p_monst)
-#define unc(cp)                (cp).y, (cp).x
+#define unc(cp)          (cp).y, (cp).x
 
 /*
  * things that appear on the screens
@@ -115,10 +115,10 @@ template<typename T> T max(const T a, const T b) { if (a > b) return a; return b
  * Save against things
  */
 #define VS_POISON        00
-#define VS_PARALYZATION        00
-#define VS_DEATH        00
+#define VS_PARALYZATION  00
+#define VS_DEATH         00
 #define VS_BREATH        02
-#define VS_MAGIC        03
+#define VS_MAGIC         03
 
 /*
  * Various flag bits
@@ -155,14 +155,13 @@ template<typename T> T max(const T a, const T b) { if (a > b) return a; return b
 /*
  * Flags for level map
  */
-#define F_PASS                0x0080                /* is a passageway */
-#define F_SEEN                0x0040                /* have seen this spot before */
-#define F_TMASK               0x0007                /* trap number mask */
-#define F_LOCKED              0x0020                /* door is locked */
-#define F_REAL                0x0010                /* what you see is what you get */
-#define F_PNUM                0x000f                /* passage number mask */
-#define F_TMASK               0x0007                /* trap number mask */
-#define F_ISLIT               0x0100                /* place is lit by static light */
+#define F_PASS                0x00000080                /* is a passageway */
+#define F_SEEN                0x00000040                /* have seen this spot before */
+#define F_TMASK               0x00000007                /* trap number mask */
+#define F_LOCKED              0x00000020                /* door is locked */
+#define F_REAL                0x00000010                /* what you see is what you get */
+#define F_TMASK               0x00000007                /* trap number mask */
+#define F_ISLIT               0x00000100                /* place is lit by static light */
 
 /*
  * Trap types

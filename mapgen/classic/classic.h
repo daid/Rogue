@@ -41,8 +41,6 @@ private:
     void do_passages();
     void conn(int r1, int r2);
     void door(struct room *rm, coord *cp);
-    void passnum();
-    void numpass(int y, int x);
 public:
     ClassicMapGenerator();
     

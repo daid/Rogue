@@ -143,8 +143,7 @@ void fall(ItemThing *obj, bool pr)
  *        Set up the initial goodies for a weapon
  */
 
-void
-init_weapon(ItemThing *weap, int which)
+void init_weapon(ItemThing *weap, int which)
 {
     struct init_weaps *iwp;
 
@@ -178,8 +177,7 @@ init_weapon(ItemThing *weap, int which)
  * hit_monster:
  *        Does the missile hit the monster?
  */
-int
-hit_monster(int y, int x, ItemThing *obj)
+int hit_monster(int y, int x, ItemThing *obj)
 {
     static coord mp;
 
@@ -207,8 +205,7 @@ const char* num(int n1, int n2, char type)
  *        Pull out a certain weapon
  */
 
-void
-wield()
+void wield()
 {
     ItemThing *obj, *oweapon;
     const char *sp;
@@ -222,7 +219,6 @@ wield()
     cur_weapon = oweapon;
     if ((obj = get_item("wield", WEAPON)) == NULL)
     {
-bad:
         after = FALSE;
         return;
     }
@@ -230,10 +226,14 @@ bad:
     if (obj->type == ARMOR)
     {
         msg("you can't wield armor");
-        goto bad;
+        after = FALSE;
+        return;
     }
     if (is_current(obj))
-        goto bad;
+    {
+        after = FALSE;
+        return;
+    }
 
     sp = inv_name(obj, TRUE);
     cur_weapon = obj;

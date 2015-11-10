@@ -443,8 +443,7 @@ bool is_current(ItemThing *obj)
 {
     if (obj == NULL)
         return FALSE;
-    if (obj == cur_armor || obj == cur_weapon || obj == cur_ring[LEFT]
-        || obj == cur_ring[RIGHT])
+    if (obj == cur_armor || obj == cur_weapon || obj == cur_ring[LEFT] || obj == cur_ring[RIGHT])
     {
         if (!terse)
             addmsg("That's already ");

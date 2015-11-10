@@ -148,16 +148,13 @@ const char * inv_name(ItemThing *obj, bool drop)
  *        Put something down
  */
 
-void
-drop()
+void drop()
 {
-    int ch;
     ItemThing *obj;
 
-    ch = char_at(hero.x, hero.y);
-    if ((ch != FLOOR && ch != PASSAGE) || item_at(hero.x, hero.y))
+    if (item_at(hero.x, hero.y))
     {
-        after = FALSE;
+        after = false;
         msg("there is something there already");
         return;
     }
@@ -185,16 +182,17 @@ bool dropcheck(ItemThing *obj)
 {
     if (obj == NULL)
         return TRUE;
-    if (obj != cur_armor && obj != cur_weapon
-        && obj != cur_ring[LEFT] && obj != cur_ring[RIGHT])
-            return TRUE;
+    if (obj != cur_armor && obj != cur_weapon && obj != cur_ring[LEFT] && obj != cur_ring[RIGHT])
+        return TRUE;
     if (obj->flags & ISCURSED)
     {
-        msg("you can't.  It appears to be cursed");
+        msg("you can't.\nIt appears to be cursed");
         return FALSE;
     }
     if (obj == cur_weapon)
+    {
         cur_weapon = NULL;
+    }
     else if (obj == cur_armor)
     {
         waste_time();
@@ -203,7 +201,7 @@ bool dropcheck(ItemThing *obj)
     else
     {
         cur_ring[obj == cur_ring[LEFT] ? LEFT : RIGHT] = NULL;
-        switch (obj->which)
+        switch(obj->which)
         {
             case R_ADDSTR:
                 chg_str(-obj->arm);

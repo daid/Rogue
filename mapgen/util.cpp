@@ -108,3 +108,21 @@ void placeAmuletIfRequired()
         item_at(obj->pos.x, obj->pos.y) = obj;
     }
 }
+
+void placeDoor(int x, int y)
+{
+    int ch = char_at(x, y);
+    if ((ch == WALL_H || ch == WALL_V) && rnd(10) + 1 < level && rnd(5) == 0)
+    {
+        flags_at(x, y) &=~F_REAL;
+    }
+    else
+    {
+        if (rnd(5))
+        {
+            char_at(x, y) = DOOR;
+        }else{
+            char_at(x, y) = CLOSED_DOOR;
+        }
+    }
+}

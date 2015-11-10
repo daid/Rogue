@@ -200,7 +200,7 @@ bool ClassicMapGenerator::find_floor(struct room *rp, coord *cp, int limit, bool
     bool pickroom;
 
     pickroom = (bool)(rp == NULL);
-if(!limit) limit = 50;
+
     if (!pickroom)
         compchar = ((rp->r_flags & ISMAZE) ? PASSAGE : FLOOR);
     cnt = limit;
@@ -213,7 +213,10 @@ if(!limit) limit = 50;
             rp = &rooms[rnd_room()];
             compchar = ((rp->r_flags & ISMAZE) ? PASSAGE : FLOOR);
         }
-        rnd_pos(rp, cp);
+
+        cp->x = rp->r_pos.x + rnd(rp->r_max.x - 2) + 1;
+        cp->y = rp->r_pos.y + rnd(rp->r_max.y - 2) + 1;
+
         pp = INDEX(cp->y, cp->x);
         if (monst)
         {
@@ -289,16 +292,6 @@ void ClassicMapGenerator::horiz(struct room *rp, int starty)
 
     for (x = rp->r_pos.x; x <= rp->r_pos.x + rp->r_max.x - 1; x++)
         char_at(x, starty) = WALL_H;
-}
-
-/*
- * rnd_pos:
- *        Pick a random spot in a room
- */
-void ClassicMapGenerator::rnd_pos(struct room *rp, coord *cp)
-{
-    cp->x = rp->r_pos.x + rnd(rp->r_max.x - 2) + 1;
-    cp->y = rp->r_pos.y + rnd(rp->r_max.y - 2) + 1;
 }
 
 /*
@@ -604,22 +597,10 @@ void ClassicMapGenerator::conn(int r1, int r2)
 
 void ClassicMapGenerator::door(struct room *rm, coord *cp)
 {
-    PLACE *pp;
-
     rm->r_exit[rm->r_nexits++] = *cp;
 
     if (rm->r_flags & ISMAZE)
         return;
 
-    pp = INDEX(cp->y, cp->x);
-    if (rnd(10) + 1 < level && rnd(5) == 0)
-    {
-        if (cp->y == rm->r_pos.y || cp->y == rm->r_pos.y + rm->r_max.y - 1)
-            pp->p_ch = WALL_H;
-        else
-            pp->p_ch = WALL_V;
-        pp->p_flags &= ~F_REAL;
-    }
-    else
-        pp->p_ch = DOOR;
+    placeDoor(cp->x, cp->y);
 }

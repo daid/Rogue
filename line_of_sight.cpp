@@ -14,7 +14,7 @@ bool has_line_of_sight(int x0, int y0, int x1, int y1)
         int ch = ' ';
         if (x0 >= 0 && x0 < MAXCOLS && y0 >= 0 && y0 < MAXLINES)
             ch = char_at(x0, y0);
-        if (IS_WALL(ch) || ch == ' ')
+        if (IS_WALL(ch) || ch == CLOSED_DOOR)
             return false;
         if (x0==x1 && y0==y1)
             break;

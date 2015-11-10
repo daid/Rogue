@@ -14,12 +14,6 @@
 #include "rogue.h"
 
 /*
- * used to hold the new hero position
- */
-
-coord nh;
-
-/*
  * do_run:
  *        Start the hero running
  */
@@ -38,10 +32,10 @@ do_run(int ch)
  * consequences (fighting, picking up, etc.)
  */
 
-void
-do_move(int dy, int dx)
+void do_move(int dy, int dx)
 {
     int fl;
+    coord nh;
 
     firstmove = FALSE;
     if (no_move)
@@ -111,8 +105,19 @@ do_move(int dy, int dx)
         case WALL_BR:
         case SOLID_WALL:
 hit_bound:
-            running = FALSE;
-            after = FALSE;
+            running = false;
+            after = false;
+            break;
+        case CLOSED_DOOR:
+            if (flags_at(nh.x, nh.y) & F_LOCKED)
+            {
+                //TODO: How to deal with locked doors? Right now locked doors are never placed.
+                msg("The door is locked");
+                after = false;
+                return;
+            }
+            running = false;
+            char_at(nh.x, nh.y) = DOOR;
             break;
         case DOOR:
             running = FALSE;
@@ -129,7 +134,7 @@ hit_bound:
             goto move_stuff;
         case FLOOR:
             if (!(fl & F_REAL))
-                be_trapped(&hero);
+                be_trapped(&nh);
             goto move_stuff;
         case STAIRS:
             seenstairs = TRUE;
@@ -164,32 +169,10 @@ turn_ok(int y, int x)
 }
 
 /*
- * turnref:
- *        Decide whether to refresh at a passage turning or not
- */
-
-void
-turnref()
-{
-    PLACE *pp;
-
-    pp = INDEX(hero.y, hero.x);
-    if (!(pp->p_flags & F_SEEN))
-    {
-        if (jump)
-        {
-            refreshMap();
-        }
-        pp->p_flags |= F_SEEN;
-    }
-}
-
-/*
  * be_trapped:
  *        The guy stepped on a trap.... Make him pay.
  */
-char
-be_trapped(coord *tc)
+char be_trapped(coord *tc)
 {
     PLACE *pp;
     ItemThing *arrow;

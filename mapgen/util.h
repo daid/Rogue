@@ -7,5 +7,6 @@ void placeRandomStairs();
 void placeRandomHero();
 void placeRandomItems();
 void placeAmuletIfRequired();
+void placeDoor(int x, int y);
 
 #endif//MAPGEN_UTILITIES_H

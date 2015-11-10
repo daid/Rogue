@@ -61,6 +61,7 @@ template<typename T> T max(const T a, const T b) { if (a > b) return a; return b
 #define PASSAGE             '\x02'
 #define PASSAGE_UNLIT       '\x01'
 #define DOOR                '\x16'
+#define CLOSED_DOOR         '\x18'
 #define FLOOR               '.'
 #define PLAYER              '@'
 #define TRAP                '\x05'
@@ -87,7 +88,7 @@ template<typename T> T max(const T a, const T b) { if (a > b) return a; return b
 #define CALLABLE            -1
 #define R_OR_S              -2
 
-#define IS_WALL(n) ((n) == '|' || (n) == '-' || (n) == WALL_V || (n) == WALL_H || (n) == WALL_TL || (n) == WALL_TR || (n) == WALL_BL || (n) == WALL_BR || (n) == SOLID_WALL)
+#define IS_WALL(n) ((n) == '|' || (n) == '-' || (n) == WALL_V || (n) == WALL_H || (n) == WALL_TL || (n) == WALL_TR || (n) == WALL_BL || (n) == WALL_BR || (n) == SOLID_WALL || (n) == ' ')
 
 /*
  * Various constants
@@ -155,12 +156,11 @@ template<typename T> T max(const T a, const T b) { if (a > b) return a; return b
 /*
  * Flags for level map
  */
-#define F_PASS                0x00000080                /* is a passageway */
-#define F_SEEN                0x00000040                /* have seen this spot before */
 #define F_TMASK               0x00000007                /* trap number mask */
-#define F_LOCKED              0x00000020                /* door is locked */
 #define F_REAL                0x00000010                /* what you see is what you get */
-#define F_TMASK               0x00000007                /* trap number mask */
+#define F_LOCKED              0x00000020                /* door is locked */
+#define F_SEEN                0x00000040                /* have seen this spot before */
+#define F_PASS                0x00000080                /* is a passageway */
 #define F_ISLIT               0x00000100                /* place is lit by static light */
 
 /*
@@ -580,7 +580,6 @@ void        take_off();
 void        teleport();
 void        total_winner();
 void        thunk(ItemThing *weap, const char *mname, bool noend);
-void        turnref();
 void        u_level();
 void        uncurse(ItemThing *obj);
 void        unlock_sc();
@@ -644,7 +643,6 @@ typedef struct {
 
 extern int        between;
 extern int        group;
-extern coord      nh;
 extern const char *rainbow[];
 extern int        cNCOLORS;
 extern STONE      stones[];

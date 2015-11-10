@@ -103,8 +103,7 @@ doadd(const char *fmt, va_list args)
  * step_ok:
  *        Returns true if it is ok to step on ch
  */
-int
-step_ok(int ch)
+int step_ok(int ch)
 {
     switch (ch)
     {
@@ -118,9 +117,10 @@ step_ok(int ch)
         case WALL_BL:
         case WALL_BR:
         case SOLID_WALL:
-            return FALSE;
+        case CLOSED_DOOR:
+            return false;
         default:
-            return (!isalpha(ch));
+            return true;
     }
 }
 

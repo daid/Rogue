@@ -150,8 +150,15 @@ int do_chase(MonsterThing *th)
         {
             if (x < 0 || x >= NUMCOLS || y < 0 || y >= NUMLINES)
                 return;
-            if (!step_ok(char_at(x, y)))
-                return;
+            if (char_at(x, y) == CLOSED_DOOR)
+            {
+                if (flags_at(x, y) & F_LOCKED)
+                    return;
+                base_score += 2;
+            }else{
+                if (!step_ok(char_at(x, y)))
+                    return;
+            }
             if (monster_at(x, y))
                 return;
             int pos = x | y << 16;

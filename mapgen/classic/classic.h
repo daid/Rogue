@@ -30,7 +30,6 @@ private:
     void do_rooms();
     int rnd_room();
     bool find_floor(struct room *rp, coord *cp, int limit, bool monst);
-    void rnd_pos(struct room *rp, coord *cp);
 
     void draw_room(struct room *rp);
     void vert(struct room *rp, int startx);

@@ -124,33 +124,33 @@ template<typename T> T max(const T a, const T b) { if (a > b) return a; return b
  * Various flag bits
  */
 /* flags for objects */
-#define ISCURSED 000001                /* object is cursed */
+#define ISCURSED      0000001                /* object is cursed */
 #define ISKNOW        0000002                /* player knows details about the object */
 #define ISMISL        0000004                /* object is a missile type */
 #define ISMANY        0000010                /* object comes in groups */
 /*        ISFOUND 0000020                ...is used for both objects and creatures */
-#define        ISPROT        0000040                /* armor is permanently protected */
+#define ISPROT        0000040                /* armor is permanently protected */
 
 /* flags for creatures */
-#define CANHUH       0000001                /* creature can confuse */
-#define CANSEE       0000002                /* creature can see invisible creatures */
-#define ISBLIND      0000004                /* creature is blind */
-#define ISCANC       0000010                /* creature has special qualities cancelled */
-#define ISLEVIT      0000010                /* hero is levitating */
-#define ISFOUND      0000020                /* creature has been seen (used for objects) */
-#define ISGREED      0000040                /* creature runs to protect gold */
-#define ISHASTE      0000100                /* creature has been hastened */
-#define ISTARGET     000200                /* creature is the target of an 'f' command */
-#define ISHELD       0000400                /* creature has been held */
-#define ISHUH        0001000                /* creature is confused */
-#define ISINVIS      0002000                /* creature is invisible */
-#define ISMEAN       0004000                /* creature can wake when player enters room */
-#define ISHALU       0004000                /* hero is on acid trip */
-#define ISREGEN      0010000                /* creature can regenerate */
-#define ISRUN        0020000                /* creature is running at the player */
-#define SEEMONST     0040000                /* hero can detect unseen monsters */
-#define ISFLY        0040000                /* creature can fly */
-#define ISSLOW       0100000                /* creature has been slowed */
+#define CANHUH       00000000001                /* creature can confuse */
+#define CANSEE       00000000002                /* creature can see invisible creatures */
+#define ISBLIND      00000000004                /* creature is blind */
+#define ISLEVIT      00000000010                /* hero is levitating */
+#define ISFOUND      00000000020                /* creature has been seen (used for objects) */
+#define ISGREED      00000000040                /* creature runs to protect gold */
+#define ISHASTE      00000000100                /* creature has been hastened */
+#define ISTARGET     00000000200                /* creature is the target of an 'f' command */
+#define ISHELD       00000000400                /* creature has been held */
+#define ISHUH        00000001000                /* creature is confused */
+#define ISINVIS      00000002000                /* creature is invisible */
+#define ISHALU       00000004000                /* hero is on acid trip */
+#define ISREGEN      00000010000                /* creature can regenerate */
+#define ISRUN        00000020000                /* creature is running at the player */
+#define SEEMONST     00000040000                /* hero can detect unseen monsters */
+#define ISSLOW       00000100000                /* creature has been slowed */
+#define ISCANC       00000200000                /* creature has special qualities cancelled */
+#define ISFLY        00000400000                /* creature can fly */
+#define ISMEAN       00001000000                /* creature can wake when player enters room */
 
 /*
  * Flags for level map
@@ -366,7 +366,7 @@ public:
     char type;                          /* What it is */
     char disguise;                      /* What mimic looks like */
     coord *dest;                        /* Where it is running to */
-    short flags;                        /* State word */
+    int flags;                          /* State word */
     struct stats stats;                 /* Physical description */
     std::list<ItemThing*> pack;         /* What the thing is carrying */
     int reserved;                       /* Used during saving/loading */
@@ -398,7 +398,7 @@ typedef struct {
 struct monster {
     const char *m_name;                 /* What to call the monster */
     int m_carry;                        /* Probability of carrying something */
-    short m_flags;                      /* things about the monster */
+    int m_flags;                      /* things about the monster */
     struct stats m_stats;               /* Initial stats */
 };
 

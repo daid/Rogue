@@ -191,7 +191,7 @@ MonsterThing* wake_monster(int y, int x)
     /*
      * Every time he sees mean monster, it might start chasing him
      */
-    if (!on(*tp, ISRUN) && rnd(3) != 0 && on(*tp, ISMEAN) && !on(*tp, ISHELD)
+    if (!on(*tp, ISRUN) && rnd(5) != 0 && on(*tp, ISMEAN) && !on(*tp, ISHELD)
         && !ISWEARING(R_STEALTH) && !on(player, ISLEVIT))
     {
         tp->dest = &hero;

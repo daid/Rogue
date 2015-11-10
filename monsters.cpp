@@ -55,10 +55,10 @@ randmonster(bool wander)
 MonsterThing::MonsterThing()
 {
     pos.x = pos.y = 0;                        /* Position */
-    turn = FALSE;                        /* If slowed, is it a turn to move */
+    turn = false;                        /* If slowed, is it a turn to move */
     type = 0;                        /* What it is */
     disguise = 0;                /* What mimic looks like */
-    dest = NULL;                        /* Where it is running to */
+    dest = nullptr;                        /* Where it is running to */
     flags = 0;                        /* State word */
     stats.s_str = 0;                        /* Strength */
     stats.s_exp = 0;                                /* Experience */
@@ -96,8 +96,8 @@ MonsterThing::MonsterThing(char type, const coord& cp)
     this->flags = mp->m_flags;
     if (level > 29)
         this->flags |= ISHASTE;
-    this->turn = TRUE;
-    this->dest = NULL;
+    this->turn = true;
+    this->dest = nullptr;
     if (ISWEARING(R_AGGR))
         runto(cp);
     if (type == 'X')
@@ -164,7 +164,7 @@ void wanderer()
     {
         cp = Area::random_position(Area::ForMonster);
     } while (has_line_of_sight(cp.x, cp.y, hero.x, hero.y));
-    tp = new MonsterThing(randmonster(TRUE), cp);
+    tp = new MonsterThing(randmonster(true), cp);
     if (on(player, SEEMONST))
     {
         if (!on(player, ISHALU))
@@ -186,7 +186,7 @@ MonsterThing* wake_monster(int y, int x)
     const char *mname;
 
     tp = monster_at(x, y);
-    assert(tp != NULL);
+    assert(tp != nullptr);
     ch = tp->type;
     /*
      * Every time he sees mean monster, it might start chasing him

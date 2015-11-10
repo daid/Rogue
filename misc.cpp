@@ -98,13 +98,13 @@ void look(bool wakeup)
                         continue;
             }
 
-            if ((tp = pp->p_monst) == NULL)
+            if ((tp = pp->p_monst) == nullptr)
                 ch = trip_ch(y, x, ch);
             else
                 if (on(player, SEEMONST) && on(*tp, ISINVIS))
                 {
                     if (door_stop && !firstmove)
-                        running = FALSE;
+                        running = false;
                     continue;
                 }
                 else
@@ -156,7 +156,7 @@ void look(bool wakeup)
                 {
                     case DOOR:
                         if (x == hero.x || y == hero.y)
-                            running = FALSE;
+                            running = false;
                         break;
                     case PASSAGE:
                     case PASSAGE_UNLIT:
@@ -176,13 +176,13 @@ void look(bool wakeup)
                     case ' ':
                         break;
                     default:
-                        running = FALSE;
+                        running = false;
                         break;
                 }
             }
         }
     if (door_stop && !firstmove && passcount > 1)
-        running = FALSE;
+        running = false;
     if (!running || !jump)
         setMapDisplay(hero.x, hero.y, PLAYER);
 }
@@ -256,7 +256,7 @@ void eat()
 {
     ItemThing *obj;
 
-    if ((obj = get_item("eat", FOOD)) == NULL)
+    if ((obj = get_item("eat", FOOD)) == nullptr)
         return;
     if (obj->type == FOOD)
     {
@@ -299,8 +299,8 @@ void eat()
     }
 
     if (obj == cur_weapon)
-        cur_weapon = NULL;
-    leave_pack(obj, FALSE, FALSE);
+        cur_weapon = nullptr;
+    leave_pack(obj, false, false);
 }
 
 void add_food(int amount)
@@ -393,14 +393,14 @@ bool add_haste(bool potion)
         player.flags &= ~(ISRUN|ISHASTE);
         extinguish(nohaste);
         msg("you faint from exhaustion");
-        return FALSE;
+        return false;
     }
     else
     {
         player.flags |= ISHASTE;
         if (potion)
             fuse(nohaste, 0, rnd(4)+4, AFTER);
-        return TRUE;
+        return true;
     }
 }
 
@@ -441,16 +441,16 @@ const char * vowelstr(const char *str)
  */
 bool is_current(ItemThing *obj)
 {
-    if (obj == NULL)
-        return FALSE;
+    if (obj == nullptr)
+        return false;
     if (obj == cur_armor || obj == cur_weapon || obj == cur_ring[LEFT] || obj == cur_ring[RIGHT])
     {
         if (!terse)
             addmsg("That's already ");
         msg("in use");
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 /*
@@ -478,7 +478,7 @@ bool get_dir()
             prompt = "direction: ";
         do
         {
-            gotit = TRUE;
+            gotit = true;
             switch (dir_ch)
             {
                 case 'h': case'H': case K_LEFT:       delta.y =  0; delta.x = -1;
@@ -489,14 +489,14 @@ bool get_dir()
                 when 'u': case'U': case K_UP_RIGHT:   delta.y = -1; delta.x =  1;
                 when 'b': case'B': case K_DOWN_LEFT:  delta.y =  1; delta.x = -1;
                 when 'n': case'N': case K_DOWN_RIGHT: delta.y =  1; delta.x =  1;
-                when ESCAPE: last_dir = '\0'; reset_last(); return FALSE;
+                when ESCAPE: last_dir = '\0'; reset_last(); return false;
                 otherwise:
                     dir_ch = displayMessage(prompt);
-                    gotit = FALSE;
+                    gotit = false;
             }
         } until (gotit);
         if (isupper(dir_ch))
-            dir_ch = (char) tolower(dir_ch);
+            dir_ch = tolower(dir_ch);
         last_dir = dir_ch;
         last_delt.y = delta.y;
         last_delt.x = delta.x;
@@ -507,7 +507,7 @@ bool get_dir()
             delta.y = rnd(3) - 1;
             delta.x = rnd(3) - 1;
         } while (delta.y == 0 && delta.x == 0);
-    return TRUE;
+    return true;
 }
 
 /*
@@ -543,7 +543,7 @@ void call_it(struct obj_info *info)
         if (info->oi_guess)
         {
             free(info->oi_guess);
-            info->oi_guess = NULL;
+            info->oi_guess = nullptr;
         }
     }
     else if (!info->oi_guess)
@@ -551,7 +551,7 @@ void call_it(struct obj_info *info)
         refreshMapWithMore(); //First show the map, as for some scrolls we need to see the effect
         if (askForInput(terse ? "call it:" : "what do you want to call it?", prbuf, MAXSTR) == NORM)
         {
-            if (info->oi_guess != NULL)
+            if (info->oi_guess != nullptr)
                 free(info->oi_guess);
             info->oi_guess = (char*)malloc((unsigned int) strlen(prbuf) + 1);
             strcpy(info->oi_guess, prbuf);

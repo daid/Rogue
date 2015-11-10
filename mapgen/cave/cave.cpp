@@ -64,7 +64,7 @@ bool CaveMapGenerator::generate()
         if (rnd(100) < 50)
         {
             coord co = Area::random_position(Area::ForMonster);
-            MonsterThing* mp = new MonsterThing(randmonster(FALSE), co);
+            MonsterThing* mp = new MonsterThing(randmonster(false), co);
             give_pack(mp);
             
             if (on(*mp, ISGREED) || rnd(2) == 0)

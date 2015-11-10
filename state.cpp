@@ -66,9 +66,9 @@
 #define READSTAT (format_error || read_error )
 #define WRITESTAT (write_error)
 
-static int read_error   = FALSE;
-static int write_error  = FALSE;
-static int format_error = FALSE;
+static int read_error   = false;
+static int write_error  = false;
+static int format_error = false;
 static int endian = 0x01020304;
 #define  big_endian ( *((char *)&endian) == 0x01 )
 
@@ -182,7 +182,7 @@ static int rs_read_chars(FILE *inf, char *i, int count)
     rs_read_int(inf, &value);
     
     if (value != count)
-        format_error = TRUE;
+        format_error = true;
 
     rs_read(inf, i, count);
     
@@ -215,7 +215,7 @@ static int rs_read_ints(FILE *inf, int *i, int count)
     rs_read_int(inf,&value);
 
     if (value != count)
-        format_error = TRUE;
+        format_error = true;
 
     for(n = 0; n < count; n++)
         if (rs_read_int(inf, &i[n]) != 0)
@@ -276,7 +276,7 @@ static int rs_read_booleans(FILE *inf, bool *i, int count)
     rs_read_int(inf,&value);
 
     if (value != count)
-        format_error = TRUE;
+        format_error = true;
 
     for(n = 0; n < count; n++)
         if (rs_read_boolean(inf, &i[n]) != 0)
@@ -367,7 +367,7 @@ static int rs_write_string(FILE *savef, const char *s)
     if (write_error)
         return(WRITESTAT);
 
-    len = (s == NULL) ? 0 : (int) strlen(s) + 1;
+    len = (s == nullptr) ? 0 : (int) strlen(s) + 1;
 
     rs_write_int(savef, len);
     rs_write_chars(savef, s, len);
@@ -386,13 +386,13 @@ static int rs_read_new_string(FILE *inf, char **s)
     rs_read_int(inf, &len);
 
     if (len == 0)
-        buf = NULL;
+        buf = nullptr;
     else
     { 
         buf = (char*)malloc(len);
 
-        if (buf == NULL)            
-            read_error = TRUE;
+        if (buf == nullptr)            
+            read_error = true;
     }
 
     rs_read_chars(inf, buf, len);
@@ -426,11 +426,11 @@ static int rs_read_string_index(FILE *inf, const char *master[], int maxindex, c
     rs_read_int(inf, &i);
 
     if (i > maxindex)
-        format_error = TRUE;
+        format_error = true;
     else if (i >= 0)
         *str = master[i];
     else
-        *str = NULL;
+        *str = nullptr;
 
     return(READSTAT);
 }
@@ -546,7 +546,7 @@ static ItemThing* get_list_item(std::list<ItemThing*>& l, int i)
             return obj;
         count++;
     }
-    return(NULL);
+    return(nullptr);
 }
 
 static int find_list_ptr(std::list<ItemThing*>& l, ItemThing *ptr)
@@ -627,11 +627,11 @@ static int rs_read_stone_index(FILE *inf, STONE master[], int maxindex, const ch
     rs_read_int(inf,&i);
 
     if (i > maxindex)
-        format_error = TRUE;
+        format_error = true;
     else if (i >= 0)
         *str = master[i].st_name;
     else
-        *str = NULL;
+        *str = nullptr;
 
     return(READSTAT);
 }
@@ -795,7 +795,7 @@ static int rs_write_daemons(FILE *savef, struct delayed_action *d_list, int coun
             func = 8;
         else if (d_list[i].d_func == sight)
             func = 9;
-        else if (d_list[i].d_func == NULL)
+        else if (d_list[i].d_func == nullptr)
             func = 0;
         else
             func = -1;
@@ -822,7 +822,7 @@ static int rs_read_daemons(FILE *inf, struct delayed_action *d_list, int count)
     rs_read_int(inf, &value);
 
     if (value > count)
-        format_error = TRUE;
+        format_error = true;
 
     for(i=0; i < count; i++)
     {
@@ -852,12 +852,12 @@ static int rs_read_daemons(FILE *inf, struct delayed_action *d_list, int count)
                     break;
             case 9: d_list[i].d_func = sight;
                     break;
-            default:d_list[i].d_func = NULL;
+            default:d_list[i].d_func = nullptr;
                     break;
         }
     }
 
-    if (d_list[i].d_func == NULL)
+    if (d_list[i].d_func == nullptr)
     {
         d_list[i].d_type = 0;
         d_list[i].d_arg = 0;
@@ -902,7 +902,7 @@ static int rs_read_obj_info(FILE *inf, struct obj_info *mi, int count)
     rs_read_int(inf, &value);
 
     if (value > count)
-        format_error = TRUE;
+        format_error = true;
 
     for(n = 0; n < value; n++)
     {
@@ -965,7 +965,7 @@ static int rs_read_areas(FILE *inf)
     rs_read_int(inf,&value);
 
     if (value < 0)
-        format_error = TRUE;
+        format_error = true;
     
     areas.resize(value);
     for(n = 0; n < value; n++)
@@ -1002,7 +1002,7 @@ static int rs_read_monsters(FILE *inf, struct monster *m, int count)
     rs_read_int(inf, &value);
 
     if (value != count)
-        format_error = TRUE;
+        format_error = true;
 
     for(n = 0; n < count; n++)
         rs_read_stats(inf, &m[n].m_stats);
@@ -1074,7 +1074,7 @@ static int rs_write_object_list(FILE *savef, std::list<ItemThing*>& list)
 static int rs_read_object_list(FILE *inf, std::list<ItemThing*>& list)
 {
     int i, cnt;
-    ItemThing *l = NULL;
+    ItemThing *l = nullptr;
 
     if (read_error || format_error)
         return(READSTAT);
@@ -1160,7 +1160,7 @@ static int rs_write_thing(FILE *savef, MonsterThing *t)
 
     rs_write_marker(savef, RSID_THING);
 
-    if (t == NULL)
+    if (t == nullptr)
     {
         rs_write_int(savef, 0);
         return(WRITESTAT);
@@ -1174,7 +1174,7 @@ static int rs_write_thing(FILE *savef, MonsterThing *t)
 
     /* 
         t_dest can be:
-        0,0: NULL
+        0,0: nullptr
         0,1: location of hero
         1,i: location of a thing (monster)
         2,i: location of an object
@@ -1189,7 +1189,7 @@ static int rs_write_thing(FILE *savef, MonsterThing *t)
         rs_write_int(savef,0);
         rs_write_int(savef,1);
     }
-    else if (t->dest != NULL)
+    else if (t->dest != nullptr)
     {
         i = find_monster_index_for_coord(t->dest);
             
@@ -1248,7 +1248,7 @@ static int rs_read_thing(FILE *inf, MonsterThing *t)
             
     /* 
         t_dest can be (listid,index):
-        0,0: NULL
+        0,0: nullptr
         0,1: location of hero
         1,i: location of a thing (monster)
         2,i: location of an object
@@ -1262,16 +1262,16 @@ static int rs_read_thing(FILE *inf, MonsterThing *t)
     rs_read_int(inf, &index);
     t->reserved = -1;
 
-    if (listid == 0) /* hero or NULL */
+    if (listid == 0) /* hero or nullptr */
     {
         if (index == 1)
             t->dest = &hero;
         else
-            t->dest = NULL;
+            t->dest = nullptr;
     }
     else if (listid == 1) /* monster/thing */
     {
-        t->dest     = NULL;
+        t->dest     = nullptr;
         t->reserved = index;
     }
     else if (listid == 2) /* object */
@@ -1280,13 +1280,13 @@ static int rs_read_thing(FILE *inf, MonsterThing *t)
 
         obj = get_list_item(lvl_obj, index);
 
-        if (obj != NULL)
+        if (obj != nullptr)
         {
             t->dest = &obj->pos;
         }
     }
     else
-        t->dest = NULL;
+        t->dest = nullptr;
             
     rs_read_int(inf,&t->flags);
     rs_read_stats(inf,&t->stats);
@@ -1307,7 +1307,7 @@ static void rs_fix_monster(MonsterThing *t)
         it++;
     item = *it;
 
-    if (item != NULL)
+    if (item != nullptr)
     {
         t->dest = &item->pos;
     }
@@ -1338,7 +1338,7 @@ static int rs_write_monster_list(FILE *savef)
 static int rs_read_monster_list(FILE *inf)
 {
     int i, cnt;
-    MonsterThing *l = NULL;
+    MonsterThing *l = nullptr;
 
     if (read_error || format_error)
         return(READSTAT);
@@ -1396,7 +1396,7 @@ static int rs_read_monster_reference(FILE *inf, MonsterThing **item)
 
     if (i == -1)
     {
-        *item = NULL;
+        *item = nullptr;
     }else{
         auto it = mlist.begin();
         while(i > 0)
@@ -1443,7 +1443,7 @@ static int rs_read_item_reference(FILE *inf, ItemThing** item)
 
     if (i == -1)
     {
-        *item = NULL;
+        *item = nullptr;
     }else{
         auto it = lvl_obj.begin();
         while(i > 0)

@@ -39,7 +39,7 @@ void whatis(bool insist, int type)
         {
             if (n_objs == 0)
                 return;
-            else if (obj == NULL)
+            else if (obj == nullptr)
                 msg("you must identify something");
             else if (type && obj->type != type &&
                !(type == R_OR_S && (obj->type == RING || obj->type == STICK)) )
@@ -51,7 +51,7 @@ void whatis(bool insist, int type)
             break;
     }
 
-    if (obj == NULL)
+    if (obj == nullptr)
         return;
 
     switch (obj->type)
@@ -68,7 +68,7 @@ void whatis(bool insist, int type)
         when RING:
             set_know(obj, ring_info);
     }
-    msg(inv_name(obj, FALSE));
+    msg(inv_name(obj, false));
 }
 
 /*
@@ -81,13 +81,13 @@ set_know(ItemThing *obj, struct obj_info *info)
 {
     char **guess;
 
-    info[obj->which].oi_know = TRUE;
+    info[obj->which].oi_know = true;
     obj->flags |= ISKNOW;
     guess = &info[obj->which].oi_guess;
     if (*guess)
     {
         free(*guess);
-        *guess = NULL;
+        *guess = nullptr;
     }
 }
 
@@ -99,14 +99,14 @@ const char* type_name(int type)
 {
     struct h_list *hp;
     static struct h_list tlist[] = {
-        {POTION, "potion",                FALSE},
-        {SCROLL, "scroll",                FALSE},
-        {FOOD,         "food",                FALSE},
-        {R_OR_S, "ring, wand or staff",        FALSE},
-        {RING,         "ring",                FALSE},
-        {STICK,         "wand or staff",        FALSE},
-        {WEAPON, "weapon",                FALSE},
-        {ARMOR,         "suit of armor",        FALSE},
+        {POTION, "potion",                false},
+        {SCROLL, "scroll",                false},
+        {FOOD,         "food",                false},
+        {R_OR_S, "ring, wand or staff",        false},
+        {RING,         "ring",                false},
+        {STICK,         "wand or staff",        false},
+        {WEAPON, "weapon",                false},
+        {ARMOR,         "suit of armor",        false},
     };
 
     for (hp = tlist; hp->h_ch; hp++)
@@ -126,7 +126,7 @@ void teleport()
 {
     setMapDisplay(hero.x, hero.y, char_at_place(hero.x, hero.y));
     hero = Area::random_position(Area::ForMonster);
-    look(TRUE);
+    look(true);
     setMapDisplay(hero.x, hero.y, PLAYER);
     /*
      * turn off ISHELD in case teleportation was done while fighting
@@ -139,6 +139,6 @@ void teleport()
     }
     no_move = 0;
     count = 0;
-    running = FALSE;
+    running = false;
     flush_type();
 }

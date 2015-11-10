@@ -107,7 +107,7 @@ static void refreshDisplay()
     if (surface_handle == -1)
     {
         surface_handle = open("/dev/fb0", O_RDWR);
-        surface_buffer = (uint8_t*)mmap(NULL, DISPLAY_WIDTH * DISPLAY_HEIGHT, PROT_READ | PROT_WRITE, MAP_SHARED, surface_handle, 0);
+        surface_buffer = (uint8_t*)mmap(nullptr, DISPLAY_WIDTH * DISPLAY_HEIGHT, PROT_READ | PROT_WRITE, MAP_SHARED, surface_handle, 0);
     }
 
     uint8_t* src = jedi_screen_buffer;
@@ -156,7 +156,7 @@ void initJedi()
     clearMapDisplay();
     memset(jedi_screen_buffer, 0, DISPLAY_WIDTH*DISPLAY_HEIGHT);
     
-    random_engine.seed(time(NULL));
+    random_engine.seed(time(nullptr));
 }
 
 int getRandomNumber(int max)

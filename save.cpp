@@ -41,7 +41,7 @@ save_game()
     {
         md_unlink(file_name);
     }
-    if ((savef = fopen(file_name, "wb")) == NULL)
+    if ((savef = fopen(file_name, "wb")) == nullptr)
         return;
 
     save_file(savef);
@@ -80,9 +80,9 @@ bool restore(const char *file)
         file = file_name;
 
 
-    if ((inf = fopen(file,"rb")) == NULL)
+    if ((inf = fopen(file,"rb")) == nullptr)
     {
-        return FALSE;
+        return false;
     }
 
     fflush(stdout);
@@ -90,7 +90,7 @@ bool restore(const char *file)
     if (strcmp(buf, version) != 0)
     {
         printf("Sorry, saved game is out of date.\n");
-        return FALSE;
+        return false;
     }
     encread(buf,80,inf);
     sscanf(buf,"%d x %d\n", &lines, &cols);
@@ -99,13 +99,13 @@ bool restore(const char *file)
     {
         printf("Sorry, original game was played on a screen with %d lines.\n",lines);
         printf("Current screen only has %d lines. Unable to restore game\n", NUMLINES);
-        return(FALSE);
+        return(false);
     }
     if (cols > NUMCOLS)
     {
         printf("Sorry, original game was played on a screen with %d columns.\n",cols);
         printf("Current screen only has %d columns. Unable to restore game\n", NUMCOLS);
-        return(FALSE);
+        return(false);
     }
 
     setup();
@@ -119,13 +119,13 @@ bool restore(const char *file)
     if (md_unlink_open_file(file, inf) < 0)
     {
         printf("Cannot unlink file\n");
-        return FALSE;
+        return false;
     }
 
     if (player.stats.s_hpt <= 0)
     {
         printf("\n\"He's dead, Jim\"\n");
-        return FALSE;
+        return false;
     }
 
     strcpy(file_name, file);
@@ -164,7 +164,7 @@ rd_score(SCORE *top_ten)
 {
     unsigned int i;
 
-        if (scoreboard == NULL)
+        if (scoreboard == nullptr)
                 return;
 
         rewind(scoreboard); 
@@ -191,7 +191,7 @@ wr_score(SCORE *top_ten)
 {
     unsigned int i;
 
-    if (scoreboard == NULL)
+    if (scoreboard == nullptr)
         return;
 
     rewind(scoreboard);

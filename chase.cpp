@@ -43,14 +43,14 @@ int runners(int arg)
             if (wastarget && !ce(orig_pos, tp->pos))
             {
                 tp->flags &= ~ISTARGET;
-                to_death = FALSE;
+                to_death = false;
             }
         }
     }
     if (has_hit)
     {
         endmsg();
-        has_hit = FALSE;
+        has_hit = false;
     }
     return 0;
 }
@@ -82,7 +82,7 @@ void relocate(MonsterThing *th, coord *new_loc)
     {
         if (see_monst(th))
             setMapDisplay(th->pos.x, th->pos.y, char_at_place(th->pos.x, th->pos.y));
-        monster_at(th->pos.x, th->pos.y) = NULL;
+        monster_at(th->pos.x, th->pos.y) = nullptr;
 
         if (has_line_of_sight(th->pos.x, th->pos.y, new_loc->x, new_loc->y))
             th->dest = find_dest(th);
@@ -117,13 +117,13 @@ int do_chase(MonsterThing *th)
         if (has_hit)
             endmsg();
         fire_bolt(&th->pos, &delta, "flame");
-        running = FALSE;
+        running = false;
         count = 0;
         quiet = 0;
         if (to_death && !on(*th, ISTARGET))
         {
-            to_death = FALSE;
-            kamikaze = FALSE;
+            to_death = false;
+            kamikaze = false;
         }
         return(0);
     }
@@ -271,14 +271,14 @@ int do_chase(MonsterThing *th)
 
 /*
  * see_monst:
- *        Return TRUE if the hero can see the monster
+ *        Return true if the hero can see the monster
  */
 bool see_monst(MonsterThing *mp)
 {
     if (on(player, ISBLIND))
-        return FALSE;
+        return false;
     if (on(*mp, ISINVIS) && !on(player, CANSEE))
-        return FALSE;
+        return false;
     return cansee(mp->pos.y, mp->pos.x);
 }
 
@@ -305,8 +305,8 @@ void runto(const coord& runner)
 /*
  * chase:
  *        Find the spot for the chaser(er) to move closer to the
- *        chasee(ee).  Returns TRUE if we want to keep on chasing later
- *        FALSE if we reach the goal.
+ *        chasee(ee).  Returns true if we want to keep on chasing later
+ *        false if we reach the goal.
  */
 bool chase(MonsterThing *tp, coord *ee)
 {
@@ -374,7 +374,7 @@ bool chase(MonsterThing *tp, coord *ee)
                     if (item_at(x, y))
                     {
                         ItemThing* obj = item_at(x, y);
-                        if (obj != NULL  && obj->type == SCROLL && obj->which == S_SCARE)
+                        if (obj != nullptr && obj->type == SCROLL && obj->which == S_SCARE)
                             continue;
                     }
                     /*
@@ -407,9 +407,9 @@ bool chase(MonsterThing *tp, coord *ee)
 bool diag_ok(coord *sp, coord *ep)
 {
     if (ep->x < 0 || ep->x >= NUMCOLS || ep->y <= 0 || ep->y >= NUMLINES - 1)
-        return FALSE;
+        return false;
     if (ep->x == sp->x || ep->y == sp->y)
-        return TRUE;
+        return true;
     return (bool)(step_ok(char_at(ep->x, sp->y)) && step_ok(char_at(sp->x, ep->y)));
 }
 
@@ -420,14 +420,14 @@ bool diag_ok(coord *sp, coord *ep)
 bool cansee(int y, int x)
 {
     if (on(player, ISBLIND))
-        return FALSE;
+        return false;
     if (!has_line_of_sight(hero.x, hero.y, x, y))
-        return FALSE;
+        return false;
     if (dist(y, x, hero.y, hero.x) < LAMPDIST)
-        return TRUE;
+        return true;
     if (flags_at(x, y) & F_ISLIT)
-        return TRUE;
-    return FALSE;
+        return true;
+    return false;
 }
 
 /*
@@ -455,7 +455,7 @@ coord* find_dest(MonsterThing *tp)
                     break;
                 }
             }
-            if (tp == NULL)
+            if (tp == nullptr)
                 return &obj->pos;
         }
     }

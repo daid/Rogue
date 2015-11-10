@@ -15,26 +15,26 @@
 bool after;                                /* True if we want after daemons */
 bool again;                                /* Repeating the last command */
 bool seenstairs;                        /* Have seen the stairs (for lsd) */
-bool amulet = FALSE;                        /* He found the amulet */
-bool door_stop = FALSE;                        /* Stop running when we pass a door */
-bool fight_flush = FALSE;                /* True if toilet input */
-bool firstmove = FALSE;                        /* First move after setting door_stop */
-bool has_hit = FALSE;                        /* Has a "hit" message pending in msg */
-bool inv_describe = TRUE;                /* Say which way items are being used */
-bool jump = FALSE;                        /* Show running as series of jumps */
-bool kamikaze = FALSE;                        /* to_death really to DEATH */
-bool lower_msg = FALSE;                        /* Messages should start w/lower case */
-bool move_on = FALSE;                        /* Next move shouldn't pick up items */
-bool passgo = FALSE;                        /* Follow passages */
-bool playing = TRUE;                        /* True until he quits */
-bool running = FALSE;                        /* True if player is running */
-bool save_msg = TRUE;                        /* Remember last msg */
-bool terse = FALSE;                        /* True if we should be short */
-bool to_death = FALSE;                        /* Fighting is to the death! */
+bool amulet = false;                        /* He found the amulet */
+bool door_stop = false;                        /* Stop running when we pass a door */
+bool fight_flush = false;                /* True if toilet input */
+bool firstmove = false;                        /* First move after setting door_stop */
+bool has_hit = false;                        /* Has a "hit" message pending in msg */
+bool inv_describe = true;                /* Say which way items are being used */
+bool jump = false;                        /* Show running as series of jumps */
+bool kamikaze = false;                        /* to_death really to DEATH */
+bool lower_msg = false;                        /* Messages should start w/lower case */
+bool move_on = false;                        /* Next move shouldn't pick up items */
+bool passgo = false;                        /* Follow passages */
+bool playing = true;                        /* True until he quits */
+bool running = false;                        /* True if player is running */
+bool save_msg = true;                        /* Remember last msg */
+bool terse = false;                        /* True if we should be short */
+bool to_death = false;                        /* Fighting is to the death! */
 bool pack_used[26] = {                        /* Is the character used in the pack? */
-    FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-    FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-    FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE
+    false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false
 };
 
 int dir_ch;                                /* Direction from last get_dir() call */
@@ -86,7 +86,7 @@ int a_class[MAXARMORS] = {                /* Armor class for each armor type */
 };
 
 int count = 0;                                /* Number of times to repeat command */
-FILE *scoreboard = NULL;        /* File descriptor for score file */
+FILE *scoreboard = nullptr;        /* File descriptor for score file */
 int food_left;                                /* Amount of food in hero's stomach */
 int lastscore = -1;                        /* Score before this turn */
 int no_command = 0;                        /* Number of turns asleep */
@@ -129,8 +129,8 @@ PLACE places[MAXLINES*MAXCOLS];                /* level map */
 ItemThing *cur_armor;                       /* What he is wearing */
 ItemThing *cur_ring[2];                     /* Which rings are being worn */
 ItemThing *cur_weapon;                      /* Which weapon he is weilding */
-ItemThing *l_last_pick = NULL;              /* Last last_pick */
-ItemThing *last_pick = NULL;                /* Last object picked in get_item() */
+ItemThing *l_last_pick = nullptr;              /* Last last_pick */
+ItemThing *last_pick = nullptr;                /* Last object picked in get_item() */
 std::list<ItemThing*> lvl_obj;               /* List of objects on this level */
 std::list<MonsterThing*> mlist;
 MonsterThing player;                                /* His stats */
@@ -186,162 +186,162 @@ struct obj_info things[NUMITEMTYPES] = {
 };
 
 struct obj_info arm_info[MAXARMORS] = {
-    { "leather armor",                 20,         20, NULL, FALSE },
-    { "ring mail",                     15,         25, NULL, FALSE },
-    { "studded leather armor",         15,         20, NULL, FALSE },
-    { "scale mail",                    13,         30, NULL, FALSE },
-    { "chain mail",                    12,         75, NULL, FALSE },
-    { "splint mail",                   10,         80, NULL, FALSE },
-    { "banded mail",                   10,         90, NULL, FALSE },
-    { "plate mail",                     5,        150, NULL, FALSE },
+    { "leather armor",                 20,         20, nullptr, false },
+    { "ring mail",                     15,         25, nullptr, false },
+    { "studded leather armor",         15,         20, nullptr, false },
+    { "scale mail",                    13,         30, nullptr, false },
+    { "chain mail",                    12,         75, nullptr, false },
+    { "splint mail",                   10,         80, nullptr, false },
+    { "banded mail",                   10,         90, nullptr, false },
+    { "plate mail",                     5,        150, nullptr, false },
 };
 struct obj_info pot_info[MAXPOTIONS] = {
-    { "confusion",                      7,   5, NULL, FALSE },
-    { "hallucination",                  8,   5, NULL, FALSE },
-    { "poison",                         8,   5, NULL, FALSE },
-    { "gain strength",                 13, 150, NULL, FALSE },
-    { "see invisible",                  3, 100, NULL, FALSE },
-    { "healing",                       13, 130, NULL, FALSE },
-    { "monster detection",              6, 130, NULL, FALSE },
-    { "magic detection",                6, 105, NULL, FALSE },
-    { "raise level",                    2, 250, NULL, FALSE },
-    { "extra healing",                  5, 200, NULL, FALSE },
-    { "haste self",                     5, 190, NULL, FALSE },
-    { "restore strength",              13, 130, NULL, FALSE },
-    { "blindness",                      5,   5, NULL, FALSE },
-    { "levitation",                     6,  75, NULL, FALSE },
+    { "confusion",                      7,   5, nullptr, false },
+    { "hallucination",                  8,   5, nullptr, false },
+    { "poison",                         8,   5, nullptr, false },
+    { "gain strength",                 13, 150, nullptr, false },
+    { "see invisible",                  3, 100, nullptr, false },
+    { "healing",                       13, 130, nullptr, false },
+    { "monster detection",              6, 130, nullptr, false },
+    { "magic detection",                6, 105, nullptr, false },
+    { "raise level",                    2, 250, nullptr, false },
+    { "extra healing",                  5, 200, nullptr, false },
+    { "haste self",                     5, 190, nullptr, false },
+    { "restore strength",              13, 130, nullptr, false },
+    { "blindness",                      5,   5, nullptr, false },
+    { "levitation",                     6,  75, nullptr, false },
 };
 struct obj_info ring_info[MAXRINGS] = {
-    { "protection",                     9, 400, NULL, FALSE },
-    { "add strength",                   9, 400, NULL, FALSE },
-    { "sustain strength",               5, 280, NULL, FALSE },
-    { "searching",                     10, 420, NULL, FALSE },
-    { "see invisible",                 10, 310, NULL, FALSE },
-    { "adornment",                      1,  10, NULL, FALSE },
-    { "aggravate monster",             10,  10, NULL, FALSE },
-    { "dexterity",                      8, 440, NULL, FALSE },
-    { "increase damage",                8, 400, NULL, FALSE },
-    { "regeneration",                   4, 460, NULL, FALSE },
-    { "slow digestion",                 9, 240, NULL, FALSE },
-    { "teleportation",                  5,  30, NULL, FALSE },
-    { "stealth",                        7, 470, NULL, FALSE },
-    { "maintain armor",                 5, 380, NULL, FALSE },
+    { "protection",                     9, 400, nullptr, false },
+    { "add strength",                   9, 400, nullptr, false },
+    { "sustain strength",               5, 280, nullptr, false },
+    { "searching",                     10, 420, nullptr, false },
+    { "see invisible",                 10, 310, nullptr, false },
+    { "adornment",                      1,  10, nullptr, false },
+    { "aggravate monster",             10,  10, nullptr, false },
+    { "dexterity",                      8, 440, nullptr, false },
+    { "increase damage",                8, 400, nullptr, false },
+    { "regeneration",                   4, 460, nullptr, false },
+    { "slow digestion",                 9, 240, nullptr, false },
+    { "teleportation",                  5,  30, nullptr, false },
+    { "stealth",                        7, 470, nullptr, false },
+    { "maintain armor",                 5, 380, nullptr, false },
 };
 struct obj_info scr_info[MAXSCROLLS] = {
-    { "monster confusion",              7, 140, NULL, FALSE },
-    { "magic mapping",                  4, 150, NULL, FALSE },
-    { "hold monster",                   2, 180, NULL, FALSE },
-    { "sleep",                          3,   5, NULL, FALSE },
-    { "enchant armor",                  7, 160, NULL, FALSE },
-    { "identify potion",               10,  80, NULL, FALSE },
-    { "identify scroll",               10,  80, NULL, FALSE },
-    { "identify weapon",                6,  80, NULL, FALSE },
-    { "identify armor",                 7, 100, NULL, FALSE },
-    { "identify ring, wand or staff",  10, 115, NULL, FALSE },
-    { "scare monster",                  3, 200, NULL, FALSE },
-    { "food detection",                 2,  60, NULL, FALSE },
-    { "teleportation",                  5, 165, NULL, FALSE },
-    { "enchant weapon",                 8, 150, NULL, FALSE },
-    { "create monster",                 4,  75, NULL, FALSE },
-    { "remove curse",                   7, 105, NULL, FALSE },
-    { "aggravate monsters",             3,  20, NULL, FALSE },
-    { "protect armor",                  2, 250, NULL, FALSE },
-    { "hint",                           0,   0, NULL, FALSE },
+    { "monster confusion",              7, 140, nullptr, false },
+    { "magic mapping",                  4, 150, nullptr, false },
+    { "hold monster",                   2, 180, nullptr, false },
+    { "sleep",                          3,   5, nullptr, false },
+    { "enchant armor",                  7, 160, nullptr, false },
+    { "identify potion",               10,  80, nullptr, false },
+    { "identify scroll",               10,  80, nullptr, false },
+    { "identify weapon",                6,  80, nullptr, false },
+    { "identify armor",                 7, 100, nullptr, false },
+    { "identify ring, wand or staff",  10, 115, nullptr, false },
+    { "scare monster",                  3, 200, nullptr, false },
+    { "food detection",                 2,  60, nullptr, false },
+    { "teleportation",                  5, 165, nullptr, false },
+    { "enchant weapon",                 8, 150, nullptr, false },
+    { "create monster",                 4,  75, nullptr, false },
+    { "remove curse",                   7, 105, nullptr, false },
+    { "aggravate monsters",             3,  20, nullptr, false },
+    { "protect armor",                  2, 250, nullptr, false },
+    { "hint",                           0,   0, nullptr, false },
 };
 struct obj_info weap_info[MAXWEAPONS + 1] = {
-    { "mace",                          11,   8, NULL, FALSE },
-    { "long sword",                    11,  15, NULL, FALSE },
-    { "short bow",                     12,  15, NULL, FALSE },
-    { "arrow",                         12,   1, NULL, FALSE },
-    { "dagger",                         8,   3, NULL, FALSE },
-    { "two handed sword",              10,  75, NULL, FALSE },
-    { "dart",                          12,   2, NULL, FALSE },
-    { "shuriken",                      12,   5, NULL, FALSE },
-    { "spear",                         12,   5, NULL, FALSE },
-    { NULL, 0 },        /* DO NOT REMOVE: fake entry for dragon's breath and wire/electric/cold wands */
+    { "mace",                          11,   8, nullptr, false },
+    { "long sword",                    11,  15, nullptr, false },
+    { "short bow",                     12,  15, nullptr, false },
+    { "arrow",                         12,   1, nullptr, false },
+    { "dagger",                         8,   3, nullptr, false },
+    { "two handed sword",              10,  75, nullptr, false },
+    { "dart",                          12,   2, nullptr, false },
+    { "shuriken",                      12,   5, nullptr, false },
+    { "spear",                         12,   5, nullptr, false },
+    { nullptr, 0 },        /* DO NOT REMOVE: fake entry for dragon's breath and wire/electric/cold wands */
 };
 struct obj_info ws_info[MAXSTICKS] = {
-    { "light",                        12, 250, NULL, FALSE },
-    { "invisibility",                  6,   5, NULL, FALSE },
-    { "lightning",                     3, 330, NULL, FALSE },
-    { "fire",                          3, 330, NULL, FALSE },
-    { "cold",                          3, 330, NULL, FALSE },
-    { "polymorph",                    15, 310, NULL, FALSE },
-    { "magic missile",                10, 170, NULL, FALSE },
-    { "haste monster",                10,   5, NULL, FALSE },
-    { "slow monster",                 11, 350, NULL, FALSE },
-    { "drain life",                    9, 300, NULL, FALSE },
-    { "nothing",                       1,   5, NULL, FALSE },
-    { "teleport away",                 6, 340, NULL, FALSE },
-    { "teleport to",                   6,  50, NULL, FALSE },
-    { "cancellation",                  5, 280, NULL, FALSE },
+    { "light",                        12, 250, nullptr, false },
+    { "invisibility",                  6,   5, nullptr, false },
+    { "lightning",                     3, 330, nullptr, false },
+    { "fire",                          3, 330, nullptr, false },
+    { "cold",                          3, 330, nullptr, false },
+    { "polymorph",                    15, 310, nullptr, false },
+    { "magic missile",                10, 170, nullptr, false },
+    { "haste monster",                10,   5, nullptr, false },
+    { "slow monster",                 11, 350, nullptr, false },
+    { "drain life",                    9, 300, nullptr, false },
+    { "nothing",                       1,   5, nullptr, false },
+    { "teleport away",                 6, 340, nullptr, false },
+    { "teleport to",                   6,  50, nullptr, false },
+    { "cancellation",                  5, 280, nullptr, false },
 };
 
 struct h_list helpstr[] = {
-    {'?',        ": prints help",                                TRUE},
-    {'/',        ": identify object",                        TRUE},
-    {'h',        ": left",                                        FALSE},
-    {'j',        ": down",                                        FALSE},
-    {'k',        ": up",                                        FALSE},
-    {'l',        ": right",                                        FALSE},
-    {'y',        ": up & left",                                FALSE},
-    {'u',        ": up & right",                                FALSE},
-    {'b',        ": down & left",                                FALSE},
-    {'n',        ": down & right",                                FALSE},
-    {'H',        ": run left",                                FALSE},
-    {'J',        ": run down",                                FALSE},
-    {'K',        ": run up",                                FALSE},
-    {'L',        ": run right",                                FALSE},
-    {'Y',        ": run up & left",                                FALSE},
-    {'U',        ": run up & right",                        FALSE},
-    {'B',        ": run down & left",                        FALSE},
-    {'N',        ": run down & right",                        FALSE},
-    {CTRL('H'),  ": run left until adjacent",                FALSE},
-    {CTRL('J'),  ": run down until adjacent",                FALSE},
-    {CTRL('K'),  ": run up until adjacent",                        FALSE},
-    {CTRL('L'),  ": run right until adjacent",                FALSE},
-    {CTRL('Y'),  ": run up & left until adjacent",                FALSE},
-    {CTRL('U'),  ": run up & right until adjacent",                FALSE},
-    {CTRL('B'),  ": run down & left until adjacent",        FALSE},
-    {CTRL('N'),  ": run down & right until adjacent",        FALSE},
-    {'\0',       "<dir>: walk that way",                TRUE},
-    {'\0',       "<SHIFT><dir>: run that way",                TRUE},
-    {'\0',       "<CTRL><dir>: run till adjacent",        TRUE},
-    {'f',        "<dir>: fight till death or near death",        TRUE},
-    {'t',        "<dir>: throw something",                        TRUE},
-    {'m',        "<dir>: move onto without picking up",                TRUE},
-    {'z',        "<dir>: zap a wand in a direction",                TRUE},
-    {'^',        "<dir>: identify trap type",                        TRUE},
-    {'s',        ": search for trap/secret door",                TRUE},
-    {'>',        ": go down a staircase",                        TRUE},
-    {'<',        ": go up a staircase",                        TRUE},
-    {'.',        ": rest for a turn",                        TRUE},
-    {',',        ": pick something up",                        TRUE},
-    {'i',        ": inventory",                                TRUE},
-    {'I',        ": inventory single item",                        TRUE},
-    {'q',        ": quaff potion",                                TRUE},
-    {'r',        ": read scroll",                                TRUE},
-    {'e',        ": eat food",                                TRUE},
-    {'w',        ": wield a weapon",                        TRUE},
-    {'W',        ": wear armor",                                TRUE},
-    {'T',        ": take armor off",                        TRUE},
-    {'P',        ": put on ring",                                TRUE},
-    {'R',        ": remove ring",                                TRUE},
-    {'d',        ": drop object",                                TRUE},
-    {'c',        ": call object",                                TRUE},
-    {'a',        ": repeat last command",                        TRUE},
-    {')',        ": display current weapon",                        TRUE},
-    {']',        ": display current armor",                        TRUE},
-    {'=',        ": display current rings",                        TRUE},
-    {'@',        ": display current stats",                        TRUE},
-    {'M',        ": display the whole map",                      TRUE},
-    {'D',        ": recall what's been discovered",                TRUE},
-    {CTRL('R'),  ": redraw screen",                                FALSE},
-    {CTRL('P'),  ": repeat last message",                        FALSE},
-    {ESCAPE,     ": cancel command",                        TRUE},
-    {'S',        ": save game",                                TRUE},
-    {'Q',        ": quit (no save)",                                        TRUE},
-    {'F',        "<dir>: fight till either of you dies",                TRUE},
-    {'v',        ": print version number",                        TRUE},
-    {0,          NULL }
+    {'?',        ": prints help",                         true},
+    {'/',        ": identify object",                     true},
+    {'h',        ": left",                                false},
+    {'j',        ": down",                                false},
+    {'k',        ": up",                                  false},
+    {'l',        ": right",                               false},
+    {'y',        ": up & left",                           false},
+    {'u',        ": up & right",                          false},
+    {'b',        ": down & left",                         false},
+    {'n',        ": down & right",                        false},
+    {'H',        ": run left",                            false},
+    {'J',        ": run down",                            false},
+    {'K',        ": run up",                              false},
+    {'L',        ": run right",                           false},
+    {'Y',        ": run up & left",                       false},
+    {'U',        ": run up & right",                      false},
+    {'B',        ": run down & left",                     false},
+    {'N',        ": run down & right",                    false},
+    {CTRL('H'),  ": run left until adjacent",             false},
+    {CTRL('J'),  ": run down until adjacent",             false},
+    {CTRL('K'),  ": run up until adjacent",               false},
+    {CTRL('L'),  ": run right until adjacent",            false},
+    {CTRL('Y'),  ": run up & left until adjacent",        false},
+    {CTRL('U'),  ": run up & right until adjacent",       false},
+    {CTRL('B'),  ": run down & left until adjacent",      false},
+    {CTRL('N'),  ": run down & right until adjacent",     false},
+    {'\0',       "<dir>: walk that way",                  true},
+    {'\0',       "<SHIFT><dir>: run that way",            true},
+    {'\0',       "<CTRL><dir>: run till adjacent",        true},
+    {'f',        "<dir>: fight till death or near death", true},
+    {'t',        "<dir>: throw something",                true},
+    {'m',        "<dir>: move onto without picking up",   true},
+    {'z',        "<dir>: zap a wand in a direction",      true},
+    {'^',        "<dir>: identify trap type",             true},
+    {'s',        ": search for trap/secret door",         true},
+    {'>',        ": go down a staircase",                 true},
+    {'<',        ": go up a staircase",                   true},
+    {'.',        ": rest for a turn",                     true},
+    {',',        ": pick something up",                   true},
+    {'i',        ": inventory",                           true},
+    {'I',        ": inventory single item",               true},
+    {'q',        ": quaff potion",                        true},
+    {'r',        ": read scroll",                         true},
+    {'e',        ": eat food",                            true},
+    {'w',        ": wield a weapon",                      true},
+    {'W',        ": wear armor",                          true},
+    {'T',        ": take armor off",                      true},
+    {'P',        ": put on ring",                         true},
+    {'R',        ": remove ring",                         true},
+    {'d',        ": drop object",                         true},
+    {'c',        ": call object",                         true},
+    {'a',        ": repeat last command",                 true},
+    {')',        ": display current weapon",              true},
+    {']',        ": display current armor",               true},
+    {'=',        ": display current rings",               true},
+    {'@',        ": display current stats",               true},
+    {'M',        ": display the whole map",               true},
+    {'D',        ": recall what's been discovered",       true},
+    {CTRL('R'),  ": redraw screen",                       false},
+    {CTRL('P'),  ": repeat last message",                 false},
+    {ESCAPE,     ": cancel command",                      true},
+    {'S',        ": save game",                           true},
+    {'Q',        ": quit (no save)",                      true},
+    {'F',        "<dir>: fight till either of you dies",  true},
+    {'v',        ": print version number",                true},
+    {0,          nullptr }
 };

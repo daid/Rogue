@@ -16,12 +16,6 @@
  */
 
 #include <stdbool.h>
-#ifndef TRUE
-#define TRUE true
-#endif
-#ifndef FALSE
-#define FALSE false
-#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>

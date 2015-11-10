@@ -70,7 +70,7 @@ endmsg()
      * start with a pack addressing character
      */
     if (islower(msgbuf[0]) && !lower_msg && msgbuf[1] != ')')
-        msgbuf[0] = (char) toupper(msgbuf[0]);
+        msgbuf[0] = toupper(msgbuf[0]);
     
     if (strlen(msgbuf) > 0)
         ch = displayMessage(msgbuf);
@@ -147,7 +147,7 @@ void status(bool stat_msg)
      * If nothing has changed since the last status, don't
      * bother.
      */
-    temp = (cur_armor != NULL ? cur_armor->arm : player.stats.s_arm);
+    temp = (cur_armor != nullptr ? cur_armor->arm : player.stats.s_arm);
     if (s_hp == player.stats.s_hpt && s_exp == player.stats.s_exp && s_pur == purse
         && s_arm == temp && s_str == player.stats.s_str && s_lvl == level
         && s_hungry == hungry_state

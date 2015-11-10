@@ -96,7 +96,7 @@ const char * inv_name(ItemThing *obj, bool drop)
                 sprintf(pb, "%s", sp);
             if (obj->count > 1)
                 strcat(pb, "s");
-            if (obj->label != NULL)
+            if (obj->label != nullptr)
             {
                 pb = &prbuf[strlen(prbuf)];
                 sprintf(pb, " called %s", obj->label);
@@ -114,7 +114,7 @@ const char * inv_name(ItemThing *obj, bool drop)
             }
             else
                 sprintf(pb, "%s", sp);
-            if (obj->label != NULL)
+            if (obj->label != nullptr)
             {
                 pb = &prbuf[strlen(prbuf)];
                 sprintf(pb, " called %s", obj->label);
@@ -136,9 +136,9 @@ const char * inv_name(ItemThing *obj, bool drop)
             strcat(pb, " (on right hand)");
     }
     if (drop && isupper(prbuf[0]))
-        prbuf[0] = (char) tolower(prbuf[0]);
+        prbuf[0] = tolower(prbuf[0]);
     else if (!drop && islower(*prbuf))
-        *prbuf = (char) toupper(*prbuf);
+        *prbuf = toupper(*prbuf);
     prbuf[MAXSTR-1] = '\0';
     return prbuf;
 }
@@ -158,11 +158,11 @@ void drop()
         msg("there is something there already");
         return;
     }
-    if ((obj = get_item("drop", 0)) == NULL)
+    if ((obj = get_item("drop", 0)) == nullptr)
         return;
     if (!dropcheck(obj))
         return;
-    obj = leave_pack(obj, TRUE, (bool)!ISMULT(obj->type));
+    obj = leave_pack(obj, true, (bool)!ISMULT(obj->type));
     /*
      * Link it into the level object list
      */
@@ -170,8 +170,8 @@ void drop()
     item_at(hero.x, hero.y) = obj;
     obj->pos = hero;
     if (obj->type == AMULET)
-        amulet = FALSE;
-    msg("dropped %s", inv_name(obj, TRUE));
+        amulet = false;
+    msg("dropped %s", inv_name(obj, true));
 }
 
 /*
@@ -180,27 +180,27 @@ void drop()
  */
 bool dropcheck(ItemThing *obj)
 {
-    if (obj == NULL)
-        return TRUE;
+    if (obj == nullptr)
+        return true;
     if (obj != cur_armor && obj != cur_weapon && obj != cur_ring[LEFT] && obj != cur_ring[RIGHT])
-        return TRUE;
+        return true;
     if (obj->flags & ISCURSED)
     {
         msg("you can't.\nIt appears to be cursed");
-        return FALSE;
+        return false;
     }
     if (obj == cur_weapon)
     {
-        cur_weapon = NULL;
+        cur_weapon = nullptr;
     }
     else if (obj == cur_armor)
     {
         waste_time();
-        cur_armor = NULL;
+        cur_armor = nullptr;
     }
     else
     {
-        cur_ring[obj == cur_ring[LEFT] ? LEFT : RIGHT] = NULL;
+        cur_ring[obj == cur_ring[LEFT] ? LEFT : RIGHT] = nullptr;
         switch(obj->which)
         {
             case R_ADDSTR:
@@ -212,7 +212,7 @@ bool dropcheck(ItemThing *obj)
                 break;
         }
     }
-    return TRUE;
+    return true;
 }
 
 /*
@@ -347,7 +347,7 @@ void discovered()
 
 void print_disc(char type)
 {
-    struct obj_info *info = NULL;
+    struct obj_info *info = nullptr;
     int i, maxnum = 0, num_found;
     static ItemThing obj;
     static int order[MAX4(MAXSCROLLS, MAXPOTIONS, MAXRINGS, MAXSTICKS)];
@@ -382,7 +382,7 @@ void print_disc(char type)
         {
             obj.type = type;
             obj.which = order[i];
-            displayStringListItem("%s", inv_name(&obj, FALSE));
+            displayStringListItem("%s", inv_name(&obj, false));
             num_found++;
         }
     if (num_found == 0)
@@ -418,7 +418,7 @@ void set_order(int *order, int numthings)
 const char * nothing(char type)
 {
     char *sp;
-    const char *tystr = NULL;
+    const char *tystr = nullptr;
 
     if (terse)
         sprintf(prbuf, "Nothing");

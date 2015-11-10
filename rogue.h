@@ -45,7 +45,7 @@
 template<typename T> T max(const T a, const T b) { if (a > b) return a; return b; }
 #define on(thing,flag)   ((bool)(((thing).flags & (flag)) != 0))
 #define GOLDCALC         (rnd(50 + 10 * level) + 2)
-#define ISRING(h,r)      (cur_ring[h] != NULL && cur_ring[h]->which == r)
+#define ISRING(h,r)      (cur_ring[h] != nullptr && cur_ring[h]->which == r)
 #define ISWEARING(r)     (ISRING(LEFT, r) || ISRING(RIGHT, r))
 #define ISMULT(type)     (type == POTION || type == SCROLL || type == FOOD)
 #define INDEX(y,x)       (&places[((x) << 5) + (y)])

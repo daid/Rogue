@@ -62,7 +62,7 @@
 unsigned int numscores = NUMSCORES;
 const char *Numname = NUMNAME;
 
-bool allscore = TRUE;
+bool allscore = true;
 
 /*
  * init_check:
@@ -89,24 +89,24 @@ open_score()
       * open()'s will fail.  Just reuse the earlier filehandle. 
       */
 
-    if (scoreboard != NULL) { 
+    if (scoreboard != nullptr) { 
         rewind(scoreboard); 
         return; 
     } 
 
     scoreboard = fopen(scorefile, "rb+");
 
-    if ((scoreboard == NULL) && (errno == ENOENT))
+    if ((scoreboard == nullptr) && (errno == ENOENT))
     {
         scoreboard = fopen(scorefile, "wb+");
     }
 
-    if (scoreboard == NULL) { 
+    if (scoreboard == nullptr) { 
          fprintf(stderr, "Could not open %s for writing: %s\n", scorefile, strerror(errno)); 
          fflush(stderr); 
     } 
 #else
-    scoreboard = NULL;
+    scoreboard = nullptr;
 #endif
 }
 

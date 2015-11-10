@@ -29,18 +29,18 @@ static PACT p_actions[] =
         { ISHALU,        come_down,        SEEDURATION,        /* P_LSD */
                 "Oh, wow!  Everything seems so cosmic!",
                 "Oh, wow!  Everything seems so cosmic!" },
-        { 0,                NULL,        0 },                        /* P_POISON */
-        { 0,                NULL,        0 },                        /* P_STRENGTH */
+        { 0,                nullptr,        0 },                        /* P_POISON */
+        { 0,                nullptr,        0 },                        /* P_STRENGTH */
         { CANSEE,        unsee,        SEEDURATION,                /* P_SEEINVIS */
                 prbuf,
                 prbuf },
-        { 0,                NULL,        0 },                        /* P_HEALING */
-        { 0,                NULL,        0 },                        /* P_MFIND */
-        { 0,                NULL,        0 },                        /* P_TFIND  */
-        { 0,                NULL,        0 },                        /* P_RAISE */
-        { 0,                NULL,        0 },                        /* P_XHEAL */
-        { 0,                NULL,        0 },                        /* P_HASTE */
-        { 0,                NULL,        0 },                        /* P_RESTORE */
+        { 0,                nullptr,        0 },                        /* P_HEALING */
+        { 0,                nullptr,        0 },                        /* P_MFIND */
+        { 0,                nullptr,        0 },                        /* P_TFIND  */
+        { 0,                nullptr,        0 },                        /* P_RAISE */
+        { 0,                nullptr,        0 },                        /* P_XHEAL */
+        { 0,                nullptr,        0 },                        /* P_HASTE */
+        { 0,                nullptr,        0 },                        /* P_RESTORE */
         { ISBLIND,        sight,        SEEDURATION,                /* P_BLIND */
                 "oh, bummer!  Everything is dark!  Help!",
                 "a cloak of darkness falls around you" },
@@ -57,14 +57,14 @@ static PACT p_actions[] =
 void quaff()
 {
     ItemThing *obj;
-    bool discardit = FALSE;
+    bool discardit = false;
     bool show, trip;
 
     obj = get_item("quaff", POTION);
     /*
      * Make certain that it is somethings that we want to drink
      */
-    if (obj == NULL)
+    if (obj == nullptr)
         return;
     if (obj->type != POTION)
     {
@@ -75,7 +75,7 @@ void quaff()
         return;
     }
     if (obj == cur_weapon)
-        cur_weapon = NULL;
+        cur_weapon = nullptr;
 
     //Add some food for drinking a potion
     add_food(50 + rnd(100));
@@ -84,13 +84,13 @@ void quaff()
      */
     trip = on(player, ISHALU);
     discardit = (bool)(obj->count == 1);
-    leave_pack(obj, FALSE, FALSE);
+    leave_pack(obj, false, false);
     switch (obj->which)
     {
         case P_CONFUSE:
             do_pot(P_CONFUSE, !trip);
         when P_POISON:
-            pot_info[P_POISON].oi_know = TRUE;
+            pot_info[P_POISON].oi_know = true;
             if (ISWEARING(R_SUSTSTR))
                 msg("you feel momentarily sick");
             else
@@ -100,33 +100,33 @@ void quaff()
                 come_down(0);
             }
         when P_HEALING:
-            pot_info[P_HEALING].oi_know = TRUE;
+            pot_info[P_HEALING].oi_know = true;
             if ((player.stats.s_hpt += roll(player.stats.s_lvl, 4)) > player.stats.s_maxhp)
                 player.stats.s_hpt = ++player.stats.s_maxhp;
             sight(0);
             msg("you begin to feel better");
         when P_STRENGTH:
-            pot_info[P_STRENGTH].oi_know = TRUE;
+            pot_info[P_STRENGTH].oi_know = true;
             chg_str(1);
             msg("you feel stronger, now.  What bulging muscles!");
         when P_MFIND:
             player.flags |= SEEMONST;
-            fuse(turn_see, TRUE, HUHDURATION, AFTER);
-            if (!turn_see(FALSE))
+            fuse(turn_see, true, HUHDURATION, AFTER);
+            if (!turn_see(false))
                 msg("you have a %s feeling for a moment, then it passes",
                     choose_str("normal", "strange"));
         when P_TFIND:
             /*
              * Potion of magic detection.  Show the potions and scrolls
              */
-            show = FALSE;
+            show = false;
             for(ItemThing* tp : lvl_obj)
             {
                 if (is_magic(tp))
                 {
-                    show = TRUE;
+                    show = true;
                     setMapDisplay(tp->pos.x, tp->pos.y, MAGIC);
-                    pot_info[P_TFIND].oi_know = TRUE;
+                    pot_info[P_TFIND].oi_know = true;
                 }
             }
             for (MonsterThing* mp : mlist)
@@ -135,14 +135,14 @@ void quaff()
                 {
                     if (is_magic(tp))
                     {
-                        show = TRUE;
+                        show = true;
                         setMapDisplay(mp->pos.x, mp->pos.y, MAGIC);
                     }
                 }
             }
             if (show)
             {
-                pot_info[P_TFIND].oi_know = TRUE;
+                pot_info[P_TFIND].oi_know = true;
                 displayMessage("You sense the presence of magic on this level.");
             }
             else
@@ -152,24 +152,24 @@ void quaff()
             if (!trip)
             {
                 if (on(player, SEEMONST))
-                    turn_see(FALSE);
+                    turn_see(false);
                 start_daemon(visuals, 0, BEFORE);
                 seenstairs = seen_stairs();
             }
-            do_pot(P_LSD, TRUE);
+            do_pot(P_LSD, true);
         when P_SEEINVIS:
             sprintf(prbuf, "this potion tastes like %s juice", fruit);
             show = on(player, CANSEE);
-            do_pot(P_SEEINVIS, FALSE);
+            do_pot(P_SEEINVIS, false);
             if (!show)
                 invis_on();
             sight(0);
         when P_RAISE:
-            pot_info[P_RAISE].oi_know = TRUE;
+            pot_info[P_RAISE].oi_know = true;
             msg("you suddenly feel much more skillful");
             raise_level();
         when P_XHEAL:
-            pot_info[P_XHEAL].oi_know = TRUE;
+            pot_info[P_XHEAL].oi_know = true;
             if ((player.stats.s_hpt += roll(player.stats.s_lvl, 8)) > player.stats.s_maxhp)
             {
                 if (player.stats.s_hpt > player.stats.s_maxhp + player.stats.s_lvl + 1)
@@ -180,9 +180,9 @@ void quaff()
             come_down(0);
             msg("you begin to feel much better");
         when P_HASTE:
-            pot_info[P_HASTE].oi_know = TRUE;
-            after = FALSE;
-            if (add_haste(TRUE))
+            pot_info[P_HASTE].oi_know = true;
+            after = false;
+            if (add_haste(true))
                 msg("you feel yourself moving much faster");
         when P_RESTORE:
             if (ISRING(LEFT, R_ADDSTR))
@@ -197,9 +197,9 @@ void quaff()
                 add_str(&player.stats.s_str, cur_ring[RIGHT]->arm);
             msg("hey, this tastes great.  It make you feel warm all over");
         when P_BLIND:
-            do_pot(P_BLIND, TRUE);
+            do_pot(P_BLIND, true);
         when P_LEVIT:
-            do_pot(P_LEVIT, TRUE);
+            do_pot(P_LEVIT, true);
     }
     status(false);
     /*
@@ -231,9 +231,9 @@ bool is_magic(ItemThing *obj)
         case STICK:
         case RING:
         case AMULET:
-            return TRUE;
+            return true;
     }
-    return FALSE;
+    return false;
 }
 
 /*
@@ -257,7 +257,7 @@ int turn_see(int turn_off)
 {
     bool can_see, add_new;
 
-    add_new = FALSE;
+    add_new = false;
     for (MonsterThing* mp : mlist)
     {
         can_see = see_monst(mp);
@@ -292,29 +292,29 @@ int turn_see(int turn_off)
 
 /*
  * seen_stairs:
- *        Return TRUE if the player has seen the stairs, called when starting to hallucinate
+ *        Return true if the player has seen the stairs, called when starting to hallucinate
  */
 bool seen_stairs()
 {
     MonsterThing        *tp;
 
     if (getMapDisplay(stairs.x, stairs.y) == STAIRS)                        /* it's on the map */
-        return TRUE;
+        return true;
     if (ce(hero, stairs))                        /* It's under him */
-        return TRUE;
+        return true;
 
     /*
      * if a monster is on the stairs, this gets hairy
      */
-    if ((tp = monster_at(stairs.x, stairs.y)) != NULL)
+    if ((tp = monster_at(stairs.x, stairs.y)) != nullptr)
     {
         if (see_monst(tp) && on(*tp, ISRUN))        /* if it's visible and awake */
-            return TRUE;                        /* it must have moved there */
+            return true;                        /* it must have moved there */
 
         if (on(player, SEEMONST))                /* if she can detect monster */
-            return TRUE;                        /* it must have moved there */
+            return true;                        /* it must have moved there */
     }
-    return FALSE;
+    return false;
 }
 
 /*
@@ -347,7 +347,7 @@ void do_pot(int type, bool knowit)
     {
         player.flags |= pp->pa_flags;
         fuse(pp->pa_daemon, 0, t, AFTER);
-        look(FALSE);
+        look(false);
     }
     else
         lengthen(pp->pa_daemon, t);

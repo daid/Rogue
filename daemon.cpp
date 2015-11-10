@@ -36,7 +36,7 @@ d_slot()
     for (dev = d_list; dev <= &d_list[MAXDAEMONS-1]; dev++)
         if (dev->d_type == EMPTY)
             return dev;
-    return NULL;
+    return nullptr;
 }
 
 /*
@@ -51,7 +51,7 @@ find_slot(daemon_function_t func)
     for (dev = d_list; dev <= &d_list[MAXDAEMONS-1]; dev++)
         if (dev->d_type != EMPTY && func == dev->d_func)
             return dev;
-    return NULL;
+    return nullptr;
 }
 
 /*
@@ -79,7 +79,7 @@ kill_daemon(daemon_function_t func)
 {
     register struct delayed_action *dev;
 
-    if ((dev = find_slot(func)) == NULL)
+    if ((dev = find_slot(func)) == nullptr)
         return;
     /*
      * Take it out of the list
@@ -133,7 +133,7 @@ lengthen(daemon_function_t func, int xtime)
 {
     register struct delayed_action *wire;
 
-    if ((wire = find_slot(func)) == NULL)
+    if ((wire = find_slot(func)) == nullptr)
         return;
     wire->d_time += xtime;
 }
@@ -147,7 +147,7 @@ extinguish(daemon_function_t func)
 {
     register struct delayed_action *wire;
 
-    if ((wire = find_slot(func)) == NULL)
+    if ((wire = find_slot(func)) == nullptr)
         return;
     wire->d_type = EMPTY;
 }

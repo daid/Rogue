@@ -73,7 +73,7 @@ void new_level()
     //The map generater placed the hero somewhere, display him, and redraw what's needed.
     setMapDisplay(hero.x, hero.y, PLAYER);
     if (on(player, SEEMONST))
-        turn_see(FALSE);
+        turn_see(false);
     if (on(player, ISHALU))
         visuals(0);
 }

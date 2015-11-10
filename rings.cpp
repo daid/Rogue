@@ -27,7 +27,7 @@ ring_on()
     /*
      * Make certain that it is somethings that we want to wear
      */
-    if (obj == NULL)
+    if (obj == nullptr)
         return;
     if (obj->type != RING)
     {
@@ -44,14 +44,14 @@ ring_on()
     if (is_current(obj))
         return;
 
-    if (cur_ring[LEFT] == NULL && cur_ring[RIGHT] == NULL)
+    if (cur_ring[LEFT] == nullptr && cur_ring[RIGHT] == nullptr)
     {
         if ((ring = gethand()) < 0)
             return;
     }
-    else if (cur_ring[LEFT] == NULL)
+    else if (cur_ring[LEFT] == nullptr)
         ring = LEFT;
-    else if (cur_ring[RIGHT] == NULL)
+    else if (cur_ring[RIGHT] == nullptr)
         ring = RIGHT;
     else
     {
@@ -81,7 +81,7 @@ ring_on()
 
     if (!terse)
         addmsg("you are now wearing ");
-    msg("%s (%c)", inv_name(obj, TRUE), obj->packch);
+    msg("%s (%c)", inv_name(obj, true), obj->packch);
 }
 
 /*
@@ -95,7 +95,7 @@ ring_off()
     int ring;
     ItemThing *obj;
 
-    if (cur_ring[LEFT] == NULL && cur_ring[RIGHT] == NULL)
+    if (cur_ring[LEFT] == nullptr && cur_ring[RIGHT] == nullptr)
     {
         if (terse)
             msg("no rings");
@@ -103,21 +103,21 @@ ring_off()
             msg("you aren't wearing any rings");
         return;
     }
-    else if (cur_ring[LEFT] == NULL)
+    else if (cur_ring[LEFT] == nullptr)
         ring = RIGHT;
-    else if (cur_ring[RIGHT] == NULL)
+    else if (cur_ring[RIGHT] == nullptr)
         ring = LEFT;
     else
         if ((ring = gethand()) < 0)
             return;
     obj = cur_ring[ring];
-    if (obj == NULL)
+    if (obj == nullptr)
     {
         msg("not wearing such a ring");
         return;
     }
     if (dropcheck(obj))
-        msg("was wearing %s(%c)", inv_name(obj, TRUE), obj->packch);
+        msg("was wearing %s(%c)", inv_name(obj, true), obj->packch);
 }
 
 /*
@@ -163,7 +163,7 @@ int ring_eat(int hand)
          1,        /* R_STEALTH */          1        /* R_SUSTARM */
     };
 
-    if ((ring = cur_ring[hand]) == NULL)
+    if ((ring = cur_ring[hand]) == nullptr)
         return 0;
     if ((eat = uses[ring->which]) < 0)
         eat = (rnd(-eat) == 0);

@@ -8,7 +8,7 @@ ClassicMazeGenerator::ClassicMazeGenerator()
     
     for (sp = &maze[0][0]; sp <= &maze[NUMLINES-1][NUMCOLS-1]; sp++)
     {
-        sp->used = FALSE;
+        sp->used = false;
         sp->nexits = 0;
     }
 }

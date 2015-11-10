@@ -20,15 +20,15 @@ void wear()
     ItemThing *obj;
     const char *sp;
 
-    if ((obj = get_item("wear", ARMOR)) == NULL)
+    if ((obj = get_item("wear", ARMOR)) == nullptr)
         return;
-    if (cur_armor != NULL)
+    if (cur_armor != nullptr)
     {
         addmsg("you are already wearing some");
         if (!terse)
             addmsg(".  You'll have to take it off first");
         endmsg();
-        after = FALSE;
+        after = false;
         return;
     }
     if (obj->type != ARMOR)
@@ -38,7 +38,7 @@ void wear()
     }
     waste_time();
     obj->flags |= ISKNOW;
-    sp = inv_name(obj, TRUE);
+    sp = inv_name(obj, true);
     cur_armor = obj;
     if (!terse)
         addmsg("you are now ");
@@ -53,9 +53,9 @@ void take_off()
 {
     ItemThing *obj;
 
-    if ((obj = cur_armor) == NULL)
+    if ((obj = cur_armor) == nullptr)
     {
-        after = FALSE;
+        after = false;
         if (terse)
                 msg("not wearing armor");
         else
@@ -64,12 +64,12 @@ void take_off()
     }
     if (!dropcheck(cur_armor))
         return;
-    cur_armor = NULL;
+    cur_armor = nullptr;
     if (terse)
         addmsg("was");
     else
         addmsg("you used to be");
-    msg(" wearing %c) %s", obj->packch, inv_name(obj, TRUE));
+    msg(" wearing %c) %s", obj->packch, inv_name(obj, true));
 }
 
 /*

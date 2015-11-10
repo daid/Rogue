@@ -133,7 +133,7 @@ quit(int sig)
         status(false);
         refreshMap();
         count = 0;
-        to_death = FALSE;
+        to_death = false;
     }
 }
 

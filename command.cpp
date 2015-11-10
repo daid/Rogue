@@ -26,7 +26,7 @@ command()
     register int ntimes = 1;                        /* Number of player moves */
     int *fp;
     MonsterThing *mp;
-    static char countch, direction, newcount = FALSE;
+    static char countch, direction, newcount = false;
 
     if (on(player, ISHASTE))
         ntimes++;
@@ -37,11 +37,11 @@ command()
     do_fuses(BEFORE);
     while (ntimes--)
     {
-        again = FALSE;
+        again = false;
         if (has_hit)
         {
             endmsg();
-            has_hit = FALSE;
+            has_hit = false;
         }
         /*
          * these are illegal things for the player to be, so if any are
@@ -50,16 +50,16 @@ command()
         if (on(player, ISSLOW|ISGREED|ISINVIS|ISREGEN|ISTARGET))
             exit(1);
 
-        look(TRUE);
+        look(true);
         if (!running)
-            door_stop = FALSE;
+            door_stop = false;
         status(false);
         lastscore = purse;
         setMapViewTarget(hero.x, hero.y);
         if (!((running || count) && jump))
             refreshMap();                        /* Draw screen */
         take = 0;
-        after = TRUE;
+        after = true;
         /*
          * Read command or continue run
          */
@@ -72,7 +72,7 @@ command()
             else
             {
                 ch = md_readchar();
-                move_on = FALSE;
+                move_on = false;
             }
         }
         else
@@ -90,11 +90,11 @@ command()
             /*
              * check for prefixes
              */
-            newcount = FALSE;
+            newcount = false;
             if (isdigit(ch))
             {
                 count = 0;
-                newcount = TRUE;
+                newcount = true;
                 while (isdigit(ch))
                 {
                     count = count * 10 + (ch - '0');
@@ -141,21 +141,13 @@ command()
                 l_last_pick = last_pick;
                 last_comm = ch;
                 last_dir = '\0';
-                last_pick = NULL;
+                last_pick = nullptr;
             }
 over:
             switch (ch)
             {
                 case ',': {
-                    ItemThing *found = NULL;
-                    for (ItemThing* obj : lvl_obj)
-                    {
-                        if (obj->pos.y == hero.y && obj->pos.x == hero.x)
-                        {
-                            found = obj;
-                            break;
-                        }
-                    }
+                    ItemThing *found = item_at(hero.x, hero.y);
 
                     if (found) {
                         if (levit_check())
@@ -194,8 +186,8 @@ over:
                 {
                     if (!on(player, ISBLIND))
                     {
-                        door_stop = TRUE;
-                        firstmove = TRUE;
+                        door_stop = true;
+                        firstmove = true;
                     }
                     if (count && !newcount)
                         ch = direction;
@@ -207,27 +199,27 @@ over:
                     goto over;
                 }
                 when 'F':
-                    kamikaze = TRUE;
+                    kamikaze = true;
                     /* FALLTHROUGH */
                 case 'f':
                     if (!get_dir())
                     {
-                        after = FALSE;
+                        after = false;
                         break;
                     }
                     delta.y += hero.y;
                     delta.x += hero.x;
-                    if ( ((mp = monster_at(delta.x, delta.y)) == NULL)
+                    if ( ((mp = monster_at(delta.x, delta.y)) == nullptr)
                         || ((!see_monst(mp)) && !on(player, SEEMONST)))
                     {
                         if (!terse)
                             addmsg("I see ");
                         msg("no monster there");
-                        after = FALSE;
+                        after = false;
                     }
                     else if (diag_ok(&hero, &delta))
                     {
-                        to_death = TRUE;
+                        to_death = true;
                         max_hit = 0;
                         mp->flags |= ISTARGET;
                         runch = ch = dir_ch;
@@ -235,27 +227,27 @@ over:
                     }
                 when 't':
                     if (!get_dir())
-                        after = FALSE;
+                        after = false;
                     else
                         missile(delta.y, delta.x);
                 when 'a':
                     if (last_comm == '\0')
                     {
                         msg("you haven't typed a command yet");
-                        after = FALSE;
+                        after = false;
                     }
                     else
                     {
                         ch = last_comm;
-                        again = TRUE;
+                        again = true;
                         goto over;
                     }
                 when 'q': quaff();
                 when 'Q':
-                    after = FALSE;
+                    after = false;
                     quit(0);
-                when 'i': after = FALSE; inventory(0);
-                when 'I': after = FALSE; picky_inven();
+                when 'i': after = false; inventory(0);
+                when 'I': after = false; picky_inven();
                 when 'd': drop();
                 when 'r': read_scroll();
                 when 'e': eat();
@@ -264,33 +256,33 @@ over:
                 when 'T': take_off();
                 when 'P': ring_on();
                 when 'R': ring_off();
-                when 'c': call(); after = FALSE;
-                when '>': after = FALSE; d_level();
-                when '<': after = FALSE; u_level();
-                when '?': after = FALSE; help();
-                when '/': after = FALSE; identify();
+                when 'c': call(); after = false;
+                when '>': after = false; d_level();
+                when '<': after = false; u_level();
+                when '?': after = false; help();
+                when '/': after = false; identify();
                 when 's': search();
                 when 'z':
                     do_zap();
-                when 'D': after = FALSE; discovered();
-                when CTRL('P'): after = FALSE; msg(huh);
+                when 'D': after = false; discovered();
+                when CTRL('P'): after = false; msg(huh);
                 when CTRL('R'):
-                    after = FALSE;
+                    after = false;
                     refreshMap();
                 when 'v':
-                    after = FALSE;
+                    after = false;
                     msg("version %s", release);
                 when 'M':
-                    after = FALSE;
+                    after = false;
                     displayLargeMap();
                 when 'S': 
                 case K_EXIT:
-                    after = FALSE;
+                    after = false;
                     save_game();
                 when '.': ;                        /* Rest command */
-                when ' ': after = FALSE;        /* "Legal" illegal command */
+                when ' ': after = false;        /* "Legal" illegal command */
                 when '^':
-                    after = FALSE;
+                    after = false;
                     if (get_dir())
                     {
                         delta.y += hero.y;
@@ -308,22 +300,22 @@ over:
                         }
                     }
                 when ESCAPE:        /* Escape */
-                    door_stop = FALSE;
+                    door_stop = false;
                     count = 0;
-                    after = FALSE;
-                    again = FALSE;
+                    after = false;
+                    again = false;
                 when 'm':
-                    move_on = TRUE;
+                    move_on = true;
                     if (!get_dir())
-                        after = FALSE;
+                        after = false;
                     else
                     {
                         ch = dir_ch;
                         countch = dir_ch;
                         goto over;
                     }
-                when ')': current(cur_weapon, "wielding", NULL);
-                when ']': current(cur_armor, "wearing", NULL);
+                when ')': current(cur_weapon, "wielding", nullptr);
+                when ']': current(cur_armor, "wearing", nullptr);
                 when '=':
                     current(cur_ring[LEFT], "wearing",
                                             terse ? "(L)" : "on left hand");
@@ -331,16 +323,16 @@ over:
                                             terse ? "(R)" : "on right hand");
                 when '@':
                     status(true);
-                    after = FALSE;
+                    after = false;
                 otherwise:
-                    after = FALSE;
+                    after = false;
                     illcom(ch);
             }
             /*
              * turn off flags if no longer needed
              */
             if (!running)
-                door_stop = FALSE;
+                door_stop = false;
         }
         /*
          * If he ran into something to take, let him pick it up.
@@ -348,7 +340,7 @@ over:
         if (take != 0)
             pick_up(take);
         if (!running)
-            door_stop = FALSE;
+            door_stop = false;
         if (!after)
             ntimes++;
     }
@@ -368,13 +360,12 @@ over:
  * illcom:
  *        What to do with an illegal command
  */
-void
-illcom(int ch)
+void illcom(int ch)
 {
-    save_msg = FALSE;
+    save_msg = false;
     count = 0;
     msg("illegal command '%s'", getKeyName(ch));
-    save_msg = TRUE;
+    save_msg = true;
 }
 
 /*
@@ -383,7 +374,7 @@ illcom(int ch)
  */
 void search()
 {
-    register int y, x;
+    int y, x;
     int *fp;
     int ey, ex;
     int probinc;
@@ -393,7 +384,7 @@ void search()
     ex = hero.x + 1;
     probinc = (on(player, ISHALU) ? 3 : 0);
     probinc += (on(player, ISBLIND) ? 2 : 0);
-    found = FALSE;
+    found = false;
     for (y = hero.y - 1; y <= ey; y++) 
         for (x = hero.x - 1; x <= ex; x++)
         {
@@ -413,10 +404,10 @@ void search()
                         char_at(x, y) = DOOR;
                         msg("a secret door");
 foundone:
-                        found = TRUE;
+                        found = true;
                         *fp |= F_REAL;
-                        count = FALSE;
-                        running = FALSE;
+                        count = false;
+                        running = false;
                         break;
                     case FLOOR:
                         if (rnd(2 + probinc) != 0)
@@ -441,7 +432,7 @@ foundone:
             }
         }
     if (found)
-        look(FALSE);
+        look(false);
 }
 
 /*
@@ -457,12 +448,12 @@ void help()
     // If its not a *, print the right help string or an error if he typed a funny character.
     if (helpch != '*')
     {
-        for (strp = helpstr; strp->h_desc != NULL; strp++)
+        for (strp = helpstr; strp->h_desc != nullptr; strp++)
             if (strp->h_ch == helpch)
             {
-                lower_msg = TRUE;
+                lower_msg = true;
                 msg("%s%s", getKeyName(strp->h_ch), strp->h_desc);
-                lower_msg = FALSE;
+                lower_msg = false;
                 return;
             }
         msg("unknown character '%s'", getKeyName(helpch));
@@ -470,7 +461,7 @@ void help()
     }
     */
     startDisplayOfStringList();
-    for (strp = helpstr; strp->h_desc != NULL; strp++)
+    for (strp = helpstr; strp->h_desc != nullptr; strp++)
         if (strp->h_print)
             displayStringListItem("%s%s", getKeyName(strp->h_ch), strp->h_desc);
     finishDisplayOfStringList();
@@ -490,33 +481,33 @@ identify()
     const char *str;
     
     static struct h_list ident_list[] = {
-        {WALL_H,        "wall of a room",                FALSE},
-        {WALL_V,        "wall of a room",                FALSE},
-        {WALL_TL,       "wall of a room",                FALSE},
-        {WALL_TR,       "wall of a room",                FALSE},
-        {WALL_BL,       "wall of a room",                FALSE},
-        {WALL_BR,       "wall of a room",                FALSE},
-        {SOLID_WALL,    "wall",                          FALSE},
-        {'|',           "wall of a room",                FALSE},
-        {'-',           "wall of a room",                FALSE},
-        {GOLD,          "gold",                          FALSE},
-        {STAIRS,        "a staircase",                   FALSE},
-        {DOOR,          "door",                          FALSE},
-        {CLOSED_DOOR,   "closed door",                   FALSE},
-        {FLOOR,         "room floor",                    FALSE},
-        {PLAYER,        "you",                           FALSE},
-        {PASSAGE_UNLIT, "passage",                       FALSE},
-        {PASSAGE,       "passage",                       FALSE},
-        {TRAP,          "trap",                          FALSE},
-        {POTION,        "potion",                        FALSE},
-        {SCROLL,        "scroll",                        FALSE},
-        {FOOD,          "food",                          FALSE},
-        {WEAPON,        "weapon",                        FALSE},
-        {' ',           "solid rock",                    FALSE},
-        {ARMOR,         "armor",                         FALSE},
-        {AMULET,        "the Amulet of Yendor",          FALSE},
-        {RING,          "ring",                          FALSE},
-        {STICK,         "wand or staff",                 FALSE},
+        {WALL_H,        "wall of a room",                false},
+        {WALL_V,        "wall of a room",                false},
+        {WALL_TL,       "wall of a room",                false},
+        {WALL_TR,       "wall of a room",                false},
+        {WALL_BL,       "wall of a room",                false},
+        {WALL_BR,       "wall of a room",                false},
+        {SOLID_WALL,    "wall",                          false},
+        {'|',           "wall of a room",                false},
+        {'-',           "wall of a room",                false},
+        {GOLD,          "gold",                          false},
+        {STAIRS,        "a staircase",                   false},
+        {DOOR,          "door",                          false},
+        {CLOSED_DOOR,   "closed door",                   false},
+        {FLOOR,         "room floor",                    false},
+        {PLAYER,        "you",                           false},
+        {PASSAGE_UNLIT, "passage",                       false},
+        {PASSAGE,       "passage",                       false},
+        {TRAP,          "trap",                          false},
+        {POTION,        "potion",                        false},
+        {SCROLL,        "scroll",                        false},
+        {FOOD,          "food",                          false},
+        {WEAPON,        "weapon",                        false},
+        {' ',           "solid rock",                    false},
+        {ARMOR,         "armor",                         false},
+        {AMULET,        "the Amulet of Yendor",          false},
+        {RING,          "ring",                          false},
+        {STICK,         "wand or staff",                 false},
         {'\0'}
     };
 
@@ -554,7 +545,7 @@ d_level()
     else
     {
         level++;
-        seenstairs = FALSE;
+        seenstairs = false;
         new_level();
         msg("You descend to level %d", level);
     }
@@ -599,9 +590,9 @@ bool
 levit_check()
 {
     if (!on(player, ISLEVIT))
-        return FALSE;
+        return false;
     msg("You can't.  You're floating off the ground!");
-    return TRUE;
+    return true;
 }
 
 /*
@@ -612,16 +603,16 @@ void
 call()
 {
     ItemThing *obj;
-    struct obj_info *op = NULL;
+    struct obj_info *op = nullptr;
     char **guess;
-    const char* elsewise = NULL;
+    const char* elsewise = nullptr;
     register bool *know;
 
     obj = get_item("call", CALLABLE);
     /*
      * Make certain that it is somethings that we want to wear
      */
-    if (obj == NULL)
+    if (obj == nullptr)
         return;
     switch (obj->type)
     {
@@ -643,36 +634,36 @@ call()
 norm:
             know = &op->oi_know;
             guess = &op->oi_guess;
-            if (*guess != NULL)
+            if (*guess != nullptr)
                 elsewise = *guess;
         when FOOD:
             msg("you can't call that anything");
             return;
         otherwise:
             guess = &obj->label;
-            know = NULL;
+            know = nullptr;
             elsewise = obj->label;
     }
-    if (know != NULL && *know)
+    if (know != nullptr && *know)
     {
         msg("that has already been identified");
         return;
     }
-    if (elsewise != NULL && elsewise == *guess)
+    if (elsewise != nullptr && elsewise == *guess)
     {
         if (!terse)
             addmsg("Was ");
         msg("called \"%s\"", elsewise);
     }
 
-    if (elsewise == NULL)
+    if (elsewise == nullptr)
         strcpy(prbuf, "");
     else
         strcpy(prbuf, elsewise);
 
     if (askForInput(terse ? "call it:" : "what do you want to call it?", prbuf, MAXSTR) == NORM)
     {
-        if (*guess != NULL)
+        if (*guess != nullptr)
             free(*guess);
         *guess = (char*)malloc((unsigned int) strlen(prbuf) + 1);
         strcpy(*guess, prbuf);
@@ -685,14 +676,14 @@ norm:
  */
 void current(ItemThing *cur, const char *how, const char *where)
 {
-    after = FALSE;
-    if (cur != NULL)
+    after = false;
+    if (cur != nullptr)
     {
         if (!terse)
             addmsg("you are %s (", how);
-        inv_describe = FALSE;
-        addmsg("%c) %s", cur->packch, inv_name(cur, TRUE));
-        inv_describe = TRUE;
+        inv_describe = false;
+        addmsg("%c) %s", cur->packch, inv_name(cur, true));
+        inv_describe = true;
         if (where)
             addmsg(" %s", where);
         endmsg();

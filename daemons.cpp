@@ -180,8 +180,8 @@ int stomach(int arg)
     }
     if (hungry_state != orig_hungry) { 
         player.flags &= ~ISRUN; 
-        running = FALSE; 
-        to_death = FALSE; 
+        running = false; 
+        to_death = false; 
         count = 0; 
     }
     return 0;

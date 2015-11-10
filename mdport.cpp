@@ -189,7 +189,7 @@ int md_readchar()
     {
         DIR* dh = opendir("/dev/input");
         struct dirent* dent;
-        while((dent = readdir(dh)) != NULL)
+        while((dent = readdir(dh)) != nullptr)
         {
             if (dent->d_type != DT_CHR)
                 continue;
@@ -212,7 +212,7 @@ int md_readchar()
             FD_SET(handle, &readfd);
             max_handle = std::max(max_handle, handle);
         }
-        select(max_handle + 1, &readfd, NULL, NULL, NULL);
+        select(max_handle + 1, &readfd, nullptr, nullptr, nullptr);
         for(int handle : handles)
         {
             if (FD_ISSET(handle, &readfd))

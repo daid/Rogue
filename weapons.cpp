@@ -47,18 +47,18 @@ void missile(int ydelta, int xdelta)
     /*
      * Get which thing we are hurling
      */
-    if ((obj = get_item("throw", WEAPON)) == NULL)
+    if ((obj = get_item("throw", WEAPON)) == nullptr)
         return;
     if (!dropcheck(obj) || is_current(obj))
         return;
-    obj = leave_pack(obj, TRUE, FALSE);
+    obj = leave_pack(obj, true, false);
     do_motion(obj, ydelta, xdelta);
     /*
      * AHA! Here it has hit something.  If it is a wall or a door,
      * or if it misses (combat) the monster, put it on the floor
      */
-    if (monster_at(obj->pos.x, obj->pos.y) == NULL || !hit_monster(unc(obj->pos), obj))
-        fall(obj, TRUE);
+    if (monster_at(obj->pos.x, obj->pos.y) == nullptr || !hit_monster(unc(obj->pos), obj))
+        fall(obj, true);
 }
 
 /*
@@ -130,7 +130,7 @@ void fall(ItemThing *obj, bool pr)
         if (has_hit)
         {
             endmsg();
-            has_hit = FALSE;
+            has_hit = false;
         }
         msg("the %s vanishes as it hits the ground",
             weap_info[obj->which].oi_name);
@@ -183,7 +183,7 @@ int hit_monster(int y, int x, ItemThing *obj)
 
     mp.y = y;
     mp.x = x;
-    return fight(&mp, obj, TRUE);
+    return fight(&mp, obj, true);
 }
 
 /*
@@ -217,25 +217,25 @@ void wield()
         return;
     }
     cur_weapon = oweapon;
-    if ((obj = get_item("wield", WEAPON)) == NULL)
+    if ((obj = get_item("wield", WEAPON)) == nullptr)
     {
-        after = FALSE;
+        after = false;
         return;
     }
 
     if (obj->type == ARMOR)
     {
         msg("you can't wield armor");
-        after = FALSE;
+        after = false;
         return;
     }
     if (is_current(obj))
     {
-        after = FALSE;
+        after = false;
         return;
     }
 
-    sp = inv_name(obj, TRUE);
+    sp = inv_name(obj, true);
     cur_weapon = obj;
     if (!terse)
         addmsg("you are now ");

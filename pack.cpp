@@ -25,12 +25,12 @@ void add_pack(ItemThing *obj, bool silent)
 {
     bool from_floor;
 
-    from_floor = FALSE;
-    if (obj == NULL)
+    from_floor = false;
+    if (obj == nullptr)
     {
-        if ((obj = item_at(hero.x, hero.y)) == NULL)
+        if ((obj = item_at(hero.x, hero.y)) == nullptr)
             return;
-        from_floor = TRUE;
+        from_floor = true;
     }
 
     /*
@@ -121,7 +121,7 @@ void add_pack(ItemThing *obj, bool silent)
             mp->dest = &hero;
 
     if (obj->type == AMULET)
-        amulet = TRUE;
+        amulet = true;
     /*
      * Notify the user
      */
@@ -151,7 +151,7 @@ bool pack_room(bool from_floor, ItemThing *obj)
         if (from_floor)
             move_msg(obj);
         inpack = MAXPACK;
-        return FALSE;
+        return false;
     }
 
     if (from_floor)
@@ -160,7 +160,7 @@ bool pack_room(bool from_floor, ItemThing *obj)
         item_at(hero.x, hero.y) = nullptr;
     }
 
-    return TRUE;
+    return true;
 }
 
 /*
@@ -188,8 +188,8 @@ ItemThing * leave_pack(ItemThing *obj, bool newobj, bool all)
     }
     else
     {
-        last_pick = NULL;
-        pack_used[obj->packch - 'a'] = FALSE;
+        last_pick = nullptr;
+        pack_used[obj->packch - 'a'] = false;
         player.pack.remove(obj);
     }
     return nobj;
@@ -206,13 +206,13 @@ pack_char()
 
     for (bp = pack_used; *bp; bp++)
         continue;
-    *bp = TRUE;
+    *bp = true;
     return (char)((int)(bp - pack_used) + 'a');
 }
 
 /*
  * inventory:
- *        List what is in the pack.  Return TRUE if there is something of
+ *        List what is in the pack.  Return true if there is something of
  *        the given type.
  */
 int inventory(int type)
@@ -228,7 +228,7 @@ int inventory(int type)
             !(type == R_OR_S && (list->type == RING || list->type == STICK)))
                 continue;
         n_objs++;
-        ch = displayStringListItem("%c) %s", list->packch, inv_name(list, FALSE));
+        ch = displayStringListItem("%c) %s", list->packch, inv_name(list, false));
         if (ch == ESCAPE)
             return ch;
         for (ItemThing* list2 : player.pack)
@@ -299,7 +299,7 @@ void pick_up(int ch)
         switch (ch)
         {
             case GOLD:
-                if (obj == NULL)
+                if (obj == nullptr)
                     return;
                 money(obj->arm);//gold value is stored in "arm" field (used to be handled with an ugly define)
                 lvl_obj.remove(obj);
@@ -315,7 +315,7 @@ void pick_up(int ch)
             case AMULET:
             case RING:
             case STICK:
-                add_pack(NULL, FALSE);
+                add_pack(nullptr, false);
                 break;
         }
     }
@@ -331,7 +331,7 @@ move_msg(ItemThing *obj)
 {
     if (!terse)
         addmsg("you ");
-    msg("moved onto %s", inv_name(obj, TRUE));
+    msg("moved onto %s", inv_name(obj, true));
 }
 
 /*
@@ -347,7 +347,7 @@ picky_inven()
     if (player.pack.size() == 0)
         msg("you aren't carrying anything");
     else if (player.pack.size() == 1)
-        msg("a) %s", inv_name(player.pack.front(), FALSE));
+        msg("a) %s", inv_name(player.pack.front(), false));
     else
     {
         mch = displayMessage(terse ? "item:" : "which item do you wish to inventory:");
@@ -358,7 +358,7 @@ picky_inven()
         for (ItemThing* obj : player.pack)
             if (mch == obj->packch)
             {
-                msg("%c) %s", mch, inv_name(obj, FALSE));
+                msg("%c) %s", mch, inv_name(obj, false));
                 return;
             }
         msg("'%s' not in pack", getKeyName(mch));
@@ -397,16 +397,16 @@ get_item(const char *purpose, int type)
             if (ch == ESCAPE || ch == K_EXIT)
             {
                 reset_last();
-                after = FALSE;
-                return NULL;
+                after = false;
+                return nullptr;
             }
             if (ch == '*')
             {
                 ch = inventory(type);
                 if (ch == ESCAPE)
                 {
-                    after = FALSE;
-                    return NULL;
+                    after = false;
+                    return nullptr;
                 }
                 if (ch == 0)
                 {
@@ -414,7 +414,7 @@ get_item(const char *purpose, int type)
                     continue;
                 }
             }
-            ItemThing* obj = NULL;
+            ItemThing* obj = nullptr;
             for (ItemThing* o : player.pack)
             {
                 if (o->packch == ch)
@@ -423,7 +423,7 @@ get_item(const char *purpose, int type)
                     break;
                 }
             }
-            if (obj == NULL)
+            if (obj == nullptr)
             {
                 msg("'%s' is not a valid item", getKeyName(ch));
                 continue;
@@ -432,7 +432,7 @@ get_item(const char *purpose, int type)
                 return obj;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 /*

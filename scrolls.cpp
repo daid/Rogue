@@ -26,12 +26,12 @@ void read_scroll()
     int y, x;
     int ch;
     int i;
-    bool discardit = FALSE;
+    bool discardit = false;
     ItemThing *orig_obj;
     static coord mp;
 
     obj = get_item("read", SCROLL);
-    if (obj == NULL)
+    if (obj == nullptr)
         return;
     if (obj->type != SCROLL)
     {
@@ -45,12 +45,12 @@ void read_scroll()
      * Calculate the effect it has on the poor guy.
      */
     if (obj == cur_weapon)
-        cur_weapon = NULL;
+        cur_weapon = nullptr;
     /*
      * Get rid of the thing
      */
     discardit = (bool)(obj->count == 1);
-    leave_pack(obj, FALSE, FALSE);
+    leave_pack(obj, false, false);
     orig_obj = obj;
 
     switch (obj->which)
@@ -62,7 +62,7 @@ void read_scroll()
             player.flags |= CANHUH;
             msg("your hands begin to glow %s", pick_color("red"));
         when S_ARMOR:
-            if (cur_armor != NULL)
+            if (cur_armor != nullptr)
             {
                 cur_armor->arm--;
                 cur_armor->flags &= ~ISCURSED;
@@ -79,7 +79,7 @@ void read_scroll()
                 if (x >= 0 && x < NUMCOLS)
                     for (y = hero.y - 2; y <= hero.y + 2; y++)
                         if (y >= 0 && y <= NUMLINES - 1)
-                            if ((m_obj = monster_at(x, y)) != NULL && on(*m_obj, ISRUN))
+                            if ((m_obj = monster_at(x, y)) != nullptr && on(*m_obj, ISRUN))
                             {
                                 m_obj->flags &= ~ISRUN;
                                 m_obj->flags |= ISHELD;
@@ -94,7 +94,7 @@ void read_scroll()
                 if (ch == 1)
                     addmsg("s");
                 endmsg();
-                scr_info[S_HOLD].oi_know = TRUE;
+                scr_info[S_HOLD].oi_know = true;
             }
             else
                 msg("you feel a strange sense of loss");
@@ -102,7 +102,7 @@ void read_scroll()
             /*
              * Scroll which makes you fall asleep
              */
-            scr_info[S_SLEEP].oi_know = TRUE;
+            scr_info[S_SLEEP].oi_know = true;
             no_command += rnd(SLEEPTIME) + 4;
             player.flags &= ~ISRUN;
             msg("you fall asleep");
@@ -137,7 +137,7 @@ void read_scroll()
                 msg("you hear a faint cry of anguish in the distance");
             else
             {
-                m_obj = new MonsterThing(randmonster(FALSE), mp);
+                m_obj = new MonsterThing(randmonster(false), mp);
             }
         when S_ID_POTION:
         case S_ID_SCROLL:
@@ -150,15 +150,15 @@ void read_scroll()
             /*
              * Identify, let him figure something out
              */
-            scr_info[obj->which].oi_know = TRUE;
+            scr_info[obj->which].oi_know = true;
             msg("this scroll is an %s scroll", scr_info[obj->which].oi_name);
-            whatis(TRUE, id_type[obj->which]);
+            whatis(true, id_type[obj->which]);
         }
         when S_MAP:
             /*
              * Scroll of magic mapping.
              */
-            scr_info[S_MAP].oi_know = TRUE;
+            scr_info[S_MAP].oi_know = true;
             msg("oh, now this scroll has a map on it");
             /*
              * take all the things we want to keep hidden out of the window
@@ -225,7 +225,7 @@ def:
                     }
                     if (ch != ' ')
                     {
-                        if (pp->p_monst == NULL || !on(player, SEEMONST))
+                        if (pp->p_monst == nullptr || !on(player, SEEMONST))
                             setMapDisplay(x, y, ch);
                     }
                 }
@@ -233,16 +233,16 @@ def:
             /*
              * Potion of gold detection
              */
-            ch = FALSE;
+            ch = false;
             for (ItemThing* op : lvl_obj)
                 if (op->type == FOOD)
                 {
-                    ch = TRUE;
+                    ch = true;
                     setMapDisplay(op->pos.x, op->pos.y, FOOD);
                 }
             if (ch)
             {
-                scr_info[S_FDET].oi_know = TRUE;
+                scr_info[S_FDET].oi_know = true;
                 displayMessage("Your nose tingles and you smell food.");
             }
             else
@@ -256,10 +256,10 @@ def:
                 coord old_pos = hero;
                 teleport();
                 if (!has_line_of_sight(old_pos.x, old_pos.y, hero.x, hero.y))
-                    scr_info[S_TELEP].oi_know = TRUE;
+                    scr_info[S_TELEP].oi_know = true;
             }
         when S_ENCH:
-            if (cur_weapon == NULL || cur_weapon->type != WEAPON)
+            if (cur_weapon == nullptr || cur_weapon->type != WEAPON)
                 msg("you feel a strange sense of loss");
             else
             {
@@ -292,7 +292,7 @@ def:
             aggravate();
             msg("you hear a high pitched humming noise");
         when S_PROTECT:
-            if (cur_armor != NULL)
+            if (cur_armor != nullptr)
             {
                 cur_armor->flags |= ISPROT;
                 msg("your armor is covered by a shimmering %s shield", pick_color("gold"));
@@ -321,7 +321,7 @@ def:
             }
     }
     obj = orig_obj;
-    look(TRUE);        /* put the result of the scroll on the screen */
+    look(true);        /* put the result of the scroll on the screen */
     status(false);
     
     call_it(&scr_info[obj->which]);
@@ -338,6 +338,6 @@ def:
 void
 uncurse(ItemThing *obj)
 {
-    if (obj != NULL)
+    if (obj != nullptr)
         obj->flags &= ~ISCURSED;
 }

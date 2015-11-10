@@ -20,8 +20,8 @@
 
 void do_run(int ch)
 {
-    running = TRUE;
-    after = FALSE;
+    running = true;
+    after = false;
     runch = ch;
 }
 
@@ -36,7 +36,7 @@ void do_move(int dy, int dx)
     int fl;
     coord nh;
 
-    firstmove = FALSE;
+    firstmove = false;
     if (no_move)
     {
         no_move--;
@@ -51,9 +51,9 @@ void do_move(int dy, int dx)
         nh = *rndmove(&player);
         if (ce(nh, hero))
         {
-            after = FALSE;
-            running = FALSE;
-            to_death = FALSE;
+            after = false;
+            running = false;
+            to_death = false;
             return;
         }
     }
@@ -71,12 +71,12 @@ void do_move(int dy, int dx)
         goto hit_bound;
     if (!diag_ok(&hero, &nh))
     {
-        after = FALSE;
-        running = FALSE;
+        after = false;
+        running = false;
         return;
     }
     if (running && ce(hero, nh))
-        after = running = FALSE;
+        after = running = false;
     fl = flags_at(nh.x, nh.y);
     if (!(fl & F_REAL) && char_at(nh.x, nh.y) == FLOOR)
     {
@@ -119,7 +119,7 @@ hit_bound:
             char_at(nh.x, nh.y) = DOOR;
             break;
         case DOOR:
-            running = FALSE;
+            running = false;
             goto move_stuff;
         case TRAP:
             {
@@ -136,13 +136,13 @@ hit_bound:
                 be_trapped(&nh);
             goto move_stuff;
         case STAIRS:
-            seenstairs = TRUE;
+            seenstairs = true;
             /* FALLTHROUGH */
         default:
-            running = FALSE;
+            running = false;
 move_stuff:
             if (monster_at(nh.x, nh.y))
-                fight(&nh, cur_weapon, FALSE);
+                fight(&nh, cur_weapon, false);
             else
             {
                 if (item_at(nh.x, nh.y))
@@ -178,8 +178,8 @@ char be_trapped(coord *tc)
 
     if (on(player, ISLEVIT))
         return T_RUST;        /* anything that's not a door or teleport, as returning those causes different handling */
-    running = FALSE;
-    count = FALSE;
+    running = false;
+    count = false;
     pp = INDEX(tc->y, tc->x);
     pp->p_ch = TRAP;
     tr = pp->p_flags & F_TMASK;
@@ -224,7 +224,7 @@ char be_trapped(coord *tc)
                 init_weapon(arrow, ARROW);
                 arrow->count = 1;
                 arrow->pos = hero;
-                fall(arrow, FALSE);
+                fall(arrow, false);
                 msg("an arrow shoots past you");
             }
         when T_TELEP:
@@ -295,7 +295,7 @@ bad:
 
 void rust_armor(ItemThing *arm)
 {
-    if (arm == NULL || arm->type != ARMOR || arm->which == LEATHER || arm->arm >= 9)
+    if (arm == nullptr || arm->type != ARMOR || arm->which == LEATHER || arm->arm >= 9)
         return;
 
     if ((arm->flags & ISPROT) || ISWEARING(R_SUSTARM))

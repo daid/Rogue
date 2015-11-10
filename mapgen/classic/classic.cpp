@@ -153,7 +153,7 @@ void ClassicMapGenerator::do_rooms()
 
             gold = new ItemThing();
             gold->arm = rp->r_goldval = GOLDCALC;//gold value is stored in arm field (used to be handled with ugly define)
-            find_floor(rp, &gold->pos, FALSE, FALSE);
+            find_floor(rp, &gold->pos, false, false);
             gold->flags = ISMANY;
             gold->group = GOLDGRP;
             gold->type = GOLD;
@@ -165,8 +165,8 @@ void ClassicMapGenerator::do_rooms()
          */
         if (rnd(100) < (rp->r_goldval > 0 ? 80 : 25))
         {
-            find_floor(rp, &mp, FALSE, TRUE);
-            tp = new MonsterThing(randmonster(FALSE), mp);
+            find_floor(rp, &mp, false, true);
+            tp = new MonsterThing(randmonster(false), mp);
             give_pack(tp);
         }
     }
@@ -189,7 +189,7 @@ int ClassicMapGenerator::rnd_room()
 
 /*
  * find_floor:
- *        Find a valid floor spot in this room.  If rp is NULL, then
+ *        Find a valid floor spot in this room.  If rp is nullptr, then
  *        pick a new room each time around the loop.
  */
 bool ClassicMapGenerator::find_floor(struct room *rp, coord *cp, int limit, bool monst)
@@ -199,7 +199,7 @@ bool ClassicMapGenerator::find_floor(struct room *rp, coord *cp, int limit, bool
     char compchar = 0;
     bool pickroom;
 
-    pickroom = (bool)(rp == NULL);
+    pickroom = (bool)(rp == nullptr);
 
     if (!pickroom)
         compchar = ((rp->r_flags & ISMAZE) ? PASSAGE : FLOOR);
@@ -207,7 +207,7 @@ bool ClassicMapGenerator::find_floor(struct room *rp, coord *cp, int limit, bool
     for (;;)
     {
         if (limit && cnt-- == 0)
-            return FALSE;
+            return false;
         if (pickroom)
         {
             rp = &rooms[rnd_room()];
@@ -220,11 +220,11 @@ bool ClassicMapGenerator::find_floor(struct room *rp, coord *cp, int limit, bool
         pp = INDEX(cp->y, cp->x);
         if (monst)
         {
-            if (pp->p_monst == NULL && step_ok(pp->p_ch))
-                return TRUE;
+            if (pp->p_monst == nullptr && step_ok(pp->p_ch))
+                return true;
         }
         else if (pp->p_ch == compchar)
-            return TRUE;
+            return true;
     }
 }
 
@@ -315,7 +315,7 @@ void ClassicMapGenerator::treas_room()
     num_monst = nm = rnd(spots) + MINTREAS;
     while (nm--)
     {
-        find_floor(rp, &mp, 2 * MAXTRIES, FALSE);
+        find_floor(rp, &mp, 2 * MAXTRIES, false);
         tp = new_thing();
         tp->pos = mp;
         lvl_obj.push_front(tp);
@@ -335,9 +335,9 @@ void ClassicMapGenerator::treas_room()
     while (nm--)
     {
         spots = 0;
-        if (find_floor(rp, &mp, MAXTRIES, TRUE))
+        if (find_floor(rp, &mp, MAXTRIES, true))
         {
-            monster_p = new MonsterThing(randmonster(FALSE), mp);
+            monster_p = new MonsterThing(randmonster(false), mp);
             monster_p->flags |= ISMEAN;        /* no sloughers in THIS room */
             give_pack(monster_p);
         }
@@ -352,7 +352,7 @@ void ClassicMapGenerator::treas_room()
 
 void ClassicMapGenerator::do_passages()
 {
-    struct rdes *r1, *r2 = NULL;
+    struct rdes *r1, *r2 = nullptr;
     int i, j;
     int roomcount;
     static struct rdes
@@ -378,8 +378,8 @@ void ClassicMapGenerator::do_passages()
     for (r1 = rdes; r1 <= &rdes[MAXROOMS-1]; r1++)
     {
         for (j = 0; j < MAXROOMS; j++)
-            r1->isconn[j] = FALSE;
-        r1->ingraph = FALSE;
+            r1->isconn[j] = false;
+        r1->ingraph = false;
     }
 
     /*
@@ -388,7 +388,7 @@ void ClassicMapGenerator::do_passages()
      */
     roomcount = 1;
     r1 = &rdes[rnd(MAXROOMS)];
-    r1->ingraph = TRUE;
+    r1->ingraph = true;
     do
     {
         /*
@@ -414,12 +414,12 @@ void ClassicMapGenerator::do_passages()
          */
         else
         {
-            r2->ingraph = TRUE;
+            r2->ingraph = true;
             i = (int)(r1 - rdes);
             j = (int)(r2 - rdes);
             conn(i, j);
-            r1->isconn[j] = TRUE;
-            r2->isconn[i] = TRUE;
+            r1->isconn[j] = true;
+            r2->isconn[i] = true;
             roomcount++;
         }
     } while (roomcount < MAXROOMS);
@@ -447,8 +447,8 @@ void ClassicMapGenerator::do_passages()
             i = (int)(r1 - rdes);
             j = (int)(r2 - rdes);
             conn(i, j);
-            r1->isconn[j] = TRUE;
-            r2->isconn[i] = TRUE;
+            r1->isconn[j] = true;
+            r2->isconn[i] = true;
         }
     }
 }
@@ -460,7 +460,7 @@ void ClassicMapGenerator::do_passages()
 
 void ClassicMapGenerator::conn(int r1, int r2)
 {
-    struct room *rpf, *rpt = NULL;
+    struct room *rpf, *rpt = nullptr;
     int rmt;
     int distance = 0, turn_spot, turn_distance = 0;
     int rm;

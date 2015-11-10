@@ -54,17 +54,17 @@ void do_zap()
     char monster;
     static ItemThing bolt;
 
-    if ((obj = get_item("zap with", STICK)) == NULL)
+    if ((obj = get_item("zap with", STICK)) == nullptr)
         return;
     if (obj->type != STICK)
     {
-        after = FALSE;
+        after = false;
         msg("you can't zap with that!");
         return;
     }
     if (!get_dir())
     {
-        after = FALSE;
+        after = false;
         return;
     }
     if (obj->arm <= 0) //amount of charges is stored in the arm field.
@@ -95,7 +95,7 @@ void do_zap()
             /*
              * Reddy Kilowat wand.  Light up the room
              */
-            ws_info[WS_LIGHT].oi_know = TRUE;
+            ws_info[WS_LIGHT].oi_know = true;
             visit_field_of_view(hero.x, hero.y, 10, [](int x, int y)
             {
                 flags_at(x, y) |= F_ISLIT;
@@ -129,7 +129,7 @@ void do_zap()
                 y += delta.y;
                 x += delta.x;
             }
-            if ((tp = monster_at(x, y)) != NULL)
+            if ((tp = monster_at(x, y)) != nullptr)
             {
                 monster = tp->type;
                 if (monster == 'F')
@@ -176,16 +176,16 @@ void do_zap()
                 }
             }
         when WS_MISSILE:
-            ws_info[WS_MISSILE].oi_know = TRUE;
+            ws_info[WS_MISSILE].oi_know = true;
             bolt.type = '*';
             strncpy(bolt.hurldmg,"1x4",sizeof(bolt.hurldmg));
             bolt.hplus = 100;
             bolt.dplus = 1;
             bolt.flags = ISMISL;
-            if (cur_weapon != NULL)
+            if (cur_weapon != nullptr)
                 bolt.launch = cur_weapon->which;
             do_motion(&bolt, delta.y, delta.x);
-            if ((tp = monster_at(bolt.pos.x, bolt.pos.y)) != NULL && !save_throw(VS_MAGIC, tp))
+            if ((tp = monster_at(bolt.pos.x, bolt.pos.y)) != nullptr && !save_throw(VS_MAGIC, tp))
                 hit_monster(unc(bolt.pos), &bolt);
             else if (terse)
                 msg("missle vanishes");
@@ -200,7 +200,7 @@ void do_zap()
                 y += delta.y;
                 x += delta.x;
             }
-            if ((tp = monster_at(x, y)) != NULL)
+            if ((tp = monster_at(x, y)) != nullptr)
             {
                 if (obj->which == WS_HASTE_M)
                 {
@@ -215,7 +215,7 @@ void do_zap()
                         tp->flags &= ~ISHASTE;
                     else
                         tp->flags |= ISSLOW;
-                    tp->turn = TRUE;
+                    tp->turn = true;
                 }
                 delta.y = y;
                 delta.x = x;
@@ -231,7 +231,7 @@ void do_zap()
             else
                 name = "ice";
             fire_bolt(&hero, &delta, name);
-            ws_info[obj->which].oi_know = TRUE;
+            ws_info[obj->which].oi_know = true;
         when WS_NOP:
             break;
     }
@@ -304,8 +304,8 @@ void fire_bolt(coord *start, coord *dir, const char *name)
     }
     pos = *start;
     hit_hero = (bool)(start != &hero);
-    used = FALSE;
-    changed = FALSE;
+    used = false;
+    changed = false;
     for (c1 = spotpos; c1 <= &spotpos[BOLT_LENGTH-1] && !used; c1++)
     {
         pos.y += dir->y;
@@ -335,7 +335,7 @@ void fire_bolt(coord *start, coord *dir, const char *name)
             case ' ':
                 if (!changed)
                     hit_hero = !hit_hero;
-                changed = FALSE;
+                changed = false;
                 dir->y = -dir->y;
                 dir->x = -dir->x;
                 c1--;
@@ -343,14 +343,14 @@ void fire_bolt(coord *start, coord *dir, const char *name)
                 break;
             default:
 def:
-                if (!hit_hero && (tp = monster_at(pos.x, pos.y)) != NULL)
+                if (!hit_hero && (tp = monster_at(pos.x, pos.y)) != nullptr)
                 {
-                    hit_hero = TRUE;
+                    hit_hero = true;
                     changed = !changed;
                     if (!save_throw(VS_MAGIC, tp))
                     {
                         bolt.pos = pos;
-                        used = TRUE;
+                        used = true;
                         if (tp->type == 'D' && strcmp(name, "flame") == 0)
                         {
                             addmsg("the flame bounces");
@@ -373,12 +373,12 @@ def:
                 }
                 else if (hit_hero && ce(pos, hero))
                 {
-                    hit_hero = FALSE;
+                    hit_hero = false;
                     changed = !changed;
                     if (!save(VS_MAGIC))
                     {
                         take_damage(roll(6, 6), (start == &hero) ? ('b') : (monster_at(start->x, start->y)->type));
-                        used = TRUE;
+                        used = true;
                         if (terse)
                             msg("the %s hits", name);
                         else

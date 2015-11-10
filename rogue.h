@@ -409,7 +409,7 @@ extern bool     after, again, allscore, amulet, door_stop, fight_flush,
                 firstmove, has_hit, inv_describe, jump, kamikaze,
                 lower_msg, move_on, pack_used[],
                 passgo, playing, running, save_msg,
-                seenstairs, stat_msg, terse, to_death;
+                seenstairs, terse, to_death;
 
 extern char     file_name[], huh[], *Numname, outbuf[], take;
 
@@ -573,7 +573,7 @@ int        sign(int nm);
 int        spread(int nm);
 void        start_daemon(daemon_function_t func, int arg, int type);
 void        start_score();
-void        status();
+void        status(bool stat_msg);
 int        step_ok(int ch);
 int        swing(int at_lvl, int op_arm, int wplus);
 void        take_off();

@@ -128,7 +128,7 @@ int step_ok(int ch)
  * status:
  *        Display the important stats line.  Keep the cursor where it was.
  */
-void status()
+void status(bool stat_msg)
 {
     int temp;
     static int hpwidth = 0;

@@ -1515,7 +1515,6 @@ int rs_save_file(FILE *savef)
     rs_write_boolean(savef, playing);               /* 19 */
     rs_write_boolean(savef, running);               /* 21 */
     rs_write_boolean(savef, save_msg);              /* 22 */
-    rs_write_boolean(savef, stat_msg);              /* 24 */
     rs_write_boolean(savef, terse);                 /* 25 */
     rs_write_boolean(savef, to_death);              /* 26 */
     rs_write_booleans(savef, pack_used, 26);        /* 29 */
@@ -1614,7 +1613,6 @@ int rs_restore_file(FILE *inf)
     rs_read_boolean(inf, &playing);             /* 19 */
     rs_read_boolean(inf, &running);             /* 21 */
     rs_read_boolean(inf, &save_msg);            /* 22 */
-    rs_read_boolean(inf, &stat_msg);            /* 24 */
     rs_read_boolean(inf, &terse);               /* 25 */
     rs_read_boolean(inf, &to_death);            /* 26 */
     rs_read_booleans(inf, pack_used, 26);       /* 29 */

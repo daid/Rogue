@@ -330,7 +330,7 @@ int attack(MonsterThing *mp)
     if (fight_flush && !to_death)
         flush_type();
     count = 0;
-    status();
+    status(false);
     if (mp == NULL)
         return(-1);
     else

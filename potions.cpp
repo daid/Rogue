@@ -201,7 +201,7 @@ void quaff()
         when P_LEVIT:
             do_pot(P_LEVIT, TRUE);
     }
-    status();
+    status(false);
     /*
      * Throw the item away
      */

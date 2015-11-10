@@ -53,7 +53,7 @@ command()
         look(TRUE);
         if (!running)
             door_stop = FALSE;
-        status();
+        status(false);
         lastscore = purse;
         setMapViewTarget(hero.x, hero.y);
         if (!((running || count) && jump))
@@ -330,9 +330,7 @@ over:
                     current(cur_ring[RIGHT], "wearing",
                                             terse ? "(R)" : "on right hand");
                 when '@':
-                    stat_msg = TRUE;
-                    status();
-                    stat_msg = FALSE;
+                    status(true);
                     after = FALSE;
                 otherwise:
                     after = FALSE;

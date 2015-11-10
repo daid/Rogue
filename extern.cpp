@@ -29,7 +29,6 @@ bool passgo = FALSE;                        /* Follow passages */
 bool playing = TRUE;                        /* True until he quits */
 bool running = FALSE;                        /* True if player is running */
 bool save_msg = TRUE;                        /* Remember last msg */
-bool stat_msg = FALSE;                        /* Should status() print as a msg() */
 bool terse = FALSE;                        /* True if we should be short */
 bool to_death = FALSE;                        /* Fighting is to the death! */
 bool pack_used[26] = {                        /* Is the character used in the pack? */

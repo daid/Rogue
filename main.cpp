@@ -130,7 +130,7 @@ quit(int sig)
     }
     else
     {
-        status();
+        status(false);
         refreshMap();
         count = 0;
         to_death = FALSE;

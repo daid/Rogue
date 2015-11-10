@@ -131,7 +131,6 @@ int step_ok(int ch)
 void status(bool stat_msg)
 {
     int temp;
-    static int hpwidth = 0;
     static int s_hungry = 0;
     static int s_lvl = 0;
     static int s_pur = -1;
@@ -160,10 +159,7 @@ void status(bool stat_msg)
 
     if (s_hp != player.stats.s_maxhp)
     {
-        temp = player.stats.s_maxhp;
         s_hp = player.stats.s_maxhp;
-        for (hpwidth = 0; temp; hpwidth++)
-            temp /= 10;
     }
 
     /*
@@ -178,9 +174,9 @@ void status(bool stat_msg)
 
     if (stat_msg)
     {
-        msg("Level: %d Gold: %-5d Hp: %*d(%*d) Str: %2d(%d) Arm: %-2d Exp: %d/%ld %s",
-            level, purse, hpwidth, player.stats.s_hpt, hpwidth, player.stats.s_maxhp, player.stats.s_str,
-            max_stats.s_str, 10 - s_arm, player.stats.s_lvl, player.stats.s_exp,
+        msg("Level: %d Gold: %d\nHp: %d/%d\nStr: %2d/%-2d Arm: %-2d Exp: %d/%d %s",
+            level, purse, player.stats.s_hpt, player.stats.s_maxhp, player.stats.s_str,
+            max_stats.s_str, 10 - s_arm, player.stats.s_exp, player.stats.s_lvl,
             state_name[hungry_state]);
     }
     else
@@ -191,13 +187,13 @@ void status(bool stat_msg)
         //Hp: xxx/xxx Ac: xx XP: 800k,20
         //Hp: xxx/xxx Ac: xx [HUNGRY]
         char status_line[40];
-        char* c = status_line + sprintf(status_line, " Hp: %3d/%3d Ac: %2d ", player.stats.s_hpt, player.stats.s_maxhp, 10 - s_arm);
+        char* c = status_line + sprintf(status_line, " Hp: %3d/%-3d Ac: %2d ", player.stats.s_hpt, player.stats.s_maxhp, 10 - s_arm);
         if (hungry_state == 0)
         {
             if (player.stats.s_exp < 2000)
-                sprintf(c, "Xp: %3d/%2d", player.stats.s_exp, player.stats.s_lvl);
+                sprintf(c, "Xp: %3d/%-2d", player.stats.s_exp, player.stats.s_lvl);
             else
-                sprintf(c, "Xp: %3dk/%2d", player.stats.s_exp / 1000, player.stats.s_lvl);
+                sprintf(c, "Xp: %3dk/%-2d", player.stats.s_exp / 1000, player.stats.s_lvl);
         }
         else
         {

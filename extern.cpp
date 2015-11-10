@@ -177,7 +177,7 @@ struct monster monsters[26] =
 #undef ___
 #undef XX
 
-struct obj_info things[NUMTHINGS] = {
+struct obj_info things[NUMITEMTYPES] = {
     { 0,                        28 },        /* potion */
     { 0,                        36 },        /* scroll */
     { 0,                        12 },        /* food */

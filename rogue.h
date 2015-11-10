@@ -19,12 +19,11 @@
 /*
  * Maximum number of different things
  */
-#define MAXTHINGS        9
 #define MAXOBJ           15   /* changed from 9 to increase number of items found in game */
 #define MAXPACK          23
 #define MAXTRAPS         10
 #define AMULETLEVEL      26
-#define NUMTHINGS        7    /* number of types of things */
+#define NUMITEMTYPES     7    /* number of types of things */
 #define NUMLINES         32
 #define NUMCOLS          80
 #define BORE_LEVEL       50

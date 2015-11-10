@@ -1824,7 +1824,7 @@ rs_save_file(FILE *savef)
     rs_write_areas(savef);
 
     rs_write_monsters(savef,monsters,26);               
-    rs_write_obj_info(savef, things,   NUMTHINGS);   
+    rs_write_obj_info(savef, things,   NUMITEMTYPES);   
     rs_write_obj_info(savef, arm_info,  MAXARMORS);  
     rs_write_obj_info(savef, pot_info,  MAXPOTIONS);  
     rs_write_obj_info(savef, ring_info,  MAXRINGS);    
@@ -1928,7 +1928,7 @@ rs_restore_file(FILE *inf)
     rs_read_areas(inf);
 
     rs_read_monsters(inf,monsters,26);                  
-    rs_read_obj_info(inf, things,   NUMTHINGS);         
+    rs_read_obj_info(inf, things,   NUMITEMTYPES);         
     rs_read_obj_info(inf, arm_info,   MAXARMORS);         
     rs_read_obj_info(inf, pot_info,  MAXPOTIONS);       
     rs_read_obj_info(inf, ring_info,  MAXRINGS);         

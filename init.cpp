@@ -31,6 +31,7 @@ init_player()
      */
     obj = new ItemThing();
     obj->type = FOOD;
+    obj->which = F_FOOD_RATION;
     obj->count = 1;
     add_pack(obj, true);
     /*
@@ -146,32 +147,32 @@ static const char *sylls[] = {
 };
 
 STONE stones[] = {
-    { "agate",                 25},
-    { "alexandrite",         40},
-    { "amethyst",         50},
-    { "carnelian",         40},
+    { "agate",          25},
+    { "alexandrite",    40},
+    { "amethyst",       50},
+    { "carnelian",      40},
     { "diamond",        300},
     { "emerald",        300},
-    { "germanium",        225},
-    { "granite",          5},
-    { "garnet",                 50},
-    { "jade",                150},
-    { "kryptonite",        300},
-    { "lapis lazuli",         50},
-    { "moonstone",         50},
-    { "obsidian",         15},
-    { "onyx",                 60},
-    { "opal",                200},
-    { "pearl",                220},
-    { "peridot",         63},
-    { "ruby",                350},
-    { "sapphire",        285},
-    { "stibotantalite",        200},
-    { "tiger eye",         50},
-    { "topaz",                 60},
-    { "turquoise",         70},
-    { "taaffeite",        300},
-    { "zircon",                  80},
+    { "germanium",      225},
+    { "granite",        5},
+    { "garnet",         50},
+    { "jade",           150},
+    { "kryptonite",     300},
+    { "lapis lazuli",   50},
+    { "moonstone",      50},
+    { "obsidian",       15},
+    { "onyx",           60},
+    { "opal",           200},
+    { "pearl",          220},
+    { "peridot",        63},
+    { "ruby",           350},
+    { "sapphire",       285},
+    { "stibotantalite", 200},
+    { "tiger eye",      50},
+    { "topaz",          60},
+    { "turquoise",      70},
+    { "taaffeite",      300},
+    { "zircon",         80},
 };
 
 #define NSTONES (sizeof stones / sizeof (STONE))
@@ -251,8 +252,7 @@ static bool used[MAX3(NCOLORS, NSTONES, NWOOD)];
  * init_colors:
  *        Initialize the potion color scheme for this time
  */
-void
-init_colors()
+void init_colors()
 {
     unsigned int i, j;
 
@@ -308,8 +308,7 @@ void init_names()
  * init_stones:
  *        Initialize the ring stone setting scheme for this time
  */
-void
-init_stones()
+void init_stones()
 {
     unsigned int i, j;
 
@@ -330,8 +329,7 @@ init_stones()
  * init_materials:
  *        Initialize the construction materials for wands and staffs
  */
-void
-init_materials()
+void init_materials()
 {
     unsigned int i, j;
     const char *str;
@@ -396,6 +394,7 @@ void sumprobs(struct obj_info *info, int bound, const char *name)
 void init_probs()
 {
     sumprobs(things, NUMITEMTYPES, "things");
+    sumprobs(food_info, MAXFOODS, "foods");
     sumprobs(pot_info, MAXPOTIONS, "potions");
     sumprobs(scr_info, MAXSCROLLS, "scrolls");
     sumprobs(ring_info, MAXRINGS, "rings");

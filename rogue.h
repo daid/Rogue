@@ -176,6 +176,18 @@ template<typename T> T max(const T a, const T b) { if (a > b) return a; return b
 #define T_MYST  07
 #define NTRAPS        8
 
+
+/*
+ * Food types
+ */
+#define F_SLIME_MOLD      0
+#define F_FOOD_RATION     1
+#define F_SANDWICH        2
+#define F_SALTY_CRAKERS   3
+#define F_CANNED_HAM      4
+#define F_ICECREAM_BUCKET 5
+#define MAXFOODS          6
+
 /*
  * Potion types
  */
@@ -449,8 +461,14 @@ extern struct stats        max_stats;
 
 extern struct monster        monsters[];
 
-extern struct obj_info        arm_info[], pot_info[], ring_info[],
-                        scr_info[], things[], ws_info[], weap_info[];
+extern struct obj_info things[];
+extern struct obj_info food_info[];
+extern struct obj_info arm_info[];
+extern struct obj_info pot_info[];
+extern struct obj_info ring_info[];
+extern struct obj_info scr_info[];
+extern struct obj_info ws_info[];
+extern struct obj_info weap_info[];
 
 /*
  * Function types
@@ -492,6 +510,7 @@ void        drain();
 void        drop();
 void        eat();
 void add_food(int amount);
+void check_spoiled_food();
 size_t  encread(void *start, size_t size, FILE *inf);
 size_t  encwrite(const void *start, size_t size, FILE *outf);
 int        endmsg();

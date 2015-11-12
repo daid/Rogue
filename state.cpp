@@ -1528,8 +1528,6 @@ int rs_save_file(FILE *savef)
     rs_write_scrolls(savef);
     rs_write_char(savef, take);
     rs_write_sticks(savef);
-    rs_write_int(savef,orig_dsusp);
-    rs_write_chars(savef, fruit, MAXSTR);
     rs_write_int(savef,l_last_comm);
     rs_write_int(savef,l_last_dir);
     rs_write_int(savef,last_comm);
@@ -1574,12 +1572,13 @@ int rs_save_file(FILE *savef)
 
     rs_write_monsters(savef,monsters,26);               
     rs_write_obj_info(savef, things,   NUMITEMTYPES);   
+    rs_write_obj_info(savef, food_info, MAXFOODS);  
     rs_write_obj_info(savef, arm_info,  MAXARMORS);  
     rs_write_obj_info(savef, pot_info,  MAXPOTIONS);  
-    rs_write_obj_info(savef, ring_info,  MAXRINGS);    
+    rs_write_obj_info(savef, ring_info, MAXRINGS);    
     rs_write_obj_info(savef, scr_info,  MAXSCROLLS);  
-    rs_write_obj_info(savef, weap_info,  MAXWEAPONS+1);  
-    rs_write_obj_info(savef, ws_info, MAXSTICKS);      
+    rs_write_obj_info(savef, weap_info, MAXWEAPONS+1);  
+    rs_write_obj_info(savef, ws_info,   MAXSTICKS);      
     
     
     rs_write_daemons(savef, &d_list[0], 20);            /* 5.4-daemon.c */
@@ -1626,8 +1625,6 @@ int rs_restore_file(FILE *inf)
     rs_read_scrolls(inf);
     rs_read_char(inf, &take);
     rs_read_sticks(inf);
-    rs_read_int(inf,&orig_dsusp);
-    rs_read_chars(inf, fruit, MAXSTR);
     rs_read_int(inf, &l_last_comm);
     rs_read_int(inf, &l_last_dir);
     rs_read_int(inf, &last_comm);
@@ -1674,12 +1671,13 @@ int rs_restore_file(FILE *inf)
 
     rs_read_monsters(inf,monsters,26);                  
     rs_read_obj_info(inf, things,   NUMITEMTYPES);         
-    rs_read_obj_info(inf, arm_info,   MAXARMORS);         
+    rs_read_obj_info(inf, food_info, MAXFOODS);  
+    rs_read_obj_info(inf, arm_info,  MAXARMORS);         
     rs_read_obj_info(inf, pot_info,  MAXPOTIONS);       
-    rs_read_obj_info(inf, ring_info,  MAXRINGS);         
+    rs_read_obj_info(inf, ring_info, MAXRINGS);         
     rs_read_obj_info(inf, scr_info,  MAXSCROLLS);       
     rs_read_obj_info(inf, weap_info, MAXWEAPONS+1);       
-    rs_read_obj_info(inf, ws_info, MAXSTICKS);       
+    rs_read_obj_info(inf, ws_info,   MAXSTICKS);       
 
     rs_read_daemons(inf, d_list, 20);                   /* 5.4-daemon.c     */
     rs_read_int(inf,&between);                          /* 5.4-daemons.c    */

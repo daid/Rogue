@@ -34,8 +34,7 @@ static char wand_mons[] = {
  *        Pick a monster to show up.  The lower the level,
  *        the meaner the monster.
  */
-char
-randmonster(bool wander)
+char randmonster(bool wander)
 {
     int d;
     char *mons;
@@ -246,6 +245,16 @@ void give_pack(MonsterThing *tp)
 {
     if (level >= max_level && rnd(100) < monsters[tp->type-'A'].m_carry)
         tp->pack.push_front(new_thing());
+    
+    //Give Icemonsters icecream buckets by a random chance
+    if (tp->type == 'I' && rnd(100) < 20)
+    {
+        ItemThing* obj = new ItemThing();
+        obj->type = FOOD;
+        obj->which = F_ICECREAM_BUCKET;
+        obj->count = 1;
+        tp->pack.push_back(obj);
+    }
 }
 
 /*

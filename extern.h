@@ -54,8 +54,7 @@
  * Now all the global variables
  */
 
-extern char        fruit[], prbuf[];
-extern int orig_dsusp;
+extern char        prbuf[];
 extern FILE        *scoreboard;
 
 /*

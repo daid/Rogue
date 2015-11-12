@@ -335,8 +335,7 @@ def:
  *        Uncurse an item
  */
 
-void
-uncurse(ItemThing *obj)
+void uncurse(ItemThing *obj)
 {
     if (obj != nullptr)
         obj->flags &= ~ISCURSED;

@@ -541,13 +541,16 @@ d_level()
     if (levit_check())
         return;
     if (char_at(hero.x, hero.y) != STAIRS)
+    {
         msg("I see no way down");
+    }
     else
     {
         level++;
         seenstairs = false;
         new_level();
         msg("You descend to level %d", level);
+        check_spoiled_food();
     }
 }
 
@@ -568,7 +571,8 @@ u_level()
             if (level == 0)
                 total_winner();
             new_level();
-            msg("you feel a wrenching sensation in your gut");
+            msg("you feel a wrenching sensation in your gut as you move up the stairs");
+            check_spoiled_food();
         }
         else
         {

@@ -24,7 +24,7 @@ ItemThing::ItemThing()
     damage[0] = '\0';                 /* Damage if used like sword */
     hurldmg[0] = '\0';                /* Damage if thrown */
     count = 0;                        /* count for plural objects */
-    which = -1;                       /* Which object of a type it is */
+    which = 0;                        /* Which object of a type it is */
     hplus = 0;                        /* Plusses to hit */
     dplus = 0;                        /* Plusses to damage */
     arm = 0;                          /* Armor protection/charge count/gold amount */
@@ -73,16 +73,10 @@ const char * inv_name(ItemThing *obj, bool drop)
             else
                 sprintf(pb, "titled '%s'", s_names[which]);
         when FOOD:
-            if (which == 1)
-                if (obj->count == 1)
-                    sprintf(pb, "A%s %s", vowelstr(fruit), fruit);
-                else
-                    sprintf(pb, "%d %ss", obj->count, fruit);
+            if (obj->count == 1)
+                sprintf(pb, "A%s %s", vowelstr(food_info[obj->which].oi_name), food_info[obj->which].oi_name);
             else
-                if (obj->count == 1)
-                    strcpy(pb, "Some food");
-                else
-                    sprintf(pb, "%d rations of food", obj->count);
+                sprintf(pb, "%d %ss", obj->count, food_info[obj->which].oi_name);
         when WEAPON:
             sp = weap_info[which].oi_name;
             if (obj->count > 1)
@@ -251,12 +245,9 @@ ItemThing* new_thing()
                 cur->which = pick_one(scr_info, MAXSCROLLS);
             }
         when 2:
-            cur->type = FOOD;
             no_food = 0;
-            if (rnd(10) != 0)
-                cur->which = 0;
-            else
-                cur->which = 1;
+            cur->type = FOOD;
+            cur->which = pick_one(food_info, MAXFOODS);
         when 3:
             init_weapon(cur, pick_one(weap_info, MAXWEAPONS));
             if ((r = rnd(100)) < 10)

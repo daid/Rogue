@@ -48,8 +48,6 @@ char *s_names[MAXSCROLLS];                /* Names of the scrolls */
 char take;                                /* Thing she is taking */
 const char *ws_made[MAXSTICKS];                /* What sticks are made of */
 const char *ws_type[MAXSTICKS];                /* Is it a wand or a staff */
-int  orig_dsusp;                        /* Original dsusp char */
-char fruit[MAXSTR] = "slime-mold";      /* Favorite fruit */
 int l_last_comm = '\0';                /* Last last_comm */
 int l_last_dir = '\0';                        /* Last last_dir */
 int last_comm = '\0';                        /* Last command typed */
@@ -185,6 +183,14 @@ struct obj_info things[NUMITEMTYPES] = {
     { 0,                         5 },        /* stick */
 };
 
+struct obj_info food_info[MAXFOODS] = {
+    { "slime-mold",                    20,          2, nullptr, false },
+    { "food ration",                   20,          2, nullptr, false },
+    { "sandwich",                      20,          2, nullptr, false },
+    { "salty cracker",                 20,          2, nullptr, false },
+    { "canned ham",                    15,          2, nullptr, false },
+    { "icecream bucket",                5,          2, nullptr, false },
+};
 struct obj_info arm_info[MAXARMORS] = {
     { "leather armor",                 20,         20, nullptr, false },
     { "ring mail",                     15,         25, nullptr, false },

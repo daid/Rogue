@@ -32,8 +32,8 @@ static PACT p_actions[] =
         { 0,                nullptr,        0 },                        /* P_POISON */
         { 0,                nullptr,        0 },                        /* P_STRENGTH */
         { CANSEE,        unsee,        SEEDURATION,                /* P_SEEINVIS */
-                prbuf,
-                prbuf },
+                "this tastes amazing!",
+                "this potion tastes like slime-mold juice" },
         { 0,                nullptr,        0 },                        /* P_HEALING */
         { 0,                nullptr,        0 },                        /* P_MFIND */
         { 0,                nullptr,        0 },                        /* P_TFIND  */
@@ -158,7 +158,6 @@ void quaff()
             }
             do_pot(P_LSD, true);
         when P_SEEINVIS:
-            sprintf(prbuf, "this potion tastes like %s juice", fruit);
             show = on(player, CANSEE);
             do_pot(P_SEEINVIS, false);
             if (!show)
@@ -354,6 +353,7 @@ void do_pot(int type, bool knowit)
     msg(choose_str(pp->pa_high, pp->pa_straight));
 }
 
+/* Called when a monster is hit by a thrown potion. */
 void hit_by_potion(int type, MonsterThing* mp)
 {
     switch(type)

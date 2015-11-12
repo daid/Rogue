@@ -89,8 +89,7 @@ ring_on()
  *        take off a ring
  */
 
-void
-ring_off()
+void ring_off()
 {
     int ring;
     ItemThing *obj;

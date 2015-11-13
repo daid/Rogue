@@ -186,10 +186,10 @@ struct obj_info food_info[MAXFOODS] = {
     { "slime-mold",                    20,          2, nullptr, false },
     { "food ration",                   20,          2, nullptr, false },
     { "sandwich",                      20,          2, nullptr, false },
-    { "salty cracker",                 20,          2, nullptr, false },
+    { "salty cracker",                 19,          2, nullptr, false },
     { "canned ham",                    15,          2, nullptr, false },
     { "icecream bucket",                5,          2, nullptr, false },
-    { "rainbow poo",                    0,        100, nullptr, false },
+    { "rainbow poo",                    1,        100, nullptr, false },
 };
 struct obj_info arm_info[MAXARMORS] = {
     { "leather armor",                 20,         20, nullptr, false },

@@ -57,8 +57,28 @@ void missile(int ydelta, int xdelta)
      * AHA! Here it has hit something.  If it is a wall or a door,
      * or if it misses (combat) the monster, put it on the floor
      */
-    if (monster_at(obj->pos.x, obj->pos.y) == nullptr || !hit_monster(unc(obj->pos), obj))
-        fall(obj, true);
+    if (monster_at(obj->pos.x, obj->pos.y))
+    {
+        //Only certain item types can actually hit a monster. The rest just drops on the floor.
+        //This allows you to throw the other items at monsters to confuse them.
+        if (obj->type == WEAPON || obj->type == POTION || obj->type == STICK)
+        {
+            if (hit_monster(unc(obj->pos), obj))
+            {
+                lvl_obj.remove(obj);
+                delete obj;
+                return;
+            }
+        }
+        if (obj->type == POTION)
+        {
+            lvl_obj.remove(obj);
+            delete obj;
+            msg("The potion breaks as it hits the floor");
+            return;
+        }
+    }
+    fall(obj, true);
 }
 
 /*
@@ -132,8 +152,7 @@ void fall(ItemThing *obj, bool pr)
             endmsg();
             has_hit = false;
         }
-        msg("the %s vanishes as it hits the ground",
-            weap_info[obj->which].oi_name);
+        msg("the %s vanishes as it hits the ground", inv_name(obj, true));
     }
     delete obj;
 }
@@ -261,10 +280,11 @@ bool fallpos(coord *pos, coord *newpos)
              */
             if (y == hero.y && x == hero.x)
                 continue;
-            if (!item_at(y, x) && rnd(++cnt) == 0 && step_ok(char_at(x, y)))
+            if (!item_at(x, y) && step_ok(char_at(x, y)) && rnd(cnt+1) == 0)
             {
-                newpos->y = y;
                 newpos->x = x;
+                newpos->y = y;
+                cnt++;
             }
         }
     return (bool)(cnt != 0);

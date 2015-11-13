@@ -125,10 +125,12 @@ int fight(coord *mp, ItemThing *weap, bool thrown)
         did_hit = true;
     }
     else
+    {
         if (thrown)
             bounce(weap, mname, terse);
         else
             miss(nullptr, mname, terse);
+    }
     return did_hit;
 }
 

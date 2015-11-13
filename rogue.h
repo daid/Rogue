@@ -609,7 +609,6 @@ void        wear();
 void        whatis(bool insist, int type);
 void        wield();
 
-bool        chase(MonsterThing *tp, coord *ee);
 bool        diag_ok(coord *sp, coord *ep);
 bool        dropcheck(ItemThing *obj);
 bool        fallpos(coord *pos, coord *newpos);
@@ -641,7 +640,7 @@ int        trip_ch(int y, int x, int ch);
 int        char_at_place(int x, int y);
 
 coord        *find_dest(MonsterThing *tp);
-coord        *rndmove(MonsterThing *who);
+coord        rndmove(MonsterThing *who);
 
 ItemThing   *get_item(const char *purpose, int type);
 ItemThing   *leave_pack(ItemThing *obj, bool newobj, bool all);

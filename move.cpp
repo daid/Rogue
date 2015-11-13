@@ -48,7 +48,7 @@ void do_move(int dy, int dx)
      */
     if (on(player, ISHUH) && rnd(5) != 0)
     {
-        nh = *rndmove(&player);
+        nh = rndmove(&player);
         if (ce(nh, hero))
         {
             after = false;
@@ -256,10 +256,10 @@ char be_trapped(coord *tc)
  * rndmove:
  *        Move in a random direction if the monster/person is confused
  */
-coord* rndmove(MonsterThing *who)
+coord rndmove(MonsterThing *who)
 {
     int x, y;
-    static coord ret;  /* what we will be returning */
+    coord ret;  /* what we will be returning */
 
     y = ret.y = who->pos.y + rnd(3) - 1;
     x = ret.x = who->pos.x + rnd(3) - 1;
@@ -268,7 +268,7 @@ coord* rndmove(MonsterThing *who)
      * (I.e., bump into the wall or whatever)
      */
     if (y == who->pos.y && x == who->pos.x)
-        return &ret;
+        return ret;
     if (!diag_ok(&who->pos, &ret))
         goto bad;
     else
@@ -280,11 +280,11 @@ coord* rndmove(MonsterThing *who)
         if (item_at(x, y) && item_at(x, y)->type == SCROLL && item_at(x, y)->which == S_SCARE)
             goto bad;
     }
-    return &ret;
+    return ret;
 
 bad:
     ret = who->pos;
-    return &ret;
+    return ret;
 }
 
 /*

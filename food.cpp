@@ -16,7 +16,10 @@ void eat()
         return;
     if (obj->type == FOOD)
     {
-        add_food(HUNGERTIME - 200 + rnd(400));
+        if (obj->which == F_SALTY_CRAKER)
+            add_food(HUNGERTIME / 2 - 200 + rnd(400));
+        else
+            add_food(HUNGERTIME - 200 + rnd(400));
 
         if (obj->which == F_ICECREAM_BUCKET && rnd(100) < 40)
         {

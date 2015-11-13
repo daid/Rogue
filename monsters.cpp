@@ -98,7 +98,7 @@ MonsterThing::MonsterThing(char type, const coord& cp)
     this->turn = true;
     this->dest = nullptr;
     if (ISWEARING(R_AGGR))
-        runto(cp);
+        runto(this);
     if (type == 'X')
         this->disguise = rnd_thing();
     this->reserved = 0;
@@ -171,7 +171,7 @@ void wanderer()
         else
             setMapDisplay(cp.x, cp.y, (rnd(26) + 'A') | DISPLAY_INVERT);
     }
-    runto(tp->pos);
+    runto(tp);
 }
 
 /*

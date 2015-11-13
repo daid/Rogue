@@ -76,7 +76,7 @@ int fight(coord *mp, ItemThing *weap, bool thrown)
      */
     count = 0;
     quiet = 0;
-    runto(*mp);
+    runto(tp);
     /*
      * Let him know it was really a xeroc (if it was one).
      */

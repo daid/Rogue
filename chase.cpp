@@ -80,17 +80,19 @@ void relocate(MonsterThing *th, coord *new_loc)
 {
     if (!ce(*new_loc, th->pos))
     {
+        monster_at(th->pos.x, th->pos.y) = nullptr;
         if (see_monst(th))
             setMapDisplay(th->pos.x, th->pos.y, char_at_place(th->pos.x, th->pos.y));
-        monster_at(th->pos.x, th->pos.y) = nullptr;
 
-        if (has_line_of_sight(th->pos.x, th->pos.y, new_loc->x, new_loc->y))
+        if (!has_line_of_sight(th->pos.x, th->pos.y, new_loc->x, new_loc->y))
             th->dest = find_dest(th);
         th->pos = *new_loc;
         monster_at(new_loc->x, new_loc->y) = th;
     }
     if (see_monst(th))
+    {
         setMapDisplay(new_loc->x, new_loc->y, th->disguise);
+    }
     else if (on(player, SEEMONST))
     {
         setMapDisplay(new_loc->x, new_loc->y, th->type | DISPLAY_INVERT);
@@ -286,14 +288,8 @@ bool see_monst(MonsterThing *mp)
  * runto:
  *        Set a monster running after the hero.
  */
-void runto(const coord& runner)
+void runto(MonsterThing *tp)
 {
-    MonsterThing *tp;
-
-    /*
-     * If we couldn't find him, something is funny
-     */
-    tp = monster_at(runner.x, runner.y);
     /*
      * Start the beastie running
      */

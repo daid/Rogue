@@ -336,7 +336,7 @@ bool add_haste(bool potion)
 void aggravate()
 {
     for(MonsterThing *mp : mlist)
-        runto(mp->pos);
+        runto(mp);
 }
 
 /*

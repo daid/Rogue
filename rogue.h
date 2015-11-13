@@ -577,7 +577,7 @@ int        rnd(int range);
 int        roll(int number, int sides);
 int        rs_save_file(FILE *savef);
 int        rs_restore_file(FILE *inf);
-void        runto(const coord& runner);
+void        runto(MonsterThing *tp);
 void        rust_armor(ItemThing *arm);
 int        save(int which);
 void        save_file(FILE *savef);

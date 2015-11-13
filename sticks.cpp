@@ -82,7 +82,7 @@ void do_zap()
             //The wand explodes, take 2d6 damage!
             msg("The %s explodes!", inv_name(obj, false));
 
-            leave_pack(obj, false, true);
+            leave_pack(obj, false, false);
             delete obj;
 
             take_damage(roll(2, 6), 'z');
@@ -219,7 +219,7 @@ void do_zap()
                 }
                 delta.y = y;
                 delta.x = x;
-                runto(delta);
+                runto(tp);
             }
         when WS_ELECT:
         case WS_FIRE:
@@ -271,7 +271,7 @@ drain()
         if ((mp->stats.s_hpt -= amount) <= 0)
             killed(mp, see_monst(mp));
         else
-            runto(mp->pos);
+            runto(mp);
     }
 }
 
@@ -364,7 +364,7 @@ def:
                     else if (ch != 'M' || tp->disguise == 'M')
                     {
                         if (start == &hero)
-                            runto(pos);
+                            runto(tp);
                         if (terse)
                             msg("%s misses", name);
                         else

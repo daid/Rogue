@@ -183,10 +183,11 @@ template<typename T> T max(const T a, const T b) { if (a > b) return a; return b
 #define F_SLIME_MOLD      0
 #define F_FOOD_RATION     1
 #define F_SANDWICH        2
-#define F_SALTY_CRAKER    3
+#define F_SALTY_CRACKER   3
 #define F_CANNED_HAM      4
 #define F_ICECREAM_BUCKET 5
-#define MAXFOODS          6
+#define F_RAINBOW_POO     6
+#define MAXFOODS          7
 
 /*
  * Potion types

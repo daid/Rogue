@@ -171,6 +171,17 @@ bool check_change_target(MonsterThing* tp)
             }
         });
     }
+    if (tp->type == 'U' && tp->dest == &hero)
+    {
+        //Black unicorns love crackers
+        visit_field_of_view(tp->pos.x, tp->pos.y, 1, [tp](int x, int y)
+        {
+            if (item_at(x, y) && item_at(x, y)->type == FOOD && item_at(x, y)->which == F_SALTY_CRACKER)
+            {
+                tp->dest = &item_at(x, y)->pos;
+            }
+        });
+    }
     return false;
 }
 

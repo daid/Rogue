@@ -16,12 +16,21 @@ void eat()
         return;
     if (obj->type == FOOD)
     {
-        if (obj->which == F_SALTY_CRAKER)
+        if (obj->which == F_SALTY_CRACKER)
             add_food(HUNGERTIME / 2 - 200 + rnd(400));
         else
             add_food(HUNGERTIME - 200 + rnd(400));
-
-        if (obj->which == F_ICECREAM_BUCKET && rnd(100) < 40)
+        
+        if (obj->which == F_RAINBOW_POO)
+        {
+            msg("This does not taste like poo at all! Yummy!");
+            //Restore health when eating rainbow poo.
+            if ((player.stats.s_hpt += roll(player.stats.s_lvl, 4)) > player.stats.s_maxhp)
+            {
+                player.stats.s_hpt = player.stats.s_maxhp;
+            }
+        }
+        else if (obj->which == F_ICECREAM_BUCKET && rnd(100) < 40)
         {
             msg("Ugh, brainfreeze!");
             waste_time();

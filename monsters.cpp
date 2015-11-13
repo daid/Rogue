@@ -255,6 +255,15 @@ void give_pack(MonsterThing *tp)
         obj->count = 1;
         tp->pack.push_back(obj);
     }
+    //Give Unicorns rainbow poo by chance.
+    if (tp->type == 'U' && rnd(100) < 20)
+    {
+        ItemThing* obj = new ItemThing();
+        obj->type = FOOD;
+        obj->which = F_RAINBOW_POO;
+        obj->count = 1;
+        tp->pack.push_back(obj);
+    }
 }
 
 /*

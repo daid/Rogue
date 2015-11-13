@@ -138,7 +138,7 @@ int fight(coord *mp, ItemThing *weap, bool thrown)
  * attack:
  *        The monster attacks the player
  */
-int attack(MonsterThing *mp)
+bool attack(MonsterThing *mp)
 {
     const char *mname;
     int oldhp;
@@ -238,7 +238,7 @@ int attack(MonsterThing *mp)
                      */
                     if (rnd(100) < (mp->type == 'W' ? 15 : 30))
                     {
-                        register int fewer;
+                        int fewer;
 
                         if (mp->type == 'W')
                         {
@@ -276,7 +276,7 @@ int attack(MonsterThing *mp)
                     /*
                      * Leperachaun steals some gold
                      */
-                    register int lastpurse;
+                    int lastpurse;
 
                     lastpurse = purse;
                     purse -= GOLDCALC;
@@ -334,9 +334,9 @@ int attack(MonsterThing *mp)
     count = 0;
     status(false);
     if (mp == nullptr)
-        return(-1);
+        return true;
     else
-        return(0);
+        return false;
 }
 
 /*

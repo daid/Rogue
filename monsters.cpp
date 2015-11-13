@@ -54,7 +54,7 @@ char randmonster(bool wander)
 MonsterThing::MonsterThing()
 {
     pos.x = pos.y = 0;                        /* Position */
-    turn = false;                        /* If slowed, is it a turn to move */
+    turn_delay = 0;
     type = 0;                        /* What it is */
     disguise = 0;                /* What mimic looks like */
     dest = nullptr;                        /* Where it is running to */
@@ -95,7 +95,7 @@ MonsterThing::MonsterThing(char type, const coord& cp)
     this->flags = mp->m_flags;
     if (level > 29)
         this->flags |= ISHASTE;
-    this->turn = true;
+    this->turn_delay = 0;
     this->dest = nullptr;
     if (ISWEARING(R_AGGR))
         runto(this);

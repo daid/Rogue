@@ -305,7 +305,7 @@ def:
                 scr_info[S_HINT].oi_know = true;
                 msg("There is just some text on this");
             }
-            switch(rnd(11))
+            switch(rnd(12))
             {
             case 0: msg("Did you know you can eat scrolls if you are really hungry?");
             when 1: msg("Scrolls of scare monster work on the floor");
@@ -318,6 +318,7 @@ def:
             when 8: msg("Find the amulet on level 26 to escape!");
             when 9: msg("Every item has some kind of use. Except for one type of wand");
             when 10: msg("Waiting recovers my health, but too much waiting and monsters show up.");
+            when 11: msg("Orcs and trolls love ham.");
             }
     }
     obj = orig_obj;

@@ -132,7 +132,7 @@ void do_motion(ItemThing *obj, int ydelta, int xdelta)
 
 void fall(ItemThing *obj, bool pr)
 {
-    static coord fpos;
+    coord fpos;
 
     if (fallpos(&obj->pos, &fpos))
     {

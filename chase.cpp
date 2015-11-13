@@ -130,17 +130,19 @@ int runners(int arg)
 
     for(auto it = mlist.begin(); it != mlist.end(); )
     {
-        /* Move the iterator before we start moving the monster, as the monster might die due to movement. */
+        /* Move the iterator before we start moving the monster, as the monster might be deleted when moving (L hitting you and stealing your gold for example). */
         MonsterThing* tp = *it++;
         
         if (!on(*tp, ISHELD) && on(*tp, ISRUN))
         {
+            check_change_target(tp);
             orig_pos = tp->pos;
             wastarget = on(*tp, ISTARGET);
-            if (move_monst(tp) == -1)
+            if (move_monst(tp))
                 continue;
             if (on(*tp, ISFLY) && dist_cp(&hero, &tp->pos) >= 7)
-                move_monst(tp);
+                if(move_monst(tp))
+                    continue;
             if (wastarget && !ce(orig_pos, tp->pos))
             {
                 tp->flags &= ~ISTARGET;
@@ -156,20 +158,41 @@ int runners(int arg)
     return 0;
 }
 
+bool check_change_target(MonsterThing* tp)
+{
+    if ((tp->type == 'O' || tp->type == 'T') && tp->dest == &hero)
+    {
+        //Orcs and trolls love ham.
+        visit_field_of_view(tp->pos.x, tp->pos.y, 1, [tp](int x, int y)
+        {
+            if (item_at(x, y) && item_at(x, y)->type == FOOD && item_at(x, y)->which == F_CANNED_HAM)
+            {
+                tp->dest = &item_at(x, y)->pos;
+            }
+        });
+    }
+    return false;
+}
+
 /*
  * move_monst:
  *        Execute a single turn of running for a monster
  */
-int move_monst(MonsterThing *tp)
+bool move_monst(MonsterThing *tp)
 {
-    if (!on(*tp, ISSLOW) || tp->turn)
-        if (do_chase(tp) == -1)
-            return(-1);
+    tp->turn_delay--;
+    if (tp->turn_delay <= 0)
+    {
+        tp->turn_delay = 1;
+        if (on(*tp, ISSLOW))
+            tp->turn_delay = 2;
+        if (do_chase(tp))
+            return true;
+    }
     if (on(*tp, ISHASTE))
-        if (do_chase(tp) == -1)
-            return(-1);
-    tp->turn = !tp->turn;
-    return(0);
+        if (do_chase(tp))
+            return true;
+    return false;
 }
 
 /*
@@ -208,7 +231,7 @@ void relocate(MonsterThing *th, coord *new_loc)
  * do_chase:
  *        Make one thing chase another.
  */
-int do_chase(MonsterThing *th)
+bool do_chase(MonsterThing *th)
 {
     /*
      * For dragons check and see if (a) the hero is on a straight
@@ -241,7 +264,7 @@ int do_chase(MonsterThing *th)
             to_death = false;
             kamikaze = false;
         }
-        return(0);
+        return false;
     }
         
     coord target = th->pos;
@@ -267,7 +290,6 @@ int do_chase(MonsterThing *th)
         target = solver.solve(th->pos, *th->dest);
     }
     
-    bool stoprun = false;
     /*
      * This now contains what we want to run to this time
      * so we run to it.  If we hit it we either want to fight it
@@ -277,7 +299,14 @@ int do_chase(MonsterThing *th)
     {
         return( attack(th) );
     }
-    else if (ce(target, *th->dest))
+    else if(th->type == 'F')
+    {
+        //venus flytrap never moves
+        return false;
+    }
+    relocate(th, &target);
+
+    if (ce(th->pos, *th->dest))
     {
         ItemThing* obj = item_at(th->dest->x, th->dest->y);
         if (obj && &obj->pos == th->dest)
@@ -286,20 +315,21 @@ int do_chase(MonsterThing *th)
             item_at(obj->pos.x, obj->pos.y) = nullptr;
             th->pack.push_front(obj);
             th->dest = find_dest(th);
+            th->turn_delay = 5;
+            if (cansee(obj->pos.y, obj->pos.x))
+            {
+                msg("%s picked up the %s", set_mname(th), inv_name(obj, false));
+            }
         }
-        if (th->type != 'F')
-            stoprun = true;
-    }else if(th->type == 'F')
-    {
-        return(0);
     }
-    relocate(th, &target);
+
     /*
      * And stop running if need be
      */
-    if (stoprun && ce(th->pos, *(th->dest)))
+    if (ce(th->pos, *(th->dest)))
         th->flags &= ~ISRUN;
-    return(0);
+
+    return false;
 }
 
 /*

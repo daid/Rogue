@@ -1168,7 +1168,7 @@ static int rs_write_thing(FILE *savef, MonsterThing *t)
     
     rs_write_int(savef, 1);
     rs_write_coord(savef, t->pos);
-    rs_write_boolean(savef, t->turn);
+    rs_write_int(savef, t->turn_delay);
     rs_write_char(savef, t->type);
     rs_write_char(savef, t->disguise);
 
@@ -1242,7 +1242,7 @@ static int rs_read_thing(FILE *inf, MonsterThing *t)
         return(READSTAT);
 
     rs_read_coord(inf,&t->pos);
-    rs_read_boolean(inf,&t->turn);
+    rs_read_int(inf,&t->turn_delay);
     rs_read_char(inf,&t->type);
     rs_read_char(inf,&t->disguise);
             

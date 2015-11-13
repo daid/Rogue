@@ -373,7 +373,7 @@ class MonsterThing
 {
 public:    
     coord pos;                          /* Position */
-    bool turn;                          /* If slowed, is it a turn to move */
+    int turn_delay;                     /* Count down to 0 when it is time to move again. Used for slow and other delayed actions. */
     char type;                          /* What it is */
     char disguise;                      /* What mimic looks like */
     coord *dest;                        /* Where it is running to */
@@ -387,7 +387,8 @@ public:
     MonsterThing(char type, const coord& cp);
 
     void polymorph(char new_type);
-    
+
+private:
     int experienceAdd();
 };
 
@@ -479,7 +480,7 @@ void        add_pack(ItemThing *obj, bool silent);
 void        add_pass();
 void        add_str(str_t *sp, int amt);
 void        aggravate();
-int        attack(MonsterThing *mp);
+bool        attack(MonsterThing *mp);
 void        badcheck(const char *name, struct obj_info *info, int bound);
 void        bounce(ItemThing *weap, const char *mname, bool noend);
 void        call();
@@ -496,7 +497,7 @@ char        death_monst();
 void        discovered();
 int        dist(int y1, int x1, int y2, int x2);
 int        dist_cp(coord *c1, coord *c2);
-int        do_chase(MonsterThing *th);
+bool        do_chase(MonsterThing *th);
 void        do_daemons(int flag);
 void        do_fuses(int flag);
 void        do_motion(ItemThing *obj, int ydelta, int xdelta);
@@ -549,7 +550,8 @@ bool        lock_sc();
 void        miss(const char *er, const char *ee, bool noend);
 void        missile(int ydelta, int xdelta);
 void        money(int value);
-int        move_monst(MonsterThing *tp);
+bool        check_change_target(MonsterThing *tp);
+bool        move_monst(MonsterThing *tp);
 void        move_msg(ItemThing *obj);
 int        msg(const char *fmt, ...);
 void        nameit(ItemThing *obj, const char *type, const char *which, struct obj_info *op, const char *(*prfunc)(ItemThing *));

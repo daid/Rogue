@@ -1534,7 +1534,6 @@ int rs_save_file(FILE *savef)
     rs_write_int(savef,last_dir);
     rs_write_int(savef,n_objs);
     rs_write_int(savef, hungry_state);
-    rs_write_int(savef, inpack);
     rs_write_int(savef, inv_type);
     rs_write_int(savef, level);
     rs_write_int(savef, max_level);
@@ -1631,7 +1630,6 @@ int rs_restore_file(FILE *inf)
     rs_read_int(inf, &last_dir);
     rs_read_int(inf, &n_objs);
     rs_read_int(inf, &hungry_state);
-    rs_read_int(inf, &inpack);
     rs_read_int(inf, &inv_type);
     rs_read_int(inf, &level);
     rs_read_int(inf, &max_level);

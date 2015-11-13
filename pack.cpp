@@ -56,7 +56,6 @@ void add_pack(ItemThing *obj, bool silent)
         if (op->type == obj->type && op->which == obj->which && op->group && op->group == obj->group)
         {
             //Call tke pack_room function, which removes the object from the floor (odd side behaviour)
-            inpack--;
             pack_room(from_floor, obj);
             
             op->count += obj->count;
@@ -140,7 +139,7 @@ void add_pack(ItemThing *obj, bool silent)
  */
 bool pack_room(bool from_floor, ItemThing *obj)
 {
-    if (++inpack > MAXPACK)
+    if (pack_count() >= MAXPACK)
     {
         if (!terse)
             addmsg("there's ");
@@ -150,7 +149,6 @@ bool pack_room(bool from_floor, ItemThing *obj)
         endmsg();
         if (from_floor)
             move_msg(obj);
-        inpack = MAXPACK;
         return false;
     }
 
@@ -171,14 +169,11 @@ ItemThing * leave_pack(ItemThing *obj, bool newobj, bool all)
 {
     ItemThing *nobj;
 
-    inpack--;
     nobj = obj;
     if (obj->count > 1 && !all)
     {
         last_pick = obj;
         obj->count--;
-        if (obj->group)
-            inpack++;
         if (newobj)
         {
             nobj = new ItemThing();
@@ -199,8 +194,7 @@ ItemThing * leave_pack(ItemThing *obj, bool newobj, bool all)
  * pack_char:
  *        Return the next unused pack character.
  */
-char
-pack_char()
+char pack_char()
 {
     bool *bp;
 
@@ -208,6 +202,23 @@ pack_char()
         continue;
     *bp = true;
     return (char)((int)(bp - pack_used) + 'a');
+}
+
+/*
+ * pack_count:
+ *      Return the amount of items in the pack.
+ */
+int pack_count()
+{
+    int count = 0;
+    for(ItemThing* obj : player.pack)
+    {
+        if (obj->group)
+            count++;    //Grouped items only count as a single item.
+        else
+            count += obj->count;
+    }
+    return count;
 }
 
 /*
@@ -326,8 +337,7 @@ void pick_up(int ch)
  *        Print out the message if you are just moving onto an object
  */
 
-void
-move_msg(ItemThing *obj)
+void move_msg(ItemThing *obj)
 {
     if (!terse)
         addmsg("you ");
@@ -339,8 +349,7 @@ move_msg(ItemThing *obj)
  *        Allow player to inventory a single item
  */
 
-void
-picky_inven()
+void picky_inven()
 {
     char mch;
 
@@ -369,8 +378,7 @@ picky_inven()
  * get_item:
  *        Pick something out of a pack for a purpose
  */
-ItemThing *
-get_item(const char *purpose, int type)
+ItemThing * get_item(const char *purpose, int type)
 {
     int ch;
 
@@ -439,7 +447,6 @@ get_item(const char *purpose, int type)
  * money:
  *        Add or subtract gold from the pack
  */
-
 void money(int value)
 {
     purse += value;
@@ -455,9 +462,7 @@ void money(int value)
  * reset_last:
  *        Reset the last command when the current one is aborted
  */
-
-void
-reset_last()
+void reset_last()
 {
     last_comm = l_last_comm;
     last_dir = l_last_dir;

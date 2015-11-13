@@ -435,7 +435,7 @@ extern const char *tr_name[];
 extern const char *ws_made[];
 extern const char *ws_type[];
 
-extern int      a_class[], count, food_left, hungry_state, inpack,
+extern int      a_class[], count, food_left, hungry_state,
                 inv_type, lastscore, level, max_hit, max_level, runch,
                 n_objs, no_command, no_food, no_move, purse,
                 l_last_comm, l_last_dir, last_comm, last_dir, dir_ch,
@@ -616,6 +616,7 @@ bool        fallpos(coord *pos, coord *newpos);
 bool        is_magic(ItemThing *obj);
 bool        levit_check();
 bool        pack_room(bool from_floor, ItemThing *obj);
+int pack_count();
 bool        roll_em(MonsterThing *thatt, MonsterThing *thdef, ItemThing *weap, bool hurl);
 bool        see_monst(MonsterThing *mp);
 bool        seen_stairs();

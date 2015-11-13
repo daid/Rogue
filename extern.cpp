@@ -66,7 +66,6 @@ const char *tr_name[] = {                        /* Names of the traps */
 
 int n_objs;                                /* # items listed in inventory() call */
 int hungry_state = 0;                        /* How hungry is he */
-int inpack = 0;                                /* Number of things in pack */
 int inv_type = 0;                        /* Type of inventory to use */
 int level = 1;                                /* What level she is on */
 int max_hit;                                /* Max damage done to her in to_death */

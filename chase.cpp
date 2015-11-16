@@ -49,7 +49,7 @@ class AStarSolver
                 return;
         }
         if (monster_at(x, y))
-            return;
+            base_score += 4;
         if (item_at(x, y) && item_at(x, y)->type == SCROLL && item_at(x, y)->which == S_SCARE)
             return;
         int pos = x | y << 16;
